@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="תרופות">
 <meta name="theme-color" content="#4A7C6F">
 <title>מעקב תרופות – דיור מוגן</title>
-<!-- v10 -->
+<!-- v11 -->
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1825,33 +1825,53 @@ const origOpenModal = openModal;
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      const reg = await navigator.serviceWorker.register('./sw.js');
+      const reg = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
 
-      // Check for updates every 30 seconds while the app is open
-      setInterval(() => reg.update(), 30000);
+      // ── 1. Check for updates aggressively ─────────────────────────────
+      //    Every 30s while open, and on every visibility change (app resume)
+      const checkUpdate = () => reg.update().catch(() => {});
+      setInterval(checkUpdate, 30_000);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') checkUpdate();
+      });
 
-      // When a new SW is waiting — activate it immediately and reload
+      // ── 2. New SW installing → skip waiting immediately ───────────────
       reg.addEventListener('updatefound', () => {
-        const newSW = reg.installing;
-        newSW.addEventListener('statechange', () => {
-          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-            // New version ready — tell it to take over
-            newSW.postMessage('skipWaiting');
-          }
+        const sw = reg.installing;
+        sw.addEventListener('statechange', () => {
+          if (sw.state === 'installed') sw.postMessage('skipWaiting');
         });
       });
 
-      // When the SW has taken over — reload the page silently
-      let refreshing = false;
+      // ── 3. SW took over → reload silently ────────────────────────────
+      //    This fires on both Android and iOS when the new SW activates
+      let reloading = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
-          refreshing = true;
+        if (!reloading) { reloading = true; window.location.reload(); }
+      });
+
+      // ── 4. SW signals content changed (stale-while-revalidate) ───────
+      navigator.serviceWorker.addEventListener('message', e => {
+        if (e.data?.type === 'SW_UPDATED' && !reloading) {
+          reloading = true;
           window.location.reload();
         }
       });
 
+      // ── 5. iOS PWA: check on every app foreground (page show) ─────────
+      //    iOS Safari fires 'pageshow' with persisted=true when resuming
+      //    from background — trigger update check then too
+      window.addEventListener('pageshow', e => {
+        if (e.persisted) checkUpdate();
+      });
+
+      // ── 6. If no controller yet (first install), claim immediately ────
+      if (!navigator.serviceWorker.controller) {
+        await reg.update();
+      }
+
     } catch(e) {
-      console.log('SW error', e);
+      console.warn('SW error', e);
     }
   });
 }
