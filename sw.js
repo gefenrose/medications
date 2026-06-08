@@ -1,4 +1,4 @@
-const CACHE = 'medtrack-v1';
+const CACHE = 'medtrack-v3';
 const ASSETS = [
   './',
   './index.html',
