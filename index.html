@@ -639,6 +639,88 @@ function icon(name, size=18, cls='') {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"${clsAttr}>${path}</svg>`;
 }
 
+
+// ==================== SESSION PERSISTENCE ====================
+const SESSION_KEY   = 'medtrack_session';
+const ADMIN_TIMEOUT = 15 * 60 * 1000;   // 15 min in ms
+let _adminIdleTimer = null;
+
+function saveSession(user) {
+  const session = {
+    user,
+    savedAt: Date.now(),
+    type: user.type
+  };
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch(e) {}
+}
+
+function clearSession() {
+  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+}
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    if (!session || !session.user) return null;
+    // Admin: expire after 15 min from last save (covers app-close scenario)
+    if (session.type === 'admin') {
+      if (Date.now() - session.savedAt > ADMIN_TIMEOUT) {
+        clearSession();
+        return null;
+      }
+    }
+    return session.user;
+  } catch(e) { return null; }
+}
+
+function resetAdminIdleTimer() {
+  if (!state.currentUser || state.currentUser.type !== 'admin') return;
+  if (_adminIdleTimer) clearTimeout(_adminIdleTimer);
+  // Bump savedAt so re-opens within 15 min still work
+  saveSession(state.currentUser);
+  _adminIdleTimer = setTimeout(() => {
+    if (state.currentUser?.type === 'admin') {
+      clearSession();
+      doLogout();
+    }
+  }, ADMIN_TIMEOUT);
+}
+
+function stopAdminIdleTimer() {
+  if (_adminIdleTimer) { clearTimeout(_adminIdleTimer); _adminIdleTimer = null; }
+}
+
+// Reset idle timer on any user interaction (admin only)
+['click','touchstart','keydown','scroll'].forEach(evt =>
+  document.addEventListener(evt, () => {
+    if (state.currentUser?.type === 'admin') resetAdminIdleTimer();
+  }, { passive: true })
+);
+
+// On visibility hidden: stamp the time (admin session expiry on re-open)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && state.currentUser?.type === 'admin') {
+    saveSession(state.currentUser);  // stamp current time
+  }
+  if (document.visibilityState === 'visible') {
+    // Re-check session validity when app comes back to foreground
+    const saved = loadSession();
+    if (!saved && state.currentUser) {
+      // Session expired while in background
+      doLogout();
+    }
+  }
+});
+
+// iOS PWA: pageshow fires on resume from background
+window.addEventListener('pageshow', e => {
+  if (!e.persisted) return;
+  const saved = loadSession();
+  if (!saved && state.currentUser) doLogout();
+});
+
 // ==================== LOGIN ====================
 function setLoginType(type) {
   state.loginType = type;
@@ -653,6 +735,8 @@ function doLogin() {
   if (state.loginType === 'admin') {
     if (u === 'admin' && p === '1234') {
       state.currentUser = { type: 'admin', name: 'מנהל' };
+      saveSession(state.currentUser);
+      resetAdminIdleTimer();
       showScreen('adminScreen');
       adminTab('rounds');
       // Load latest from Firebase first
@@ -675,6 +759,7 @@ function doLogin() {
     if (nurse) {
       state.currentUser = { type: 'nurse', name: nurse.name, id: nurse.id };
       state.selectedDate = new Date().toISOString().split('T')[0];
+      saveSession(state.currentUser);
       // Schedule notifications after data loads
       setTimeout(() => scheduleRoundNotifications(), 2000);
       showScreen('nurseScreen');
@@ -702,6 +787,8 @@ function doLogin() {
 document.getElementById('loginPassword').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 function doLogout() {
   stopSync();
+  stopAdminIdleTimer();
+  clearSession();
   state.currentUser = null;
   showScreen('loginScreen');
   document.getElementById('loginUsername').value = '';
@@ -1807,6 +1894,56 @@ function initNavIcons() {
   });
 }
 document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ── Auto-restore session on app open ──────────────────────────────────────
+(function restoreSession() {
+  const saved = loadSession();
+  if (!saved) return;
+
+  state.currentUser = saved;
+
+  if (saved.type === 'admin') {
+    showScreen('adminScreen');
+    adminTab('rounds');
+    resetAdminIdleTimer();
+    // Load fresh data from GitHub
+    ghRead().then(remote => {
+      if (remote) {
+        if (remote.nurses)   data.nurses   = remote.nurses;
+        if (remote.residents) data.residents = remote.residents;
+        if (remote.meds)     data.meds      = remote.meds;
+        if (remote.rounds)   data.rounds    = remote.rounds;
+        if (remote.history)  data.history   = remote.history;
+        if (remote.activeRoundSession !== undefined) data.activeRoundSession = remote.activeRoundSession;
+        localStorage.setItem('medtrack_data', JSON.stringify(data));
+        renderAdminContent();
+      }
+    });
+    startSync();
+  } else if (saved.type === 'nurse') {
+    showScreen('nurseScreen');
+    const ui = document.getElementById('nurseUserInfo');
+    if (ui) {
+      ui.querySelector('strong').textContent = saved.name || '';
+      ui.querySelector('span').textContent   = 'שלום, ' + (saved.name || '').split(' ')[0];
+    }
+    document.getElementById('nurseTitle').textContent = 'חלוקת תרופות';
+    ghRead().then(remote => {
+      if (remote) {
+        if (remote.nurses)   data.nurses   = remote.nurses;
+        if (remote.residents) data.residents = remote.residents;
+        if (remote.meds)     data.meds      = remote.meds;
+        if (remote.rounds)   data.rounds    = remote.rounds;
+        if (remote.history)  data.history   = remote.history;
+        if (remote.activeRoundSession !== undefined) data.activeRoundSession = remote.activeRoundSession;
+        localStorage.setItem('medtrack_data', JSON.stringify(data));
+      }
+      nurseTab('round');
+    }).catch(() => nurseTab('round'));
+    startSync();
+    setTimeout(() => scheduleRoundNotifications(), 2000);
+  }
+})();
 // Inject admin tab icons on first render
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
