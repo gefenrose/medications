@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="תרופות">
 <meta name="theme-color" content="#4A7C6F">
 <title>מעקב תרופות – דיור מוגן</title>
-<!-- v8 -->
+<!-- v9 -->
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -401,7 +401,8 @@ let state = {
   adminTab: 'rounds',
   nurseTab: 'round',
   remindersEnabled: true,
-  editId: null
+  editId: null,
+  selectedDate: new Date().toISOString().split('T')[0]
 };
 
 const defaultData = {
@@ -635,6 +636,7 @@ function doLogin() {
     const nurse = data.nurses.find(n => n.username === u && n.password === p);
     if (nurse) {
       state.currentUser = { type: 'nurse', name: nurse.name, id: nurse.id };
+      state.selectedDate = new Date().toISOString().split('T')[0];
       showScreen('nurseScreen');
       document.getElementById('nurseTitle').textContent = 'חלוקת תרופות';
       const ui = document.getElementById('nurseUserInfo');
@@ -1022,6 +1024,13 @@ function getCurrentRound() {
 }
 
 function renderNurseRound() {
+  const today = new Date().toISOString().split('T')[0];
+  const selDate = state.selectedDate || today;
+  const isPast = selDate < today;
+
+  // For past dates — show history view
+  if (isPast) return renderNurseDateHistory(selDate);
+
   const round = data.activeRoundSession ? data.rounds.find(r=>r.id===data.activeRoundSession.roundId) : getCurrentRound();
   if (!round) return `<div class="empty-state"><div class="empty-icon">○</div><p>אין סבבים מוגדרים</p></div>`;
 
@@ -1052,11 +1061,26 @@ function renderNurseRound() {
     <div class="stat-card"><div class="stat-num" style="color:var(--text-secondary)">${totalMeds - given - skipped}</div><div class="stat-label">ממתינות</div></div>
   </div>`;
 
-  // Rounds selector
-  const roundOptions = data.rounds.sort((a,b)=>a.time.localeCompare(b.time)).map(r =>
-    `<option value="${r.id}" ${r.id===round.id?'selected':''}>${r.name} (${r.time})</option>`
-  ).join('');
-  html += `<div class="form-group" style="margin-bottom:.8rem"><select class="full-select" onchange="switchRound(this.value)">${roundOptions}</select></div>`;
+  // Date + round picker
+  const today = new Date().toISOString().split('T')[0];
+  const selDate = state.selectedDate || today;
+
+  // Build history summary for selected date (which rounds were done)
+  const doneRoundIds = new Set(
+    data.history.filter(h => h.date && h.date.startsWith(selDate)).map(h => h.roundId)
+  );
+
+  const roundOptions = data.rounds.sort((a,b)=>a.time.localeCompare(b.time)).map(r => {
+    const done = doneRoundIds.has(r.id) ? ' ✓' : '';
+    return `<option value="${r.id}" ${r.id===round.id?'selected':''}>${r.name} (${r.time})${done}</option>`;
+  }).join('');
+
+  html += `<div style="display:flex;gap:.5rem;margin-bottom:.8rem;align-items:center">
+    <input type="date" value="${selDate}" max="${today}"
+      onchange="nurseSelectDate(this.value)"
+      style="flex:1;padding:.6rem .8rem;border:1px solid var(--border-light);border-radius:var(--radius-sm);font-size:15px;font-family:var(--font);background:white;color:var(--text);direction:ltr;text-align:center">
+    <select class="full-select" style="flex:2" onchange="switchRound(this.value)">${roundOptions}</select>
+  </div>`;
 
   html += `<div class="section-header"><div class="section-title">רשימת דיירים</div></div>`;
 
@@ -1121,10 +1145,21 @@ function renderNurseRound() {
   return html;
 }
 
+function nurseSelectDate(dateStr) {
+  state.selectedDate = dateStr;
+  // If viewing today — keep active session; otherwise show history view for that date
+  const today = new Date().toISOString().split('T')[0];
+  if (dateStr !== today && data.activeRoundSession) {
+    // Don't clear session, just re-render with date context
+  }
+  renderNurseContent();
+}
+
 function switchRound(roundId) {
   if (data.activeRoundSession && data.activeRoundSession.roundId !== roundId) {
     if (!confirm('לעבור לסבב אחר? הפעולות שבוצעו לא יאבדו.')) return;
   }
+  const today = new Date().toISOString().split('T')[0];
   if (!data.activeRoundSession || data.activeRoundSession.roundId !== roundId) {
     data.activeRoundSession = { roundId, statuses: {}, startTime: new Date().toISOString() };
   }
@@ -1181,6 +1216,83 @@ function finishRound(roundId) {
   data.activeRoundSession = null;
   saveData();
   renderNurseContent();
+}
+
+
+function renderNurseDateHistory(dateStr) {
+  const today = new Date().toISOString().split('T')[0];
+  const selDate = state.selectedDate || today;
+  const dateLabel = new Date(dateStr + 'T12:00:00').toLocaleDateString('he-IL', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  const dayHistory = data.history.filter(h => h.date && h.date.startsWith(dateStr));
+
+  // Date picker (always shown)
+  let html = `<div style="display:flex;gap:.5rem;margin-bottom:.8rem;align-items:center">
+    <input type="date" value="${dateStr}" max="${today}"
+      onchange="nurseSelectDate(this.value)"
+      style="flex:1;padding:.6rem .8rem;border:1px solid var(--border-light);border-radius:var(--radius-sm);font-size:15px;font-family:var(--font);background:white;color:var(--text);direction:ltr;text-align:center">
+  </div>`;
+
+  html += `<div class="round-card" style="margin-bottom:1rem">
+    <h2>${dateLabel}</h2>
+    <p>היסטוריית חלוקה ליום זה</p>
+  </div>`;
+
+  if (!dayHistory.length) {
+    html += `<div class="empty-state"><div class="empty-icon">○</div><p>אין רישומים ליום ${dateStr}</p></div>`;
+    return html;
+  }
+
+  // Group by round
+  const byRound = {};
+  dayHistory.forEach(h => {
+    if (!byRound[h.roundId]) byRound[h.roundId] = [];
+    byRound[h.roundId].push(h);
+  });
+
+  const sortedRounds = Object.keys(byRound).sort((a,b) => {
+    const ra = data.rounds.find(r=>r.id===a), rb = data.rounds.find(r=>r.id===b);
+    return (ra?.time||'').localeCompare(rb?.time||'');
+  });
+
+  sortedRounds.forEach(roundId => {
+    const round = data.rounds.find(r=>r.id===roundId);
+    const entries = byRound[roundId];
+    html += `<div class="card" style="margin-bottom:.7rem">
+      <div class="card-header">
+        <div class="card-title">${round ? esc(round.name) : 'סבב לא ידוע'}</div>
+        <div class="card-subtitle">${round?.time || ''}</div>
+      </div>`;
+    // Group by resident
+    const byRes = {};
+    entries.forEach(h => {
+      if (!byRes[h.residentId]) byRes[h.residentId] = [];
+      byRes[h.residentId].push(h);
+    });
+    Object.entries(byRes).forEach(([resId, hlist]) => {
+      const res = data.residents.find(r=>r.id===resId);
+      html += `<div style="display:flex;align-items:flex-start;gap:.7rem;padding:.5rem 0;border-bottom:1px solid var(--border-light)">
+        <div class="resident-avatar">${initials(res?.name||'?')}</div>
+        <div style="flex:1">
+          <div class="resident-name">${res ? esc(res.name) : '?'}</div>
+          ${hlist.map(h => {
+            const med = data.meds.find(m=>m.id===h.medId);
+            const badge = h.status==='given'
+              ? '<span class="badge badge-given">ניתנה ✓</span>'
+              : '<span class="badge badge-skipped">דולג</span>';
+            return `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:.3rem;font-size:.82rem">
+              <span>${med ? esc(med.name)+' '+esc(med.dose) : '?'}</span>
+              <div style="display:flex;align-items:center;gap:.4rem">${badge}<span style="color:var(--text-muted);font-size:.75rem">${h.time||''}</span></div>
+            </div>
+            ${h.note ? `<div style="font-size:.75rem;color:var(--text-muted);margin-top:.1rem">הערה: ${esc(h.note)}</div>` : ''}`;
+          }).join('')}
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  return html;
 }
 
 function renderNurseHistory() {
