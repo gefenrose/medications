@@ -13,6 +13,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
   :root {
@@ -337,7 +338,7 @@
 <!-- ===== ADMIN SCREEN ===== -->
 <div id="adminScreen" class="screen">
   <div class="topbar">
-    <button class="topbar-btn" onclick="doLogout()">יציאה ←</button>
+    <button class="topbar-btn" onclick="doLogout()">${icon("log-out",15)} יציאה</button>
     <div class="topbar-title" id="adminTitle">לוח ניהול <span id="syncBadge" style="font-size:.7rem;background:var(--success-bg);color:var(--success);border-radius:10px;padding:.15rem .4rem;opacity:0;transition:opacity .4s;margin-right:.3rem">✓ מסונכרן</span></div>
     <div class="topbar-user">
       <strong>מנהל</strong>
@@ -345,13 +346,13 @@
     </div>
   </div>
   <div style="flex:1;padding:1rem;padding-bottom:calc(1rem + env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch">
-    <div class="admin-tabs">
-      <button class="admin-tab active" onclick="adminTab('rounds')">סבבים</button>
-      <button class="admin-tab" onclick="adminTab('residents')">דיירים</button>
-      <button class="admin-tab" onclick="adminTab('meds')">תרופות</button>
-      <button class="admin-tab" onclick="adminTab('nurses')">מדריכות</button>
-      <button class="admin-tab" onclick="adminTab('history')">היסטוריה</button>
-      <button class="admin-tab" onclick="adminTab('export')">ייצוא</button>
+    <div class="admin-tabs" id="adminTabs">
+      <button class="admin-tab active" onclick="adminTab('rounds')"><span class="tab-icon" data-icon="rotate-ccw"></span>סבבים</button>
+      <button class="admin-tab" onclick="adminTab('residents')"><span class="tab-icon" data-icon="users"></span>דיירים</button>
+      <button class="admin-tab" onclick="adminTab('meds')"><span class="tab-icon" data-icon="pill"></span>תרופות</button>
+      <button class="admin-tab" onclick="adminTab('nurses')"><span class="tab-icon" data-icon="user"></span>מדריכות</button>
+      <button class="admin-tab" onclick="adminTab('history')"><span class="tab-icon" data-icon="history"></span>היסטוריה</button>
+      <button class="admin-tab" onclick="adminTab('export')"><span class="tab-icon" data-icon="download"></span>ייצוא</button>
     </div>
     <div id="adminContent"></div>
     <div class="page-hint" style="padding-bottom:env(safe-area-inset-bottom)"><a href="#" onclick="showNurseViewFromAdmin()" style="color:var(--text-muted);text-decoration:none;font-size:.8rem">← מעבר לתצוגת מדריכה</a></div>
@@ -362,7 +363,7 @@
 <div id="nurseScreen" class="screen">
   <div class="topbar">
     <div style="display:flex;gap:.5rem">
-      <button class="topbar-btn" onclick="doLogout()">יציאה ←</button>
+      <button class="topbar-btn" onclick="doLogout()">${icon("log-out",15)} יציאה</button>
       <button class="topbar-btn accent" onclick="showAdminFromNurse()" id="toAdminBtn" style="display:none">לניהול</button>
     </div>
     <div class="topbar-title" id="nurseTitle">חלוקת תרופות <span id="syncBadge" style="font-size:.7rem;background:var(--success-bg);color:var(--success);border-radius:10px;padding:.15rem .4rem;opacity:0;transition:opacity .4s">✓</span></div>
@@ -374,13 +375,13 @@
   <div class="content" id="nurseContent"></div>
   <nav class="bottom-nav">
     <button class="nav-btn active" id="navRound" onclick="nurseTab('round')">
-      <span class="nav-icon">⊙</span><span>סבב נוכחי</span>
+      <span class="nav-icon" id="ni-round"></span><span>סבב נוכחי</span>
     </button>
     <button class="nav-btn" id="navHistory" onclick="nurseTab('history')">
-      <span class="nav-icon">◷</span><span>היסטוריה</span>
+      <span class="nav-icon" id="ni-hist"></span><span>היסטוריה</span>
     </button>
     <button class="nav-btn" id="navReminders" onclick="nurseTab('reminders')">
-      <span class="nav-icon">🔔</span><span>התראות</span>
+      <span class="nav-icon" id="ni-bell"></span><span>התראות</span>
     </button>
   </nav>
 </div>
@@ -560,7 +561,7 @@ function startSync() {
   _pollInterval = setInterval(async () => {
     if (!_syncEnabled || _writing) return;
     const remote = await ghRead();
-    if (!remote) { showSyncBadge('⚠ אין חיבור', true); return; }
+    if (!remote) { showSyncBadge('<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> אין חיבור', true); return; }
     if ((remote._ts || 0) > _lastTs) {
       _lastTs = remote._ts;
       mergeRemote(remote);
@@ -604,6 +605,39 @@ function saveData() {
 let data = loadData();
 
 function genId() { return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+
+
+// ── Lucide icon helper ───────────────────────────────────────────────────
+function icon(name, size=18, cls='') {
+  // Inline SVG paths for the icons we use (subset of Lucide)
+  const icons = {
+    'bell':         '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+    'bell-off':     '<path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 0 .6 5"/><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><line x1="2" y1="2" x2="22" y2="22"/>',
+    'trash-2':      '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>',
+    'pencil':       '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+    'calendar':     '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+    'clock':        '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    'pill':         '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/>',
+    'users':        '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    'user':         '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    'home':         '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    'history':      '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    'download':     '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+    'log-out':      '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+    'shield-check': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+    'circle':       '<circle cx="12" cy="12" r="10"/>',
+    'check':        '<polyline points="20 6 9 11 4 6 4 18 9 13 20 18"/>',
+    'check-circle': '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+    'x-circle':     '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+    'alert-circle': '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+    'plus':         '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+    'rotate-ccw':   '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>',
+    'settings':     '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  };
+  const path = icons[name] || '<circle cx="12" cy="12" r="4"/>';
+  const clsAttr = cls ? ` class="${cls}"` : '';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"${clsAttr}>${path}</svg>`;
+}
 
 // ==================== LOGIN ====================
 function setLoginType(type) {
@@ -676,6 +710,7 @@ function doLogout() {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  setTimeout(initNavIcons, 10);
 }
 
 // ==================== ADMIN ====================
@@ -686,6 +721,11 @@ function adminTab(tab) {
   const idx = tabs.indexOf(tab);
   if (idx >= 0) document.querySelectorAll('.admin-tab')[idx].classList.add('active');
   renderAdminContent();
+  // Inject tab icons
+  document.querySelectorAll('.tab-icon[data-icon]').forEach(el => {
+    el.innerHTML = icon(el.dataset.icon, 13);
+    el.style.cssText = 'display:inline-flex;align-items:center;margin-left:3px;opacity:.7';
+  });
 }
 
 function renderAdminContent() {
@@ -703,7 +743,7 @@ function renderAdminContent() {
 function renderAdminRounds() {
   let html = `<div class="section-header"><div class="section-title">סבבי חלוקה</div><button class="btn btn-orange btn-sm" onclick="openRoundModal()">+ חדש</button></div>`;
   if (!data.rounds.length) {
-    html += `<div class="empty-state"><div class="empty-icon">○</div><p>אין סבבים עדיין</p></div>`;
+    html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין סבבים עדיין</p></div>`;
   }
   data.rounds.sort((a,b) => a.time.localeCompare(b.time)).forEach(round => {
     const entryCount = round.entries.length;
@@ -714,8 +754,8 @@ function renderAdminRounds() {
           <div class="card-subtitle">${round.time} | ${entryCount} דיירים</div>
         </div>
         <div class="flex gap-sm">
-          <button class="btn-icon" onclick="openRoundModal('${round.id}')">✏️</button>
-          <button class="btn-icon" onclick="deleteRound('${round.id}')">🗑️</button>
+          <button class="btn-icon" title="עריכה" onclick="openRoundModal('${round.id}')">${icon('pencil',14)}</button>
+          <button class="btn-icon" title="מחיקה" onclick="deleteRound('${round.id}')">${icon('trash-2',14)}</button>
         </div>
       </div>
       ${round.entries.map(e => {
@@ -730,7 +770,7 @@ function renderAdminRounds() {
 
 function renderAdminResidents() {
   let html = `<div class="section-header"><div class="section-title">דיירים</div><button class="btn btn-orange btn-sm" onclick="openResidentModal()">+ חדש</button></div>`;
-  if (!data.residents.length) html += `<div class="empty-state"><div class="empty-icon">○</div><p>אין דיירים</p></div>`;
+  if (!data.residents.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין דיירים</p></div>`;
   data.residents.forEach(res => {
     const medNames = res.meds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name : '?'; }).join(', ');
     html += `<div class="list-item">
@@ -738,11 +778,11 @@ function renderAdminResidents() {
       <div class="list-item-content">
         <div class="list-item-title">${esc(res.name)} — חדר ${esc(res.room)}</div>
         <div class="list-item-sub">${medNames || 'ללא תרופות'}</div>
-        ${res.notes ? `<div class="list-item-sub" style="color:var(--skip)">⚠️ ${esc(res.notes)}</div>` : ''}
+        ${res.notes ? `<div class="list-item-sub" style="color:var(--skip)">${icon("alert-circle",13)} ${esc(res.notes)}</div>` : ''}
       </div>
       <div class="list-item-actions">
-        <button class="btn-icon" onclick="openResidentModal('${res.id}')">✏️</button>
-        <button class="btn-icon" onclick="deleteResident('${res.id}')">🗑️</button>
+        <button class="btn-icon" title="עריכה" onclick="openResidentModal('${res.id}')">${icon('pencil',14)}</button>
+        <button class="btn-icon" title="מחיקה" onclick="deleteResident('${res.id}')">${icon('trash-2',14)}</button>
       </div>
     </div>`;
   });
@@ -751,7 +791,7 @@ function renderAdminResidents() {
 
 function renderAdminMeds() {
   let html = `<div class="section-header"><div class="section-title">תרופות</div><button class="btn btn-orange btn-sm" onclick="openMedModal()">+ חדש</button></div>`;
-  if (!data.meds.length) html += `<div class="empty-state"><div class="empty-icon">○</div><p>אין תרופות</p></div>`;
+  if (!data.meds.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין תרופות</p></div>`;
   data.meds.forEach(med => {
     html += `<div class="list-item">
       <div style="width:36px;height:36px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--primary);flex-shrink:0">Rx</div>
@@ -760,8 +800,8 @@ function renderAdminMeds() {
         <div class="list-item-sub">${esc(med.type)} | מינון: ${esc(med.dose)}${med.notes ? ' | ' + esc(med.notes) : ''}</div>
       </div>
       <div class="list-item-actions">
-        <button class="btn-icon" onclick="openMedModal('${med.id}')">✏️</button>
-        <button class="btn-icon" onclick="deleteMed('${med.id}')">🗑️</button>
+        <button class="btn-icon" title="עריכה" onclick="openMedModal('${med.id}')">${icon('pencil',14)}</button>
+        <button class="btn-icon" title="מחיקה" onclick="deleteMed('${med.id}')">${icon('trash-2',14)}</button>
       </div>
     </div>`;
   });
@@ -778,8 +818,8 @@ function renderAdminNurses() {
         <div class="list-item-sub">שם משתמש: ${esc(nurse.username)}</div>
       </div>
       <div class="list-item-actions">
-        <button class="btn-icon" onclick="openNurseModal('${nurse.id}')">✏️</button>
-        <button class="btn-icon" onclick="deleteNurse('${nurse.id}')">🗑️</button>
+        <button class="btn-icon" title="עריכה" onclick="openNurseModal('${nurse.id}')">${icon('pencil',14)}</button>
+        <button class="btn-icon" title="מחיקה" onclick="deleteNurse('${nurse.id}')">${icon('trash-2',14)}</button>
       </div>
     </div>`;
   });
@@ -789,7 +829,7 @@ function renderAdminNurses() {
 function renderAdminHistory() {
   let html = `<div class="section-header"><div class="section-title">היסטוריה</div></div>`;
   if (!data.history.length) {
-    html += `<div class="empty-state"><div class="empty-icon">○</div><p>אין היסטוריה עדיין</p></div>`;
+    html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין היסטוריה עדיין</p></div>`;
   } else {
     const byDate = {};
     data.history.forEach(h => {
@@ -798,7 +838,7 @@ function renderAdminHistory() {
       byDate[d].push(h);
     });
     Object.keys(byDate).sort().reverse().forEach(date => {
-      html += `<div class="card"><div class="card-title" style="margin-bottom:.6rem">📅 ${formatDate(date)}</div>`;
+      html += `<div class="card"><div class="card-title" style="margin-bottom:.6rem">${icon("calendar",14)} ${formatDate(date)}</div>`;
       byDate[date].forEach(h => {
         const res = data.residents.find(r => r.id === h.residentId);
         const med = data.meds.find(m => m.id === h.medId);
@@ -1044,7 +1084,7 @@ function renderNurseRound() {
   if (isPast) return renderNurseDateHistory(selDate);
 
   const round = data.activeRoundSession ? data.rounds.find(r=>r.id===data.activeRoundSession.roundId) : getCurrentRound();
-  if (!round) return `<div class="empty-state"><div class="empty-icon">○</div><p>אין סבבים מוגדרים</p></div>`;
+  if (!round) return `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין סבבים מוגדרים</p></div>`;
 
   const session = data.activeRoundSession && data.activeRoundSession.roundId === round.id ? data.activeRoundSession : null;
   const statuses = session ? session.statuses : {};
@@ -1182,7 +1222,7 @@ function renderNurseRound() {
         <div class="resident-info">
           <div class="resident-name">${esc(res.name)}</div>
           <div class="resident-meds">חדר ${esc(res.room)}</div>
-          ${res.notes ? `<div class="resident-meds" style="color:var(--skip);font-size:.75rem">⚠ ${esc(res.notes)}</div>` : ''}
+          ${res.notes ? `<div class="resident-meds" style="color:var(--skip);font-size:.75rem">${icon("alert-circle",13)} ${esc(res.notes)}</div>` : ''}
         </div>
       </div>
       ${medsHtml}
@@ -1293,7 +1333,7 @@ function renderNurseDateHistory(dateStr) {
   </div>`;
 
   if (!dayHistory.length) {
-    html += `<div class="empty-state"><div class="empty-icon">○</div><p>אין רישומים ליום ${dateStr}</p></div>`;
+    html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין רישומים ליום ${dateStr}</p></div>`;
     return html;
   }
 
@@ -1352,7 +1392,7 @@ function renderNurseDateHistory(dateStr) {
 function renderNurseHistory() {
   let html = `<div class="section-header"><div class="section-title">היסטוריית חלוקה</div></div>`;
   const myHistory = data.history.filter(h => h.nurseName === state.currentUser?.name);
-  if (!myHistory.length) return html + `<div class="empty-state"><div class="empty-icon">○</div><p>אין היסטוריה עדיין</p></div>`;
+  if (!myHistory.length) return html + `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין היסטוריה עדיין</p></div>`;
   const byDate = {};
   myHistory.forEach(h => {
     const d = h.date.split('T')[0];
@@ -1360,7 +1400,7 @@ function renderNurseHistory() {
     byDate[d].push(h);
   });
   Object.keys(byDate).sort().reverse().forEach(date => {
-    html += `<div class="card"><div class="card-title" style="margin-bottom:.6rem">📅 ${formatDate(date)}</div>`;
+    html += `<div class="card"><div class="card-title" style="margin-bottom:.6rem">${icon("calendar",14)} ${formatDate(date)}</div>`;
     byDate[date].forEach(h => {
       const res = data.residents.find(r=>r.id===h.residentId);
       const med = data.meds.find(m=>m.id===h.medId);
@@ -1391,7 +1431,7 @@ function renderNurseReminders() {
       <div>
         <div style="font-weight:700;font-size:.95rem">התראות Push</div>
         <div style="font-size:.78rem;color:var(--text-muted);margin-top:.2rem">
-          ${notifDenied  ? '⚠ נחסמו בהגדרות הדפדפן' :
+          ${notifDenied  ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> נחסמו בהגדרות הדפדפן' :
             !notifGranted ? 'אפשרי התראות לקבל תזכורת לפני כל סבב' :
             globalOn      ? 'פועל — התראות מתוזמנות לפי הסבבים' :
                             'כבוי — לא יישלחו התראות'}
@@ -1418,7 +1458,7 @@ function renderNurseReminders() {
   const sorted = [...data.rounds].sort((a,b) => a.time.localeCompare(b.time));
 
   if (!sorted.length) {
-    html += `<div class="empty-state"><div class="empty-icon">○</div><p>אין סבבים מוגדרים</p></div>`;
+    html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין סבבים מוגדרים</p></div>`;
     return html;
   }
 
@@ -1469,10 +1509,10 @@ function checkSyncStatus() {
   const el = document.getElementById('syncStatus');
   if (el) el.textContent = 'בודק...';
   ghRead().then(remote => {
-    if (!remote) { if (el) el.textContent = '⚠ אין חיבור'; return; }
+    if (!remote) { if (el) el.textContent = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> אין חיבור'; return; }
     const t = remote._ts ? new Date(remote._ts).toLocaleTimeString('he-IL') : '—';
     if (el) el.textContent = `✓ מחובר — עדכון אחרון: ${t}`;
-  }).catch(() => { if (el) el.textContent = '⚠ שגיאת חיבור'; });
+  }).catch(() => { if (el) el.textContent = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> שגיאת חיבור'; });
 }
 function renderAdminExport() {
   const today = new Date().toISOString().split('T')[0];
@@ -1497,7 +1537,7 @@ function renderAdminExport() {
       </div>
     </div>
     <button class="btn btn-orange" onclick="exportPDFRange()" style="display:flex;align-items:center;gap:.5rem;padding:.7rem 1.4rem">
-      ⬇ הורד קובץ Excel
+      ${icon("download",16)} הורד קובץ Excel
     </button>
   </div>`;
 }
@@ -1687,7 +1727,7 @@ function triggerRoundNotification(round) {
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({
       type: 'SHOW_NOTIFICATION',
-      title: `💊 ${round.name} — ${round.time}`,
+      title: `${round.name} — ${round.time}`,
       body,
       tag: `round-${round.id}-${new Date().toISOString().split('T')[0]}`
     });
@@ -1759,6 +1799,13 @@ function toggleRoundNotif(roundId, mute) {
 }
 
 // ==================== INIT ====================
+function initNavIcons() {
+  const ni = {'ni-round':'pill','ni-hist':'history','ni-bell':'bell'};
+  Object.entries(ni).forEach(([id,name]) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = icon(name, 22);
+  });
+}
 document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 // Patch round form options after modal opens
 const origOpenModal = openModal;
