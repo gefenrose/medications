@@ -12,7 +12,6 @@
 <!-- v4 -->
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
   :root {
@@ -1261,8 +1260,8 @@ function renderAdminExport() {
     <button class="btn btn-outline btn-sm mt-sm" onclick="checkSyncStatus()">בדוק חיבור</button>
   </div>
   <div class="card">
-    <div class="card-title" style="margin-bottom:.3rem">ייצוא-PDF דוח חלוקה</div>
-    <p class="text-muted" style="margin-bottom:1.2rem">בחר טווח תאריכים לדות. הדוח יכלול את כל רישומי החלוקה (ניתנה/דולגה) בטווח שנבחר.</p>
+    <div class="card-title" style="margin-bottom:.3rem">ייצוא דוח חלוקה — Excel</div>
+    <p class="text-muted" style="margin-bottom:1.2rem">הדוח יכלול: תאריך, שעת סבב, מדריכה, דייר, תרופה, מינון, שעת נתינה, סטטוס, הערות — לפי סדר כרונולוגי. ניתן לפתוח ישירות ב-Excel.</p>
     <div style="display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.2rem">
       <div class="form-group" style="margin:0">
         <label>מתאריך</label>
@@ -1274,61 +1273,77 @@ function renderAdminExport() {
       </div>
     </div>
     <button class="btn btn-orange" onclick="exportPDFRange()" style="display:flex;align-items:center;gap:.5rem;padding:.7rem 1.4rem">
-      <span>📄</span> הפק דוח PDF
+      ⬇ הורד קובץ Excel / CSV
     </button>
   </div>`;
 }
 
+// ==================== PDF ====================
 function exportPDFRange() {
   const from = document.getElementById('pdf_from')?.value || '';
-  const to = document.getElementById('pdf_to')?.value || '';
-  exportPDF(from, to);
+  const to   = document.getElementById('pdf_to')?.value   || '';
+  exportExcel(from, to);
 }
 
-// ==================== PDF ====================
-function exportPDF(fromDate, toDate) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-  doc.setFont('helvetica');
-  doc.setFontSize(18);
-  doc.text('Medication Tracking Report', 105, 20, { align: 'center' });
-  doc.setFontSize(12);
-  doc.text('Date: ' + new Date().toLocaleDateString('he-IL'), 105, 30, { align: 'center' });
-
-  let y = 45;
-  doc.setFontSize(14);
-  doc.text('Rounds Summary', 20, y); y += 8;
-  doc.setFontSize(10);
-  data.rounds.forEach(round => {
-    doc.setFont('helvetica', 'bold');
-    doc.text(round.name + ' - ' + round.time, 20, y); y += 6;
-    doc.setFont('helvetica', 'normal');
-    round.entries.forEach(e => {
-      const res = data.residents.find(r=>r.id===e.residentId);
-      const meds = e.medIds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name : '?'; }).join(', ');
-      if (res) { doc.text('  ' + res.name + ' - ' + meds, 20, y); y += 5; }
-      if (y > 270) { doc.addPage(); y = 20; }
-    });
-    y += 3;
+function exportExcel(fromDate, toDate) {
+  // Filter history by date range
+  const rows = data.history.filter(h => {
+    if (!fromDate && !toDate) return true;
+    const d = h.date.split('T')[0];
+    return (!fromDate || d >= fromDate) && (!toDate || d <= toDate);
   });
 
-  y += 5;
-  doc.setFontSize(14);
-  doc.text('History Log', 20, y); y += 8;
-  doc.setFontSize(10);
-  const filteredHist = fromDate && toDate
-    ? data.history.filter(h => { const d = h.date.split('T')[0]; return d >= fromDate && d <= toDate; })
-    : data.history.slice(-50);
-  filteredHist.forEach(h => {
-    const res = data.residents.find(r=>r.id===h.residentId);
-    const med = data.meds.find(m=>m.id===h.medId);
+  // Sort chronologically: date → round time → actual time
+  rows.sort((a, b) => {
+    const da = a.date.split('T')[0], db = b.date.split('T')[0];
+    if (da !== db) return da < db ? -1 : 1;
+    const ra = data.rounds.find(r=>r.id===a.roundId), rb = data.rounds.find(r=>r.id===b.roundId);
+    const ta = ra?.time || '', tb = rb?.time || '';
+    if (ta !== tb) return ta < tb ? -1 : 1;
+    return (a.time||'') < (b.time||'') ? -1 : 1;
+  });
+
+  // Build CSV with BOM for Excel Hebrew support
+  const BOM = '\uFEFF';
+  const headers = ['תאריך','שעת סבב','שם מדריכה','שם דייר','תרופה','מינון','שעת נתינה בפועל','סטטוס','הערות'];
+
+  const escCSV = v => {
+    const s = String(v ?? '');
+    return s.includes(',') || s.includes('"') || s.includes('\n') ? '"' + s.replace(/"/g,'""') + '"' : s;
+  };
+
+  const lines = [headers.map(escCSV).join(',')];
+
+  rows.forEach(h => {
+    const res   = data.residents.find(r=>r.id===h.residentId);
+    const med   = data.meds.find(m=>m.id===h.medId);
     const round = data.rounds.find(r=>r.id===h.roundId);
-    const line = `${h.date.split('T')[0]} ${h.time} | ${round?round.name:''} | ${res?res.name:'?'} | ${med?med.name:'?'} | ${h.status==='given'?'Given':'Skipped'} | ${h.nurseName}`;
-    doc.text(line, 20, y); y += 5;
-    if (y > 270) { doc.addPage(); y = 20; }
+    const dateStr = h.date ? new Date(h.date).toLocaleDateString('he-IL') : '';
+    const status  = h.status === 'given' ? 'ניתנה' : 'דולג';
+    lines.push([
+      dateStr,
+      round?.time  || '',
+      h.nurseName  || '',
+      res?.name    || '',
+      med?.name    || '',
+      med?.dose    || '',
+      h.time       || '',
+      status,
+      h.note       || ''
+    ].map(escCSV).join(','));
   });
 
-  doc.save('medication-report-' + new Date().toISOString().split('T')[0] + '.pdf');
+  const csv  = BOM + lines.join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const dateLabel = fromDate && toDate
+    ? `${fromDate}_${toDate}`
+    : new Date().toISOString().split('T')[0];
+  a.href     = url;
+  a.download = `מעקב-תרופות-${dateLabel}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ==================== MODAL ====================
