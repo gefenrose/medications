@@ -402,7 +402,8 @@ let state = {
   nurseTab: 'round',
   remindersEnabled: true,
   editId: null,
-  selectedDate: new Date().toISOString().split('T')[0]
+  selectedDate: new Date().toISOString().split('T')[0],
+  mutedRounds: {}   // roundId -> true  (per-round mute)
 };
 
 const defaultData = {
@@ -1370,75 +1371,89 @@ function renderNurseHistory() {
 }
 
 function renderNurseReminders() {
-  const notifGranted = ('Notification' in window) && Notification.permission === 'granted';
-  const notifDenied  = ('Notification' in window) && Notification.permission === 'denied';
-  const activeCount  = Object.keys(_scheduledNotifs).length;
+  const notifSupported = 'Notification' in window;
+  const notifGranted   = notifSupported && Notification.permission === 'granted';
+  const notifDenied    = notifSupported && Notification.permission === 'denied';
+  const globalOn       = state.remindersEnabled && notifGranted;
 
-  let html = `<div class="section-header">
-    <div class="section-title">תזכורות</div>
-    <div class="toggle-wrap">
-      <span class="text-sm">${state.remindersEnabled ? 'פעיל' : 'כבוי'}</span>
-      <label class="toggle"><input type="checkbox" ${state.remindersEnabled ? 'checked' : ''} onchange="toggleReminders()"><span class="toggle-slider"></span></label>
-    </div>
-  </div>
-  <div class="card" style="margin-bottom:.8rem">
+  // ── Global header card ─────────────────────────────────────────────────
+  let html = `<div class="card" style="margin-bottom:.8rem">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:.8rem">
       <div>
-        <div style="font-weight:700;font-size:.9rem">התראות Push</div>
-        <div style="font-size:.78rem;color:var(--text-muted);margin-top:.15rem">
-          ${notifDenied ? 'נחסמו בהגדרות הדפדפן' :
-            notifGranted ? (activeCount > 0 ? activeCount + ' התראות מתוזמנות להיום' : 'פעיל — אין סבבים קרובים היום') :
-            'קבלי התראה לפני כל סבב חלוקה'}
+        <div style="font-weight:700;font-size:.95rem">התראות Push</div>
+        <div style="font-size:.78rem;color:var(--text-muted);margin-top:.2rem">
+          ${notifDenied  ? '⚠ נחסמו בהגדרות הדפדפן' :
+            !notifGranted ? 'אפשרי התראות לקבל תזכורת לפני כל סבב' :
+            globalOn      ? 'פועל — התראות מתוזמנות לפי הסבבים' :
+                            'כבוי — לא יישלחו התראות'}
         </div>
       </div>
-      ${notifDenied ? '' :
-        notifGranted
-          ? '<button class="btn btn-sm" style="background:var(--skip-bg);color:var(--skip)" onclick="disableNotifications()">כבה</button>'
-          : '<button class="btn btn-orange btn-sm" onclick="enableNotifications()">הפעל</button>'
-      }
+      <div style="display:flex;align-items:center;gap:.5rem">
+        ${notifDenied ? '' :
+          !notifGranted
+            ? `<button class="btn btn-orange btn-sm" onclick="enableNotifications()">הפעל</button>`
+            : `<label class="toggle" title="${globalOn ? 'כבה הכל' : 'הפעל הכל'}">
+                <input type="checkbox" ${globalOn ? 'checked' : ''} onchange="toggleGlobalNotif(this.checked)">
+                <span class="toggle-slider"></span>
+               </label>`
+        }
+      </div>
     </div>
-    ${notifGranted && activeCount > 0 ? `
-    <div style="margin-top:.7rem;border-top:1px solid var(--border-light);padding-top:.6rem">
-      ${data.rounds.sort((a,b)=>a.time.localeCompare(b.time)).filter(r=>_scheduledNotifs[r.id]).map(r => {
-        const names = (r.entries||[]).map(e=>{const res=data.residents.find(x=>x.id===e.residentId);return res?res.name:null;}).filter(Boolean);
-        return '<div style="display:flex;align-items:center;gap:.5rem;padding:.25rem 0;font-size:.82rem"><span style="font-weight:700;color:var(--primary);min-width:40px">' + r.time + '</span><span style="color:var(--text-secondary)">' + names.join(' · ') + '</span></div>';
-      }).join('')}
-    </div>` : ''}
   </div>`;
 
-  if (!state.remindersEnabled) {
-    html += `<div class="info-box">התזכורות כבויות. הפעל אותן כדי לראות תזכורות לפי שעה.</div>`;
+  if (!notifGranted) return html;
+
+  // ── Per-round rows ─────────────────────────────────────────────────────
+  html += `<div class="section-title" style="margin-bottom:.6rem">לפי סבב</div>`;
+
+  const sorted = [...data.rounds].sort((a,b) => a.time.localeCompare(b.time));
+
+  if (!sorted.length) {
+    html += `<div class="empty-state"><div class="empty-icon">○</div><p>אין סבבים מוגדרים</p></div>`;
     return html;
   }
 
-  // Group by time
-  const byTime = {};
-  data.rounds.forEach(round => {
-    if (!byTime[round.time]) byTime[round.time] = [];
-    round.entries.forEach(entry => {
-      const res = data.residents.find(r=>r.id===entry.residentId);
-      const medNames = entry.medIds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name : '?'; }).join(', ');
-      if (res) byTime[round.time].push({ resName: res.name, medNames, roundName: round.name });
-    });
-  });
+  sorted.forEach(round => {
+    const isMuted    = !!state.mutedRounds[round.id];
+    const isScheduled = !!_scheduledNotifs[round.id];
+    const roundOn    = globalOn && !isMuted;
 
-  if (!Object.keys(byTime).length) {
-    return html + `<div class="empty-state"><div class="empty-icon">○</div><p>אין סבבים מוגדרים</p></div>`;
-  }
+    const names = (round.entries || []).map(e => {
+      const res = data.residents.find(r => r.id === e.residentId);
+      return res ? res.name : null;
+    }).filter(Boolean);
 
-  Object.keys(byTime).sort().forEach(time => {
-    const items = byTime[time];
-    html += `<div class="reminder-card">
-      <div class="reminder-time">${time}</div>
-      <div class="reminder-list">${items.map(i => `• ${i.resName}: ${i.medNames}`).join('<br>')}</div>
+    const statusColor = !globalOn ? 'var(--text-muted)' : roundOn ? 'var(--success)' : 'var(--skip)';
+    const statusText  = !globalOn ? 'גלובלי כבוי' : roundOn ? (isScheduled ? 'מתוזמן' : 'עבר') : 'מושתק';
+
+    html += `<div class="card" style="margin-bottom:.5rem;padding:.9rem 1rem">
+      <div style="display:flex;align-items:center;gap:.7rem">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span style="font-weight:700;font-size:.92rem">${esc(round.name)}</span>
+            <span style="font-size:.8rem;font-weight:700;color:var(--primary)">${round.time}</span>
+            <span style="font-size:.72rem;color:${statusColor};margin-right:auto">${statusText}</span>
+          </div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-top:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            ${names.length ? names.join(' · ') : 'אין דיירים'}
+          </div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" ${roundOn ? 'checked' : ''} ${!globalOn ? 'disabled' : ''}
+            data-rid="${round.id}"
+            onchange="toggleRoundNotif(this.dataset.rid, !this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
     </div>`;
   });
+
   return html;
 }
 
+
 function toggleReminders() {
-  state.remindersEnabled = !state.remindersEnabled;
-  if (state.nurseTab === 'reminders') renderNurseContent();
+  toggleGlobalNotif(!state.remindersEnabled);
 }
 
 function checkSyncStatus() {
@@ -1626,15 +1641,17 @@ function scheduleRoundNotifications() {
   const todayStr = now.toISOString().split('T')[0];
 
   data.rounds.forEach(round => {
+    // Skip globally disabled or per-round muted
+    if (!state.remindersEnabled) return;
+    if (state.mutedRounds[round.id]) return;
+
     const [hh, mm] = round.time.split(':').map(Number);
     const fireAt = new Date(now);
     fireAt.setHours(hh, mm, 0, 0);
 
-    // If time already passed today, skip (don't schedule for tomorrow)
     const msUntil = fireAt - now;
-    if (msUntil < -60000) return;  // more than 1 min in the past — skip
+    if (msUntil < -60000) return;
     if (msUntil < 0) {
-      // Within the last minute — fire immediately (user just opened app)
       triggerRoundNotification(round);
       return;
     }
@@ -1688,8 +1705,47 @@ async function enableNotifications() {
 }
 
 function disableNotifications() {
+  state.remindersEnabled = false;
   Object.values(_scheduledNotifs).forEach(id => clearTimeout(id));
   _scheduledNotifs = {};
+  renderNurseContent();
+}
+
+function toggleGlobalNotif(enabled) {
+  state.remindersEnabled = enabled;
+  if (enabled) {
+    scheduleRoundNotifications();
+  } else {
+    Object.values(_scheduledNotifs).forEach(id => clearTimeout(id));
+    _scheduledNotifs = {};
+  }
+  renderNurseContent();
+}
+
+function toggleRoundNotif(roundId, mute) {
+  if (mute) {
+    state.mutedRounds[roundId] = true;
+    if (_scheduledNotifs[roundId]) {
+      clearTimeout(_scheduledNotifs[roundId]);
+      delete _scheduledNotifs[roundId];
+    }
+  } else {
+    delete state.mutedRounds[roundId];
+    // Re-schedule just this round
+    if (state.remindersEnabled && Notification.permission === 'granted') {
+      const round = data.rounds.find(r => r.id === roundId);
+      if (round) {
+        const now = new Date();
+        const [hh, mm] = round.time.split(':').map(Number);
+        const fireAt = new Date(now);
+        fireAt.setHours(hh, mm, 0, 0);
+        const msUntil = fireAt - now;
+        if (msUntil > 0) {
+          _scheduledNotifs[roundId] = setTimeout(() => triggerRoundNotification(round), msUntil);
+        }
+      }
+    }
+  }
   renderNurseContent();
 }
 
