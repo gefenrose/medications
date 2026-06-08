@@ -1061,9 +1061,7 @@ function renderNurseRound() {
     <div class="stat-card"><div class="stat-num" style="color:var(--text-secondary)">${totalMeds - given - skipped}</div><div class="stat-label">ממתינות</div></div>
   </div>`;
 
-  // Date + round picker
-  const today = new Date().toISOString().split('T')[0];
-  const selDate = state.selectedDate || today;
+  // Date + round picker (today/selDate already declared above)
 
   // Build history summary for selected date (which rounds were done)
   const doneRoundIds = new Set(
@@ -1102,45 +1100,66 @@ function renderNurseRound() {
       const isPending = ms.status === 'pending';
       return (() => {
       const givenTime = isGiven && ms.time ? ms.time : '';
-      return `<div id="medrow_${entry.residentId}_${mid}"
-        style="display:flex;flex-direction:column;gap:.3rem;padding:.6rem .7rem;border-radius:12px;
-               border:${isGiven?'1.5px solid var(--success)':isSkipped?'1.5px solid var(--skip)':'1px solid var(--border-light)'};
-               background:${isGiven?'var(--success-bg)':isSkipped?'var(--skip-bg)':'white'};
-               margin-bottom:.4rem;transition:all .2s">
+      const rId = round.id;
+      const resId = entry.residentId;
+
+      let notePart = '';
+      if (!isPending) {
+        notePart = `<div style="padding-right:38px;margin-top:.3rem">
+          <input type="text" placeholder="הערה (אופציונלי)" value="${esc(ms.note||'')}"
+            class="med-note-input"
+            style="width:100%;border:1px solid var(--border-light);border-radius:8px;background:white;font-family:var(--font);direction:rtl"
+            data-round="${rId}" data-res="${resId}" data-med="${mid}"
+            oninput="saveMedNote(this.dataset.round,this.dataset.res,this.dataset.med,this.value)">
+        </div>`;
+      }
+
+      const circleStyle = isGiven
+        ? 'background:var(--success);color:white'
+        : isSkipped
+          ? 'background:var(--skip);color:white'
+          : 'background:var(--surface2);color:var(--text-muted)';
+      const circleIcon = isGiven ? '✓' : isSkipped ? '✕' : '·';
+
+      const nameColor = isGiven ? 'var(--success)' : isSkipped ? 'var(--skip)' : 'var(--text)';
+      const borderStyle = isGiven
+        ? '1.5px solid var(--success)'
+        : isSkipped
+          ? '1.5px solid var(--skip)'
+          : '1px solid var(--border-light)';
+      const bgStyle = isGiven ? 'var(--success-bg)' : isSkipped ? 'var(--skip-bg)' : 'white';
+
+      const btnGivenStyle  = isGiven  ? 'background:var(--success);color:white;font-weight:700' : 'background:var(--success-bg);color:var(--success);opacity:.55';
+      const btnSkipStyle   = isSkipped ? 'background:var(--skip);color:white;font-weight:700'   : 'background:var(--skip-bg);color:var(--skip);opacity:.55';
+      const btnGivenLabel  = isGiven  ? '✓ ניתנה' : 'ניתנה';
+      const btnSkipLabel   = isSkipped ? '✕ דולג'  : 'דולג';
+
+      return `<div id="medrow_${resId}_${mid}"
+        style="display:flex;flex-direction:column;gap:.3rem;padding:.6rem .7rem;border-radius:12px;border:${borderStyle};background:${bgStyle};margin-bottom:.4rem;transition:all .2s">
         <div style="display:flex;align-items:center;gap:.5rem">
-          <div style="width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;
-            background:${isGiven?'var(--success)':isSkipped?'var(--skip)':'var(--surface2)'};
-            color:${isGiven||isSkipped?'white':'var(--text-muted)'}">
-            ${isGiven?'✓':isSkipped?'✕':'·'}
+          <div style="width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;${circleStyle}">
+            ${circleIcon}
           </div>
           <div style="flex:1;min-width:0">
-            <div style="font-weight:600;font-size:.9rem;color:${isGiven?'var(--success)':isSkipped?'var(--skip)':'var(--text)'}">${esc(med.name)}</div>
+            <div style="font-weight:600;font-size:.9rem;color:${nameColor}">${esc(med.name)}</div>
             <div style="font-size:.75rem;color:var(--text-muted);display:flex;gap:.4rem;margin-top:.05rem;flex-wrap:wrap">
               <span>${esc(med.dose)}</span>
               ${isGiven && givenTime ? `<span style="color:var(--success);font-weight:600">· ${givenTime}</span>` : ''}
-              ${isSkipped ? `<span style="color:var(--skip)">· דולג</span>` : ''}
+              ${isSkipped ? '<span style="color:var(--skip)">· דולג</span>' : ''}
             </div>
           </div>
           <div style="display:flex;gap:.3rem;flex-shrink:0">
             <button class="btn btn-sm"
+              data-r="${rId}" data-res="${resId}" data-m="${mid}"
               onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'given')"
-              data-r="${round.id}" data-res="${entry.residentId}" data-m="${mid}"
-              style="${isGiven?'background:var(--success);color:white;font-weight:700':'background:var(--success-bg);color:var(--success);opacity:.55'}">
-              ${isGiven?'✓ ניתנה':'ניתנה'}
-            </button>
+              style="${btnGivenStyle}">${btnGivenLabel}</button>
             <button class="btn btn-sm"
+              data-r="${rId}" data-res="${resId}" data-m="${mid}"
               onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'skipped')"
-              data-r="${round.id}" data-res="${entry.residentId}" data-m="${mid}"
-              style="${isSkipped?'background:var(--skip);color:white;font-weight:700':'background:var(--skip-bg);color:var(--skip);opacity:.55'}">
-              ${isSkipped?'✕ דולג':'דולג'}
-            </button>
+              style="${btnSkipStyle}">${btnSkipLabel}</button>
           </div>
         </div>
-        ${!isPending ? `<div style="padding-right:38px">
-          <input type="text" placeholder="הערה (אופציונלי)" value="${esc(ms.note||'')}"
-            class="med-note-input" style="width:100%;border:1px solid var(--border-light);border-radius:8px;background:white;font-family:var(--font);direction:rtl"
-            oninput="saveMedNote('${round.id}','${entry.residentId}','${mid}',this.value)">
-        </div>` : ''}
+        ${notePart}
       </div>`;
     })();
     }).join('');
