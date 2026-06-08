@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="תרופות">
 <meta name="theme-color" content="#4A7C6F">
 <title>מעקב תרופות – דיור מוגן</title>
-<!-- v9 -->
+<!-- v10 -->
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1100,28 +1100,49 @@ function renderNurseRound() {
       const isGiven = ms.status === 'given';
       const isSkipped = ms.status === 'skipped';
       const isPending = ms.status === 'pending';
-      return `<div class="med-row" id="medrow_${entry.residentId}_${mid}" style="display:flex;flex-direction:column;gap:.35rem;padding:.55rem .65rem;border-radius:8px;border:1px solid var(--border-light);background:${isGiven?'var(--success-bg)':isSkipped?'var(--skip-bg)':'#F9F9FB'};margin-bottom:.35rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
-          <div style="flex:1">
-            <span style="font-weight:600;font-size:.88rem">${esc(med.name)}</span>
-            <span style="font-size:.75rem;color:var(--text-muted);margin-right:.4rem">${esc(med.dose)}</span>
+      return (() => {
+      const givenTime = isGiven && ms.time ? ms.time : '';
+      return `<div id="medrow_${entry.residentId}_${mid}"
+        style="display:flex;flex-direction:column;gap:.3rem;padding:.6rem .7rem;border-radius:12px;
+               border:${isGiven?'1.5px solid var(--success)':isSkipped?'1.5px solid var(--skip)':'1px solid var(--border-light)'};
+               background:${isGiven?'var(--success-bg)':isSkipped?'var(--skip-bg)':'white'};
+               margin-bottom:.4rem;transition:all .2s">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <div style="width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;
+            background:${isGiven?'var(--success)':isSkipped?'var(--skip)':'var(--surface2)'};
+            color:${isGiven||isSkipped?'white':'var(--text-muted)'}">
+            ${isGiven?'✓':isSkipped?'✕':'·'}
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:.9rem;color:${isGiven?'var(--success)':isSkipped?'var(--skip)':'var(--text)'}">${esc(med.name)}</div>
+            <div style="font-size:.75rem;color:var(--text-muted);display:flex;gap:.4rem;margin-top:.05rem;flex-wrap:wrap">
+              <span>${esc(med.dose)}</span>
+              ${isGiven && givenTime ? `<span style="color:var(--success);font-weight:600">· ${givenTime}</span>` : ''}
+              ${isSkipped ? `<span style="color:var(--skip)">· דולג</span>` : ''}
+            </div>
           </div>
           <div style="display:flex;gap:.3rem;flex-shrink:0">
-            ${isPending ? `
-              <button class="btn btn-success btn-sm" onclick="markMedStatus('${round.id}','${entry.residentId}','${mid}','given')">ניתנה</button>
-              <button class="btn btn-danger btn-sm" onclick="markMedStatus('${round.id}','${entry.residentId}','${mid}','skipped')">דולג</button>
-            ` : `
-              <span class="badge ${isGiven?'badge-given':'badge-skipped'}">${isGiven?'ניתנה ✓':'דולג'}</span>
-              <button class="btn btn-outline btn-sm" onclick="markMedStatus('${round.id}','${entry.residentId}','${mid}','pending')">בטל</button>
-            `}
+            <button class="btn btn-sm" onclick="markMedStatus('${round.id}','${entry.residentId}','${mid}','given')"
+              style="${isGiven
+                ? 'background:var(--success);color:white;font-weight:700;'
+                : 'background:var(--success-bg);color:var(--success);opacity:.6;'}">
+              ${isGiven ? '✓ ניתנה' : 'ניתנה'}
+            </button>
+            <button class="btn btn-sm" onclick="markMedStatus('${round.id}','${entry.residentId}','${mid}','skipped')"
+              style="${isSkipped
+                ? 'background:var(--skip);color:white;font-weight:700;'
+                : 'background:var(--skip-bg);color:var(--skip);opacity:.6;'}">
+              ${isSkipped ? '✕ דולג' : 'דולג'}
+            </button>
           </div>
         </div>
-        ${!isPending ? `<div style="display:flex;align-items:center;gap:.4rem">
+        ${!isPending ? `<div style="padding-right:38px">
           <input type="text" placeholder="הערה (אופציונלי)" value="${esc(ms.note||'')}"
-            class="med-note-input" style="flex:1;border:1px solid var(--border);border-radius:6px;background:white;font-family:var(--font);direction:rtl;width:100%"
+            class="med-note-input" style="width:100%;border:1px solid var(--border-light);border-radius:8px;background:white;font-family:var(--font);direction:rtl"
             oninput="saveMedNote('${round.id}','${entry.residentId}','${mid}',this.value)">
         </div>` : ''}
       </div>`;
+    })();
     }).join('');
 
     html += `<div class="resident-row ${rowClass}" id="row_${entry.residentId}" style="flex-direction:column;align-items:stretch;padding:.9rem 1rem">
@@ -1187,10 +1208,12 @@ function markMedStatus(roundId, residentId, medId, status) {
     const existing = (data.activeRoundSession.statuses[residentId].meds[medId] || {}).note || '';
     data.activeRoundSession.statuses[residentId].meds[medId] = { status, note: existing };
     data.history = data.history.filter(h => !(h.roundId===roundId && h.residentId===residentId && h.medId===medId && h.sessionId===sid));
+    const nowTime = new Date().toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'});
+    data.activeRoundSession.statuses[residentId].meds[medId].time = nowTime;
     data.history.push({
       id: genId(), roundId, residentId, medId, status,
       date: new Date().toISOString(),
-      time: new Date().toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'}),
+      time: nowTime,
       nurseName: state.currentUser?.name || '',
       sessionId: sid,
       note: existing
