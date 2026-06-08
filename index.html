@@ -1122,17 +1122,17 @@ function renderNurseRound() {
             </div>
           </div>
           <div style="display:flex;gap:.3rem;flex-shrink:0">
-            <button class="btn btn-sm" onclick="markMedStatus('${round.id}','${entry.residentId}','${mid}','given')"
-              style="${isGiven
-                ? 'background:var(--success);color:white;font-weight:700;'
-                : 'background:var(--success-bg);color:var(--success);opacity:.6;'}">
-              ${isGiven ? '✓ ניתנה' : 'ניתנה'}
+            <button class="btn btn-sm"
+              onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'given')"
+              data-r="${round.id}" data-res="${entry.residentId}" data-m="${mid}"
+              style="${isGiven?'background:var(--success);color:white;font-weight:700':'background:var(--success-bg);color:var(--success);opacity:.55'}">
+              ${isGiven?'✓ ניתנה':'ניתנה'}
             </button>
-            <button class="btn btn-sm" onclick="markMedStatus('${round.id}','${entry.residentId}','${mid}','skipped')"
-              style="${isSkipped
-                ? 'background:var(--skip);color:white;font-weight:700;'
-                : 'background:var(--skip-bg);color:var(--skip);opacity:.6;'}">
-              ${isSkipped ? '✕ דולג' : 'דולג'}
+            <button class="btn btn-sm"
+              onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'skipped')"
+              data-r="${round.id}" data-res="${entry.residentId}" data-m="${mid}"
+              style="${isSkipped?'background:var(--skip);color:white;font-weight:700':'background:var(--skip-bg);color:var(--skip);opacity:.55'}">
+              ${isSkipped?'✕ דולג':'דולג'}
             </button>
           </div>
         </div>
