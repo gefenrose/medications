@@ -637,6 +637,8 @@ function doLogin() {
     if (nurse) {
       state.currentUser = { type: 'nurse', name: nurse.name, id: nurse.id };
       state.selectedDate = new Date().toISOString().split('T')[0];
+      // Schedule notifications after data loads
+      setTimeout(() => scheduleRoundNotifications(), 2000);
       showScreen('nurseScreen');
       document.getElementById('nurseTitle').textContent = 'חלוקת תרופות';
       const ui = document.getElementById('nurseUserInfo');
@@ -1368,12 +1370,40 @@ function renderNurseHistory() {
 }
 
 function renderNurseReminders() {
+  const notifGranted = ('Notification' in window) && Notification.permission === 'granted';
+  const notifDenied  = ('Notification' in window) && Notification.permission === 'denied';
+  const activeCount  = Object.keys(_scheduledNotifs).length;
+
   let html = `<div class="section-header">
     <div class="section-title">תזכורות</div>
     <div class="toggle-wrap">
       <span class="text-sm">${state.remindersEnabled ? 'פעיל' : 'כבוי'}</span>
       <label class="toggle"><input type="checkbox" ${state.remindersEnabled ? 'checked' : ''} onchange="toggleReminders()"><span class="toggle-slider"></span></label>
     </div>
+  </div>
+  <div class="card" style="margin-bottom:.8rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:.8rem">
+      <div>
+        <div style="font-weight:700;font-size:.9rem">התראות Push</div>
+        <div style="font-size:.78rem;color:var(--text-muted);margin-top:.15rem">
+          ${notifDenied ? 'נחסמו בהגדרות הדפדפן' :
+            notifGranted ? (activeCount > 0 ? activeCount + ' התראות מתוזמנות להיום' : 'פעיל — אין סבבים קרובים היום') :
+            'קבלי התראה לפני כל סבב חלוקה'}
+        </div>
+      </div>
+      ${notifDenied ? '' :
+        notifGranted
+          ? '<button class="btn btn-sm" style="background:var(--skip-bg);color:var(--skip)" onclick="disableNotifications()">כבה</button>'
+          : '<button class="btn btn-orange btn-sm" onclick="enableNotifications()">הפעל</button>'
+      }
+    </div>
+    ${notifGranted && activeCount > 0 ? `
+    <div style="margin-top:.7rem;border-top:1px solid var(--border-light);padding-top:.6rem">
+      ${data.rounds.sort((a,b)=>a.time.localeCompare(b.time)).filter(r=>_scheduledNotifs[r.id]).map(r => {
+        const names = (r.entries||[]).map(e=>{const res=data.residents.find(x=>x.id===e.residentId);return res?res.name:null;}).filter(Boolean);
+        return '<div style="display:flex;align-items:center;gap:.5rem;padding:.25rem 0;font-size:.82rem"><span style="font-weight:700;color:var(--primary);min-width:40px">' + r.time + '</span><span style="color:var(--text-secondary)">' + names.join(' · ') + '</span></div>';
+      }).join('')}
+    </div>` : ''}
   </div>`;
 
   if (!state.remindersEnabled) {
@@ -1571,6 +1601,98 @@ function showAdminFromNurse() {
   showScreen('adminScreen');
   adminTab('rounds');
 }
+
+// ==================== PUSH NOTIFICATIONS ====================
+
+let _scheduledNotifs = {};  // roundId -> timeoutId
+
+async function requestNotifPermission() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+  const result = await Notification.requestPermission();
+  return result === 'granted';
+}
+
+function scheduleRoundNotifications() {
+  // Cancel existing
+  Object.values(_scheduledNotifs).forEach(id => clearTimeout(id));
+  _scheduledNotifs = {};
+
+  if (!data.rounds || !data.rounds.length) return;
+  if (Notification.permission !== 'granted') return;
+
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+
+  data.rounds.forEach(round => {
+    const [hh, mm] = round.time.split(':').map(Number);
+    const fireAt = new Date(now);
+    fireAt.setHours(hh, mm, 0, 0);
+
+    // If time already passed today, skip (don't schedule for tomorrow)
+    const msUntil = fireAt - now;
+    if (msUntil < -60000) return;  // more than 1 min in the past — skip
+    if (msUntil < 0) {
+      // Within the last minute — fire immediately (user just opened app)
+      triggerRoundNotification(round);
+      return;
+    }
+
+    _scheduledNotifs[round.id] = setTimeout(() => {
+      triggerRoundNotification(round);
+    }, msUntil);
+  });
+}
+
+function triggerRoundNotification(round) {
+  if (Notification.permission !== 'granted') return;
+
+  const names = (round.entries || []).map(e => {
+    const res = data.residents.find(r => r.id === e.residentId);
+    return res ? res.name : null;
+  }).filter(Boolean);
+
+  if (!names.length) return;
+
+  const body = names.join(' · ');
+
+  // Use SW notification if available (works when app is backgrounded)
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({
+      type: 'SHOW_NOTIFICATION',
+      title: `💊 ${round.name} — ${round.time}`,
+      body,
+      tag: `round-${round.id}-${new Date().toISOString().split('T')[0]}`
+    });
+  } else {
+    // Fallback: direct Notification API
+    new Notification(`💊 ${round.name} — ${round.time}`, {
+      body,
+      icon: './icons/icon-192.png',
+      badge: './icons/icon-192.png',
+      tag: `round-${round.id}-${new Date().toISOString().split('T')[0]}`,
+      renotify: false
+    });
+  }
+}
+
+async function enableNotifications() {
+  const granted = await requestNotifPermission();
+  if (!granted) {
+    alert('ההרשאה נדחתה. אנא אפשרי התראות בהגדרות הדפדפן.');
+    return;
+  }
+  scheduleRoundNotifications();
+  renderNurseContent();
+}
+
+function disableNotifications() {
+  Object.values(_scheduledNotifs).forEach(id => clearTimeout(id));
+  _scheduledNotifs = {};
+  renderNurseContent();
+}
+
 // ==================== INIT ====================
 document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 // Patch round form options after modal opens
