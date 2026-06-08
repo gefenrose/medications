@@ -338,7 +338,7 @@
 <!-- ===== ADMIN SCREEN ===== -->
 <div id="adminScreen" class="screen">
   <div class="topbar">
-    <button class="topbar-btn" onclick="doLogout()">${icon("log-out",15)} יציאה</button>
+    <button class="topbar-btn" onclick="doLogout()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> יציאה</button>
     <div class="topbar-title" id="adminTitle">לוח ניהול <span id="syncBadge" style="font-size:.7rem;background:var(--success-bg);color:var(--success);border-radius:10px;padding:.15rem .4rem;opacity:0;transition:opacity .4s;margin-right:.3rem">✓ מסונכרן</span></div>
     <div class="topbar-user">
       <strong>מנהל</strong>
@@ -363,7 +363,7 @@
 <div id="nurseScreen" class="screen">
   <div class="topbar">
     <div style="display:flex;gap:.5rem">
-      <button class="topbar-btn" onclick="doLogout()">${icon("log-out",15)} יציאה</button>
+      <button class="topbar-btn" onclick="doLogout()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> יציאה</button>
       <button class="topbar-btn accent" onclick="showAdminFromNurse()" id="toAdminBtn" style="display:none">לניהול</button>
     </div>
     <div class="topbar-title" id="nurseTitle">חלוקת תרופות <span id="syncBadge" style="font-size:.7rem;background:var(--success-bg);color:var(--success);border-radius:10px;padding:.15rem .4rem;opacity:0;transition:opacity .4s">✓</span></div>
@@ -1807,6 +1807,16 @@ function initNavIcons() {
   });
 }
 document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+// Inject admin tab icons on first render
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    document.querySelectorAll('.tab-icon[data-icon]').forEach(el => {
+      el.innerHTML = icon(el.dataset.icon, 13);
+      el.style.cssText = 'display:inline-flex;align-items:center;margin-left:3px;opacity:.7';
+    });
+    initNavIcons();
+  }, 50);
+});
 // Patch round form options after modal opens
 const origOpenModal = openModal;
 </script>
