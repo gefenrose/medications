@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="תרופות">
 <meta name="theme-color" content="#b85c38">
 <title>מעקב תרופות – דיור מוגן</title>
-<!-- v3 -->
+<!-- v4 -->
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1379,10 +1379,36 @@ const origOpenModal = openModal;
 
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(r => console.log('SW registered'))
-      .catch(e => console.log('SW error', e));
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js');
+
+      // Check for updates every 30 seconds while the app is open
+      setInterval(() => reg.update(), 30000);
+
+      // When a new SW is waiting — activate it immediately and reload
+      reg.addEventListener('updatefound', () => {
+        const newSW = reg.installing;
+        newSW.addEventListener('statechange', () => {
+          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+            // New version ready — tell it to take over
+            newSW.postMessage('skipWaiting');
+          }
+        });
+      });
+
+      // When the SW has taken over — reload the page silently
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
+
+    } catch(e) {
+      console.log('SW error', e);
+    }
   });
 }
 </script>

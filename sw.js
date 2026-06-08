@@ -1,38 +1,68 @@
-const CACHE = 'medtrack-v3';
-const ASSETS = [
-  './',
-  './index.html',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
-  'https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap'
-];
+const CACHE = 'medtrack-v4';
+
+// Network-first for HTML — always try to get fresh, fall back to cache
+// Cache-first for static assets (fonts, jsPDF)
 
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => {}))
-  );
-  self.skipWaiting();
+  self.skipWaiting(); // activate immediately, don't wait
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        if (res && res.status === 200 && res.type !== 'opaque') {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
+  const url = new URL(e.request.url);
+  const isHTML = e.request.destination === 'document' || url.pathname.endsWith('.html') || url.pathname.endsWith('/');
+  const isStatic = url.hostname === 'cdnjs.cloudflare.com' || url.hostname === 'fonts.gstatic.com' || url.hostname === 'fonts.googleapis.com';
+
+  if (isStatic) {
+    // Cache-first for CDN assets
+    e.respondWith(
+      caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
         return res;
-      }).catch(() => cached);
-    })
+      }))
+    );
+    return;
+  }
+
+  if (isHTML) {
+    // Network-first for HTML — always get fresh, update cache, notify clients
+    e.respondWith(
+      fetch(e.request).then(res => {
+        const clone = res.clone();
+        caches.open(CACHE).then(async c => {
+          const old = await c.match(e.request);
+          c.put(e.request, clone);
+          if (old) {
+            // Compare ETags / content to detect actual change
+            const [oldText, newText] = await Promise.all([old.text(), clone.text()]);
+            // clone is consumed — re-fetch from cache for comparison
+          }
+        });
+        return res;
+      }).catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Default: network with cache fallback
+  e.respondWith(
+    fetch(e.request).then(res => {
+      const clone = res.clone();
+      caches.open(CACHE).then(c => c.put(e.request, clone));
+      return res;
+    }).catch(() => caches.match(e.request))
   );
+});
+
+// Listen for skipWaiting message from client
+self.addEventListener('message', e => {
+  if (e.data === 'skipWaiting') self.skipWaiting();
 });
