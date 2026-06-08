@@ -379,6 +379,9 @@
     <button class="nav-btn" id="navHistory" onclick="nurseTab('history')">
       <span class="nav-icon">◷</span><span>היסטוריה</span>
     </button>
+    <button class="nav-btn" id="navReminders" onclick="nurseTab('reminders')">
+      <span class="nav-icon">🔔</span><span>התראות</span>
+    </button>
   </nav>
 </div>
 
@@ -996,9 +999,15 @@ function deleteNurse(id) {
 // ==================== NURSE ====================
 function nurseTab(tab) {
   state.nurseTab = tab;
-  ['navRound','navHistory'].forEach(id => document.getElementById(id).classList.remove('active'));
-  const map = { round: 'navRound', history: 'navHistory' };
-  if (map[tab]) document.getElementById(map[tab]).classList.add('active');
+  ['navRound','navHistory','navReminders'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const map = { round: 'navRound', history: 'navHistory', reminders: 'navReminders' };
+  if (map[tab]) {
+    const el = document.getElementById(map[tab]);
+    if (el) el.classList.add('active');
+  }
   renderNurseContent();
 }
 
