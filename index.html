@@ -9,9 +9,10 @@
 <meta name="apple-mobile-web-app-title" content="תרופות">
 <meta name="theme-color" content="#4A7C6F">
 <title>מעקב תרופות – דיור מוגן</title>
-<!-- v6 -->
+<!-- v7 -->
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
   :root {
@@ -1284,7 +1285,7 @@ function renderAdminExport() {
       </div>
     </div>
     <button class="btn btn-orange" onclick="exportPDFRange()" style="display:flex;align-items:center;gap:.5rem;padding:.7rem 1.4rem">
-      ⬇ הורד קובץ Excel / CSV
+      ⬇ הורד קובץ Excel
     </button>
   </div>`;
 }
@@ -1297,14 +1298,12 @@ function exportPDFRange() {
 }
 
 function exportExcel(fromDate, toDate) {
-  // Filter history by date range
   const rows = data.history.filter(h => {
     if (!fromDate && !toDate) return true;
     const d = h.date.split('T')[0];
     return (!fromDate || d >= fromDate) && (!toDate || d <= toDate);
   });
 
-  // Sort chronologically: date → round time → actual time
   rows.sort((a, b) => {
     const da = a.date.split('T')[0], db = b.date.split('T')[0];
     if (da !== db) return da < db ? -1 : 1;
@@ -1314,47 +1313,62 @@ function exportExcel(fromDate, toDate) {
     return (a.time||'') < (b.time||'') ? -1 : 1;
   });
 
-  // Build CSV with BOM for Excel Hebrew support
-  const BOM = '\uFEFF';
   const headers = ['תאריך','שעת סבב','שם מדריכה','שם דייר','תרופה','מינון','שעת נתינה בפועל','סטטוס','הערות'];
 
-  const escCSV = v => {
-    const s = String(v ?? '');
-    return s.includes(',') || s.includes('"') || s.includes('\n') ? '"' + s.replace(/"/g,'""') + '"' : s;
-  };
-
-  const lines = [headers.map(escCSV).join(',')];
-
+  const wsData = [headers];
   rows.forEach(h => {
     const res   = data.residents.find(r=>r.id===h.residentId);
     const med   = data.meds.find(m=>m.id===h.medId);
     const round = data.rounds.find(r=>r.id===h.roundId);
-    const dateStr = h.date ? new Date(h.date).toLocaleDateString('he-IL') : '';
-    const status  = h.status === 'given' ? 'ניתנה' : 'דולג';
-    lines.push([
-      dateStr,
+    wsData.push([
+      h.date ? new Date(h.date).toLocaleDateString('he-IL') : '',
       round?.time  || '',
       h.nurseName  || '',
       res?.name    || '',
       med?.name    || '',
       med?.dose    || '',
       h.time       || '',
-      status,
+      h.status === 'given' ? 'ניתנה' : 'דולג',
       h.note       || ''
-    ].map(escCSV).join(','));
+    ]);
   });
 
-  const csv  = BOM + lines.join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  const dateLabel = fromDate && toDate
-    ? `${fromDate}_${toDate}`
-    : new Date().toISOString().split('T')[0];
-  a.href     = url;
-  a.download = `מעקב-תרופות-${dateLabel}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+  // Build XLSX using SheetJS (loaded via CDN below)
+  if (typeof XLSX === 'undefined') {
+    alert('טוען את ספריית Excel... נסה שוב בעוד שנייה');
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // ── RTL direction ──────────────────────────────────────────────────────
+  if (!ws['!sheetView']) ws['!sheetView'] = {};
+  ws['!views'] = [{ rightToLeft: true }];
+
+  // ── Column widths ──────────────────────────────────────────────────────
+  ws['!cols'] = [
+    { wch: 14 }, // תאריך
+    { wch: 10 }, // שעת סבב
+    { wch: 16 }, // מדריכה
+    { wch: 16 }, // דייר
+    { wch: 18 }, // תרופה
+    { wch: 10 }, // מינון
+    { wch: 14 }, // שעת נתינה
+    { wch: 10 }, // סטטוס
+    { wch: 24 }, // הערות
+  ];
+
+  // ── Bold header row ────────────────────────────────────────────────────
+  headers.forEach((_, ci) => {
+    const cellAddr = XLSX.utils.encode_cell({ r: 0, c: ci });
+    if (!ws[cellAddr]) return;
+    ws[cellAddr].s = { font: { bold: true } };
+  });
+
+  const dateLabel = fromDate && toDate ? `${fromDate}_${toDate}` : new Date().toISOString().split('T')[0];
+  XLSX.utils.book_append_sheet(wb, ws, 'מעקב תרופות');
+  XLSX.writeFile(wb, `מעקב-תרופות-${dateLabel}.xlsx`);
 }
 
 // ==================== MODAL ====================
