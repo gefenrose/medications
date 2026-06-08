@@ -461,7 +461,9 @@ async function ghRead() {
     if (!r.ok) return null;
     const meta = await r.json();
     _fileSha = meta.sha;
-    const decoded = JSON.parse(atob(meta.content.replace(/\n/g, '')));
+    const raw = meta.content.replace(/\n/g, '');
+    const bytes = Uint8Array.from(atob(raw), ch => ch.charCodeAt(0));
+    const decoded = JSON.parse(new TextDecoder('utf-8').decode(bytes));
     return decoded;
   } catch(e) { return null; }
 }
@@ -473,7 +475,7 @@ async function ghWrite(payload) {
     payload._ts = Date.now();
     const body = JSON.stringify({
       message: 'sync ' + new Date().toLocaleTimeString('he-IL'),
-      content: btoa(unescape(encodeURIComponent(JSON.stringify(payload)))),
+      content: btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(payload)))),
       sha: _fileSha
     });
     const r = await fetch(GH_API, {
