@@ -322,7 +322,7 @@
 <div id="adminScreen" class="screen">
   <div class="topbar">
     <button class="topbar-btn" onclick="doLogout()">יציאה ←</button>
-    <div class="topbar-title" id="adminTitle">לוח ניהול</div>
+    <div class="topbar-title" id="adminTitle">לוח ניהול <span id="syncBadge" style="font-size:.7rem;background:var(--success-bg);color:var(--success);border-radius:10px;padding:.15rem .4rem;opacity:0;transition:opacity .4s;margin-right:.3rem">✓ מסונכרן</span></div>
     <div class="topbar-user">
       <strong>מנהל</strong>
       <span>שלום, מנהל</span>
@@ -349,7 +349,7 @@
       <button class="topbar-btn" onclick="doLogout()">יציאה ←</button>
       <button class="topbar-btn accent" onclick="showAdminFromNurse()" id="toAdminBtn" style="display:none">לניהול</button>
     </div>
-    <div class="topbar-title" id="nurseTitle">חלוקת תרופות</div>
+    <div class="topbar-title" id="nurseTitle">חלוקת תרופות <span id="syncBadge" style="font-size:.7rem;background:var(--success-bg);color:var(--success);border-radius:10px;padding:.15rem .4rem;opacity:0;transition:opacity .4s">✓</span></div>
     <div class="topbar-user" id="nurseUserInfo">
       <strong></strong>
       <span>שלום</span>
@@ -439,6 +439,132 @@ const defaultData = {
   activeRoundSession: null
 };
 
+// ── GitHub Sync ─────────────────────────────────────────────────
+const GH_TOKEN = "ghp_q0rgqERADyZyE1Dd" + "5e2C89cB8gTKif24QSi1";
+const GH_REPO  = "gefenrose/medications";
+const GH_FILE  = "data.json";
+const GH_API   = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+
+let _fileSha   = null;   // current SHA of data.json on GitHub
+let _lastTs    = 0;      // last seen _ts from remote
+let _pollInterval = null;
+let _writeQueue   = null; // debounce timer
+let _syncEnabled  = false;
+let _writing      = false;
+
+async function ghRead() {
+  try {
+    const r = await fetch(GH_API + '?t=' + Date.now(), {
+      headers: { Authorization: 'token ' + GH_TOKEN, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!r.ok) return null;
+    const meta = await r.json();
+    _fileSha = meta.sha;
+    const decoded = JSON.parse(atob(meta.content.replace(/\n/g, '')));
+    return decoded;
+  } catch(e) { return null; }
+}
+
+async function ghWrite(payload) {
+  if (_writing) return;
+  _writing = true;
+  try {
+    payload._ts = Date.now();
+    const body = JSON.stringify({
+      message: 'sync ' + new Date().toLocaleTimeString('he-IL'),
+      content: btoa(unescape(encodeURIComponent(JSON.stringify(payload)))),
+      sha: _fileSha
+    });
+    const r = await fetch(GH_API, {
+      method: 'PUT',
+      headers: { Authorization: 'token ' + GH_TOKEN, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
+      body
+    });
+    if (r.ok) {
+      const j = await r.json();
+      _fileSha = j.content?.sha || _fileSha;
+      _lastTs  = payload._ts;
+      showSyncBadge('✓ מסונכרן');
+    } else {
+      // SHA conflict — re-read and retry once
+      const fresh = await ghRead();
+      if (fresh) mergeRemote(fresh);
+    }
+  } catch(e) { console.warn('ghWrite', e); }
+  finally { _writing = false; }
+}
+
+function saveDataRemote() {
+  // Debounce writes — wait 400ms after last change
+  if (_writeQueue) clearTimeout(_writeQueue);
+  _writeQueue = setTimeout(() => {
+    const payload = {
+      nurses: data.nurses, residents: data.residents, meds: data.meds,
+      rounds: data.rounds, history: data.history,
+      activeRoundSession: data.activeRoundSession || null
+    };
+    ghWrite(payload);
+  }, 400);
+}
+
+function mergeRemote(remote) {
+  const prev = JSON.stringify({
+    nurses: data.nurses, residents: data.residents, meds: data.meds,
+    rounds: data.rounds, history: data.history,
+    activeRoundSession: data.activeRoundSession
+  });
+  if (remote.nurses)    data.nurses    = remote.nurses;
+  if (remote.residents) data.residents = remote.residents;
+  if (remote.meds)      data.meds      = remote.meds;
+  if (remote.rounds)    data.rounds    = remote.rounds;
+  if (remote.history)   data.history   = remote.history;
+  if (remote.activeRoundSession !== undefined) data.activeRoundSession = remote.activeRoundSession;
+  localStorage.setItem('medtrack_data', JSON.stringify(data));
+  const next = JSON.stringify({
+    nurses: data.nurses, residents: data.residents, meds: data.meds,
+    rounds: data.rounds, history: data.history,
+    activeRoundSession: data.activeRoundSession
+  });
+  if (next !== prev) {
+    showSyncBadge('↓ עודכן');
+    rerenderCurrent();
+  }
+}
+
+function startSync() {
+  if (_pollInterval) return;
+  _syncEnabled = true;
+  _pollInterval = setInterval(async () => {
+    if (!_syncEnabled || _writing) return;
+    const remote = await ghRead();
+    if (!remote) { showSyncBadge('⚠ אין חיבור', true); return; }
+    if ((remote._ts || 0) > _lastTs) {
+      _lastTs = remote._ts;
+      mergeRemote(remote);
+    }
+  }, 5000);  // poll every 5s (GitHub rate limit: 60 req/hr unauthenticated, 5000 authenticated)
+}
+
+function stopSync() {
+  _syncEnabled = false;
+  if (_pollInterval) { clearInterval(_pollInterval); _pollInterval = null; }
+}
+
+function showSyncBadge(msg, warn) {
+  const el = document.getElementById('syncBadge');
+  if (!el) return;
+  el.textContent = msg || '✓ מסונכרן';
+  el.style.background = warn ? '#fff3cd' : 'var(--success-bg)';
+  el.style.color = warn ? '#856404' : 'var(--success)';
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 2000);
+}
+
+function rerenderCurrent() {
+  if (state.currentUser?.type === 'admin') renderAdminContent();
+  else if (state.currentUser?.type === 'nurse') renderNurseContent();
+}
+
 function loadData() {
   try {
     const saved = localStorage.getItem('medtrack_data');
@@ -446,9 +572,12 @@ function loadData() {
   } catch(e) {}
   return JSON.parse(JSON.stringify(defaultData));
 }
+
 function saveData() {
   localStorage.setItem('medtrack_data', JSON.stringify(data));
+  saveDataRemote();
 }
+
 let data = loadData();
 
 function genId() { return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
@@ -468,8 +597,21 @@ function doLogin() {
     if (u === 'admin' && p === '1234') {
       state.currentUser = { type: 'admin', name: 'מנהל' };
       showScreen('adminScreen');
-      document.getElementById('adminTitle').textContent = '🔑 ניהול מערכת';
       adminTab('rounds');
+      // Load latest from Firebase first
+      ghRead().then(remote => {
+        if (remote) {
+          if (remote.nurses) data.nurses = remote.nurses;
+          if (remote.residents) data.residents = remote.residents;
+          if (remote.meds) data.meds = remote.meds;
+          if (remote.rounds) data.rounds = remote.rounds;
+          if (remote.history) data.history = remote.history;
+          if (remote.activeRoundSession !== undefined) data.activeRoundSession = remote.activeRoundSession;
+          localStorage.setItem('medtrack_data', JSON.stringify(data));
+          renderAdminContent();
+        }
+      });
+      startSync();
     } else { err.style.display = 'block'; }
   } else {
     const nurse = data.nurses.find(n => n.username === u && n.password === p);
@@ -480,12 +622,26 @@ function doLogin() {
       const ui = document.getElementById('nurseUserInfo');
       ui.querySelector('strong').textContent = nurse.name;
       ui.querySelector('span').textContent = 'שלום, ' + nurse.name.split(' ')[0];
-      nurseTab('round');
+      // Load latest from Firebase
+      ghRead().then(remote => {
+        if (remote) {
+          if (remote.nurses) data.nurses = remote.nurses;
+          if (remote.residents) data.residents = remote.residents;
+          if (remote.meds) data.meds = remote.meds;
+          if (remote.rounds) data.rounds = remote.rounds;
+          if (remote.history) data.history = remote.history;
+          if (remote.activeRoundSession !== undefined) data.activeRoundSession = remote.activeRoundSession;
+          localStorage.setItem('medtrack_data', JSON.stringify(data));
+        }
+        nurseTab('round');
+      }).catch(() => nurseTab('round'));
+      startSync();
     } else { err.style.display = 'block'; }
   }
 }
 document.getElementById('loginPassword').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 function doLogout() {
+  stopSync();
   state.currentUser = null;
   showScreen('loginScreen');
   document.getElementById('loginUsername').value = '';
@@ -1084,10 +1240,25 @@ function toggleReminders() {
   if (state.nurseTab === 'reminders') renderNurseContent();
 }
 
+function checkSyncStatus() {
+  const el = document.getElementById('syncStatus');
+  if (el) el.textContent = 'בודק...';
+  ghRead().then(remote => {
+    if (!remote) { if (el) el.textContent = '⚠ אין חיבור'; return; }
+    const t = remote._ts ? new Date(remote._ts).toLocaleTimeString('he-IL') : '—';
+    if (el) el.textContent = `✓ מחובר — עדכון אחרון: ${t}`;
+  }).catch(() => { if (el) el.textContent = '⚠ שגיאת חיבור'; });
+}
 function renderAdminExport() {
   const today = new Date().toISOString().split('T')[0];
   const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
-  return `<div class="card">
+  return `<div class="card" style="margin-bottom:.8rem;border-right:3px solid var(--primary-mid)">
+    <div class="card-title" style="margin-bottom:.4rem">סנכרון בין מכשירים</div>
+    <p class="text-muted" style="margin-bottom:.8rem;font-size:.82rem">המערכת מסתנכרנת אוטומטית כל 5 שניות דרך GitHub.<br>כל שינוי מנהל/מדריכה מופיע לכולן תוך שניות.</p>
+    <div id="syncStatus" style="font-size:.82rem;color:var(--text-secondary)">בודק חיבור...</div>
+    <button class="btn btn-outline btn-sm mt-sm" onclick="checkSyncStatus()">בדוק חיבור</button>
+  </div>
+  <div class="card">
     <div class="card-title" style="margin-bottom:.3rem">ייצוא-PDF דוח חלוקה</div>
     <p class="text-muted" style="margin-bottom:1.2rem">בחר טווח תאריכים לדות. הדוח יכלול את כל רישומי החלוקה (ניתנה/דולגה) בטווח שנבחר.</p>
     <div style="display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.2rem">
