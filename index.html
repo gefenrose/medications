@@ -301,6 +301,188 @@
     min-height: 38px;
     padding: .4rem .7rem !important;
   }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(.94); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes popIn {
+    0%   { opacity: 0; transform: scale(.88); }
+    70%  { transform: scale(1.03); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(22px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: .55; }
+  }
+
+  /* Screen transitions */
+  .screen.active  { animation: fadeIn .22s ease; }
+  .content        { animation: fadeSlideUp .28s ease; }
+
+  /* Cards animate in staggered */
+  .card           { animation: scaleIn .24s ease both; }
+  .list-item      { animation: fadeSlideUp .2s ease both; }
+  .resident-row   { animation: fadeSlideUp .2s ease both; }
+  .stat-card      { animation: popIn .3s ease both; }
+  .reminder-card  { animation: fadeSlideUp .2s ease both; }
+
+  /* Button press feedback */
+  .btn, .btn-icon, .topbar-btn, .nav-btn, .admin-tab, .login-tab, .med-pill {
+    transition: transform .1s ease, opacity .1s ease, background .18s ease, color .18s ease, border-color .18s ease;
+  }
+  .btn:active, .btn-icon:active, .topbar-btn:active { transform: scale(.94); }
+  .nav-btn:active  { transform: scale(.88); }
+  .med-pill:active { transform: scale(.93); }
+
+  /* Toggle animation */
+  .toggle-slider:before { transition: transform .25s cubic-bezier(.4,0,.2,1), background .2s; }
+
+  /* Med row status change */
+  .med-row { transition: background .3s ease, border-color .3s ease; }
+
+  /* Sync badge pulse */
+  #syncBadge { transition: opacity .4s ease; }
+
+  /* Round card gradient shimmer on load */
+  .round-card { animation: fadeSlideDown .3s ease; }
+
+  /* Modal slide up */
+  .modal-overlay.open .modal { animation: fadeSlideUp .3s cubic-bezier(.32,0,.67,0); }
+  .modal-overlay             { animation: fadeIn .2s ease; }
+
+  /* ===== APPLE HEALTH VISUAL UPGRADES ===== */
+
+  /* Login: gradient background like Health summary */
+  #loginScreen {
+    background: linear-gradient(160deg, #e8f5f0 0%, #f4f6f4 40%, #f0ece8 100%);
+  }
+  .login-box {
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 28px;
+    box-shadow: 0 8px 40px rgba(74,124,111,.12), 0 2px 8px rgba(0,0,0,.06);
+  }
+
+  /* Nurse round-card: richer gradient */
+  .round-card {
+    background: linear-gradient(145deg, #3D6B5E 0%, #4A8075 50%, #5A9A8A 100%);
+    box-shadow: 0 4px 20px rgba(61,107,94,.3);
+  }
+
+  /* Content area: subtle gradient bg */
+  #nurseScreen .content,
+  #adminScreen > div {
+    background: linear-gradient(180deg, var(--bg) 0%, #f0f4f1 100%);
+    min-height: 100%;
+  }
+
+  /* Cards: lifted, Health-style */
+  .card {
+    box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05);
+    border-radius: 18px;
+  }
+  .list-item, .resident-row, .reminder-card {
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    border-radius: 16px;
+  }
+
+  /* Resident avatar: gradient fill */
+  .resident-avatar {
+    background: linear-gradient(135deg, var(--surface2) 0%, #d0e8e2 100%);
+  }
+
+  /* Stat cards: tonal with gradient */
+  .stat-card {
+    background: linear-gradient(145deg, #fff 0%, var(--surface1) 100%);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+
+  /* Section titles: Health-style uppercase small */
+  .section-title {
+    font-size: .72rem;
+    letter-spacing: .08em;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  /* Bottom nav: taller, Health-style pill for active */
+  .nav-btn.active .nav-icon svg {
+    filter: drop-shadow(0 0 4px rgba(74,124,111,.4));
+  }
+
+  /* Empty state icon */
+  .empty-icon svg { opacity: .3; }
+
+  /* Admin tabs: Health-style pill active */
+  .admin-tab.active {
+    background: white;
+    color: var(--primary);
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(0,0,0,.1), 0 2px 8px rgba(0,0,0,.06);
+  }
+
+  /* Stagger card animations */
+  .card:nth-child(1)       { animation-delay: .03s; }
+  .card:nth-child(2)       { animation-delay: .07s; }
+  .card:nth-child(3)       { animation-delay: .11s; }
+  .card:nth-child(4)       { animation-delay: .15s; }
+  .list-item:nth-child(1)  { animation-delay: .02s; }
+  .list-item:nth-child(2)  { animation-delay: .06s; }
+  .list-item:nth-child(3)  { animation-delay: .10s; }
+  .list-item:nth-child(4)  { animation-delay: .14s; }
+  .list-item:nth-child(5)  { animation-delay: .18s; }
+  .resident-row:nth-child(1){ animation-delay: .04s; }
+  .resident-row:nth-child(2){ animation-delay: .09s; }
+  .resident-row:nth-child(3){ animation-delay: .14s; }
+  .stat-card:nth-child(1)  { animation-delay: .05s; }
+  .stat-card:nth-child(2)  { animation-delay: .1s; }
+  .stat-card:nth-child(3)  { animation-delay: .15s; }
+
+  /* Smooth page-content swap */
+  #nurseContent, #adminContent { transition: opacity .15s ease; }
+
+  /* Login button: gradient */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    box-shadow: 0 4px 16px rgba(74,124,111,.35);
+    letter-spacing: .01em;
+  }
+  .btn-primary:active { transform: scale(.97); box-shadow: none; }
+
+  /* Form inputs: clean white with focus glow */
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    box-shadow: 0 0 0 3px rgba(74,124,111,.15);
+    border-color: var(--primary-mid);
+  }
+
+  /* Topbar: true frosted glass */
+  .topbar {
+    box-shadow: 0 .5px 0 rgba(0,0,0,.1);
+  }
+
 </style>
 </head>
 <body>
@@ -308,7 +490,7 @@
 <!-- ===== LOGIN SCREEN ===== -->
 <div id="loginScreen" class="screen active">
   <div class="login-box">
-    <div class="login-logo">
+    <div class="login-logo" style="animation:fadeSlideDown .4s ease">
       <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
   <rect x="4" y="22" width="56" height="20" rx="10" fill="#4A7C6F" transform="rotate(-35 32 32)"/>
   <rect x="4" y="22" width="28" height="20" rx="10" fill="white" opacity="0.55" transform="rotate(-35 32 32)"/>
@@ -317,7 +499,7 @@
       <h1>מעקב תרופות</h1>
       <p>מערכת ניהול תרופות לדיור מוגן</p>
     </div>
-    <div class="login-tabs">
+    <div class="login-tabs" style="animation:fadeSlideUp .35s .1s ease both">
       <button class="login-tab active" onclick="setLoginType('nurse')">מדריכה</button>
       <button class="login-tab" onclick="setLoginType('admin')">מנהל</button>
     </div>
@@ -589,6 +771,22 @@ function rerenderCurrent() {
   else if (state.currentUser?.type === 'nurse') renderNurseContent();
 }
 
+function fadeSwap(elId, html) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.style.opacity = '0';
+  el.style.transition = 'opacity .12s ease';
+  setTimeout(() => {
+    el.innerHTML = html;
+    el.style.opacity = '1';
+    // Re-inject icons after content swap
+    el.querySelectorAll('.tab-icon[data-icon]').forEach(span => {
+      span.innerHTML = icon(span.dataset.icon, 13);
+      span.style.cssText = 'display:inline-flex;align-items:center;margin-left:3px;opacity:.7';
+    });
+  }, 80);
+}
+
 function loadData() {
   try {
     const saved = localStorage.getItem('medtrack_data');
@@ -807,12 +1005,24 @@ function adminTab(tab) {
   const tabs = ['rounds','residents','meds','nurses','history','export'];
   const idx = tabs.indexOf(tab);
   if (idx >= 0) document.querySelectorAll('.admin-tab')[idx].classList.add('active');
-  renderAdminContent();
+  const adminEl = document.getElementById('adminContent');
+  if (adminEl) {
+    adminEl.style.opacity = '0';
+    adminEl.style.transition = 'opacity .1s';
+    setTimeout(() => {
+      renderAdminContent();
+      adminEl.style.opacity = '1';
+    }, 80);
+  } else {
+    renderAdminContent();
+  }
   // Inject tab icons
-  document.querySelectorAll('.tab-icon[data-icon]').forEach(el => {
-    el.innerHTML = icon(el.dataset.icon, 13);
-    el.style.cssText = 'display:inline-flex;align-items:center;margin-left:3px;opacity:.7';
-  });
+  setTimeout(() => {
+    document.querySelectorAll('.tab-icon[data-icon]').forEach(el => {
+      el.innerHTML = icon(el.dataset.icon, 13);
+      el.style.cssText = 'display:inline-flex;align-items:center;margin-left:3px;opacity:.7';
+    });
+  }, 90);
 }
 
 function renderAdminContent() {
@@ -1135,7 +1345,18 @@ function nurseTab(tab) {
     const el = document.getElementById(map[tab]);
     if (el) el.classList.add('active');
   }
-  renderNurseContent();
+  // Fade content area
+  const content = document.getElementById('nurseContent');
+  if (content) {
+    content.style.opacity = '0';
+    content.style.transition = 'opacity .1s';
+    setTimeout(() => {
+      renderNurseContent();
+      content.style.opacity = '1';
+    }, 80);
+  } else {
+    renderNurseContent();
+  }
 }
 
 function renderNurseContent() {
