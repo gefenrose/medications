@@ -817,22 +817,21 @@ function buildRoundForm(round) {
 }
 function buildEntryRow(i, resId, medIds, notes, resOpts, medOpts) {
   const ro = resOpts || window._resOptions || '';
-  const mo = medOpts || window._medOptions || '';
-  const medChecks = data.meds.map(m => {
-    const checked = medIds && medIds.includes(m.id) ? 'checked' : '';
-    return `<label class="checkbox-item"><input type="checkbox" ${checked} value="${m.id}" class="entry_med_${i}"> ${esc(m.name)}</label>`;
+  const medPills = data.meds.map(m => {
+    const sel = medIds && medIds.includes(m.id) ? ' selected' : '';
+    return `<span class="med-pill${sel}" data-medid="${m.id}" data-entry="${i}" onclick="toggleEntryMedPill(this)">${esc(m.name)} <span style="font-size:.75rem;opacity:.7">${esc(m.dose)}</span></span>`;
   }).join('');
   return `<div class="card" id="entry_${i}" style="margin-bottom:.6rem;padding:.8rem">
-    <div class="flex-center justify-between mb-sm">
+    <div class="flex-center justify-between" style="margin-bottom:.5rem">
       <div class="text-sm font-bold">דייר ${i+1}</div>
       <button class="btn-icon btn-sm" onclick="removeEntry(${i})">✕</button>
     </div>
-    <select class="full-select" id="entry_res_${i}" style="margin-bottom:.5rem">
+    <select class="full-select" id="entry_res_${i}" style="margin-bottom:.6rem">
       <option value="">— בחר דייר —</option>${ro}
     </select>
-    <div style="font-size:.82rem;font-weight:600;margin-bottom:.3rem">תרופות:</div>
-    <div class="checkbox-group">${medChecks}</div>
-    <div class="form-group" style="margin-top:.5rem;margin-bottom:0"><input id="entry_note_${i}" placeholder="הערה (אופציונלי)" value="${notes||''}"></div>
+    <div style="font-size:.78rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.4rem">תרופות</div>
+    <div class="checkbox-group" id="entry_pills_${i}">${medPills}</div>
+    <div class="form-group" style="margin-top:.6rem;margin-bottom:0"><input id="entry_note_${i}" placeholder="הערה (אופציונלי)" value="${notes||''}"></div>
   </div>`;
 }
 // patch: set resident select after DOM insert
@@ -857,7 +856,7 @@ function saveRound() {
     const idx = sel.id.split('_')[2];
     const resId = sel.value;
     if (!resId) return;
-    const medIds = [...document.querySelectorAll(`.entry_med_${idx}:checked`)].map(cb => cb.value);
+    const medIds = [...document.querySelectorAll(`#entry_pills_${idx} .med-pill.selected`)].map(p => p.dataset.medid);
     const notes = document.getElementById('entry_note_'+idx)?.value || '';
     entries.push({ residentId: resId, medIds, notes });
   });
@@ -1350,6 +1349,9 @@ function closeModalOverlay(e) { if (e.target.id === 'modalOverlay') closeModal()
 
 // ==================== UTILS ====================
 function toggleMedPill(el) {
+  el.classList.toggle('selected');
+}
+function toggleEntryMedPill(el) {
   el.classList.toggle('selected');
 }
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
