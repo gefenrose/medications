@@ -1428,17 +1428,40 @@ function renderNurseRound() {
     data.history.filter(h => h.date && h.date.startsWith(selDate)).map(h => h.roundId)
   );
 
-  const roundOptions = data.rounds.sort((a,b)=>a.time.localeCompare(b.time)).map(r => {
-    const done = doneRoundIds.has(r.id) ? ' ✓' : '';
-    return `<option value="${r.id}" ${r.id===round.id?'selected':''}>${r.name} (${r.time})${done}</option>`;
+  const sortedRounds = data.rounds.slice().sort((a,b)=>a.time.localeCompare(b.time));
+
+  const roundPills = sortedRounds.map(r => {
+    const isActive = r.id === round.id;
+    const isDone   = doneRoundIds.has(r.id);
+    const activeBg = 'var(--primary)';
+    const idleBg   = 'white';
+    return `<button
+      data-rid="${r.id}"
+      onclick="switchRound(this.dataset.rid)"
+      style="display:inline-flex;flex-direction:column;align-items:center;padding:.5rem .9rem;
+             border-radius:22px;border:1.5px solid ${isActive?'var(--primary)':'var(--border-light)'};
+             background:${isActive?activeBg:idleBg};
+             color:${isActive?'white':'var(--text-secondary)'};
+             font-family:var(--font);cursor:pointer;flex-shrink:0;
+             box-shadow:${isActive?'0 2px 12px rgba(74,124,111,.3)':'0 1px 3px rgba(0,0,0,.05)'};
+             transition:all .2s ease">
+        <span style="font-size:.82rem;font-weight:700;letter-spacing:-.01em">${r.time}</span>
+        <span style="font-size:.68rem;margin-top:1px;opacity:${isActive?'.85':'.65'}">${esc(r.name)}${isDone?' ✓':''}</span>
+      </button>`;
   }).join('');
 
-  html += `<div style="display:flex;gap:.5rem;margin-bottom:.8rem;align-items:center">
-    <input type="date" value="${selDate}" max="${today}"
-      onchange="nurseSelectDate(this.value)"
-      style="flex:1;padding:.6rem .8rem;border:1px solid var(--border-light);border-radius:var(--radius-sm);font-size:15px;font-family:var(--font);background:white;color:var(--text);direction:ltr;text-align:center">
-    <select class="full-select" style="flex:2" onchange="switchRound(this.value)">${roundOptions}</select>
-  </div>`;
+  html += `<div style="background:white;border-radius:16px;padding:.75rem .9rem;margin-bottom:.9rem;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+      <div style="font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em">סבב ותאריך</div>
+      <input type="date" value="${selDate}" max="${today}"
+        onchange="nurseSelectDate(this.value)"
+        style="font-size:13px;padding:.28rem .55rem;border:1.5px solid var(--border-light);border-radius:10px;
+               font-family:var(--font);background:var(--bg);color:var(--text);direction:ltr">
+    </div>
+    <div style="display:flex;gap:.4rem;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;-webkit-overflow-scrolling:touch">
+      ${roundPills}
+    </div>
+  </div>`
 
   html += `<div class="section-header"><div class="section-title">רשימת דיירים</div></div>`;
 
