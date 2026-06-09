@@ -1138,10 +1138,9 @@ function renderAdminResidents() {
     html += `<div class="list-item">
       <div class="resident-avatar">${initials(res.name)}</div>
       <div class="list-item-content">
-        <div class="list-item-title">${esc(res.name)} — חדר ${esc(res.room)}</div>
+        <div class="list-item-title">${esc(res.name)}${isDev ? '' : ` — חדר ${esc(res.room)}`}</div>
         <div class="list-item-sub">${medDisplay}</div>
-        ${res.notes ? `<div class="list-item-sub" style="color:var(--skip)">${icon('alert-circle',13)} ${esc(res.notes)}</div>` : ''}
-      </div>
+        ${(!isDev && res.notes) ? `<div class="list-item-sub" style="color:var(--skip)">${icon('alert-circle',13)} ${esc(res.notes)}</div>` : ''}
       ${isDev ? '' : `<div class="list-item-actions">
         <button class="btn-icon" title="עריכה" onclick="openResidentModal('${res.id}')">${icon('pencil',14)}</button>
         <button class="btn-icon" title="מחיקה" onclick="deleteResident('${res.id}')">${icon('trash-2',14)}</button>
@@ -1733,8 +1732,8 @@ function renderNurseRound() {
         <div class="resident-avatar">${initials(res.name)}</div>
         <div class="resident-info">
           <div class="resident-name">${esc(res.name)}</div>
-          <div class="resident-meds">חדר ${esc(res.room)}</div>
-          ${res.notes ? `<div class="resident-meds" style="color:var(--skip);font-size:.75rem">${icon("alert-circle",13)} ${esc(res.notes)}</div>` : ''}
+          ${state.currentUser?.type!=='dev' ? `<div class="resident-meds">חדר ${esc(res.room)}</div>` : ''}
+          ${(state.currentUser?.type!=='dev' && res.notes) ? `<div class="resident-meds" style="color:var(--skip);font-size:.75rem">${icon("alert-circle",13)} ${esc(res.notes)}</div>` : ''}
         </div>
       </div>
       ${medsHtml}
