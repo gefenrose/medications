@@ -1087,7 +1087,7 @@ function renderAdminContent() {
 }
 
 function renderAdminRounds() {
-  let html = `<div class="section-header"><div class="section-title">סבבי חלוקה</div><button class="btn btn-orange btn-sm" onclick="openRoundModal()">+ חדש</button></div>`;
+  let html = `<div class="section-header"><div class="section-title">סבבי חלוקה</div>${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openRoundModal()">+ חדש</button>' : ''}</div>`;
   if (!data.rounds.length) {
     html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין סבבים עדיין</p></div>`;
   }
@@ -1107,7 +1107,9 @@ function renderAdminRounds() {
       ${round.entries.map(e => {
         const res = data.residents.find(r => r.id === e.residentId);
         const medNames = e.medIds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name : '?'; }).join(', ');
-        return res ? `<div class="flex-center gap-sm" style="padding:.3rem 0;border-bottom:1px solid var(--border-light);font-size:.83rem;color:var(--text)"><span>${esc(res.name)}</span><span class="text-muted" style="margin-right:.3rem">— ${medNames}</span></div>` : '';
+        const isDevR = state.currentUser?.type === 'dev';
+      const medDisp = isDevR ? `<span style="filter:blur(4px);user-select:none">${medNames}</span>` : medNames;
+      return res ? `<div class="flex-center gap-sm" style="padding:.3rem 0;border-bottom:1px solid var(--border-light);font-size:.83rem;color:var(--text)"><span>${esc(res.name)}</span><span class="text-muted" style="margin-right:.3rem">— ${medDisp}</span></div>` : '';
       }).join('')}
     </div>`;
   });
@@ -1115,47 +1117,57 @@ function renderAdminRounds() {
 }
 
 function renderAdminResidents() {
-  let html = `<div class="section-header"><div class="section-title">דיירים</div><button class="btn btn-orange btn-sm" onclick="openResidentModal()">+ חדש</button></div>`;
+  let html = `<div class="section-header"><div class="section-title">דיירים</div>${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openResidentModal()">+ חדש</button>' : ''}</div>`;
   if (!data.residents.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין דיירים</p></div>`;
   data.residents.forEach(res => {
+    const isDev = state.currentUser?.type === 'dev';
     const medNames = res.meds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name : '?'; }).join(', ');
+    const medDisplay = isDev
+      ? '<span style="filter:blur(4px);user-select:none;pointer-events:none">' + (medNames || 'ללא תרופות') + '</span>'
+      : (medNames || 'ללא תרופות');
     html += `<div class="list-item">
       <div class="resident-avatar">${initials(res.name)}</div>
       <div class="list-item-content">
         <div class="list-item-title">${esc(res.name)} — חדר ${esc(res.room)}</div>
-        <div class="list-item-sub">${medNames || 'ללא תרופות'}</div>
-        ${res.notes ? `<div class="list-item-sub" style="color:var(--skip)">${icon("alert-circle",13)} ${esc(res.notes)}</div>` : ''}
+        <div class="list-item-sub">${medDisplay}</div>
+        ${res.notes ? `<div class="list-item-sub" style="color:var(--skip)">${icon('alert-circle',13)} ${esc(res.notes)}</div>` : ''}
       </div>
-      <div class="list-item-actions">
+      ${isDev ? '' : `<div class="list-item-actions">
         <button class="btn-icon" title="עריכה" onclick="openResidentModal('${res.id}')">${icon('pencil',14)}</button>
         <button class="btn-icon" title="מחיקה" onclick="deleteResident('${res.id}')">${icon('trash-2',14)}</button>
-      </div>
+      </div>`}
     </div>`;
   });
   return html;
 }
 
 function renderAdminMeds() {
-  let html = `<div class="section-header"><div class="section-title">תרופות</div><button class="btn btn-orange btn-sm" onclick="openMedModal()">+ חדש</button></div>`;
+  const isDev = state.currentUser?.type === 'dev';
+  let html = `<div class="section-header"><div class="section-title">תרופות</div>${isDev ? '' : '<button class="btn btn-orange btn-sm" onclick="openMedModal()">+ חדש</button>'}</div>`;
+  ${isDev ? '<div class="info-box" style="margin-bottom:.7rem;font-size:.82rem">🔒 גישת Developer — נתוני תרופות מוסתרים</div>' : ''}
   if (!data.meds.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין תרופות</p></div>`;
-  data.meds.forEach(med => {
-    html += `<div class="list-item">
-      <div style="width:36px;height:36px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--primary);flex-shrink:0">Rx</div>
-      <div class="list-item-content">
-        <div class="list-item-title">${esc(med.name)}</div>
-        <div class="list-item-sub">${esc(med.type)} | מינון: ${esc(med.dose)}${med.notes ? ' | ' + esc(med.notes) : ''}</div>
+  data.meds.forEach((med, i) => {
+    const maskedName = isDev ? '••••••••' : esc(med.name);
+    const maskedDose = isDev ? '•••' : esc(med.dose);
+    const maskedType = isDev ? '•••' : esc(med.type);
+    const maskedNotes= isDev ? '' : (med.notes ? ' | ' + esc(med.notes) : '');
+    html += \`<div class="list-item" style="\${isDev ? 'filter:blur(0)' : ''}">
+      <div style="width:36px;height:36px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--primary);flex-shrink:0">\${isDev ? (i+1) : 'Rx'}</div>
+      <div class="list-item-content" style="\${isDev ? 'filter:blur(3.5px);user-select:none;pointer-events:none' : ''}">
+        <div class="list-item-title">\${maskedName}</div>
+        <div class="list-item-sub">\${maskedType} | מינון: \${maskedDose}\${maskedNotes}</div>
       </div>
-      <div class="list-item-actions">
-        <button class="btn-icon" title="עריכה" onclick="openMedModal('${med.id}')">${icon('pencil',14)}</button>
-        <button class="btn-icon" title="מחיקה" onclick="deleteMed('${med.id}')">${icon('trash-2',14)}</button>
-      </div>
-    </div>`;
+      \${isDev ? '' : \`<div class="list-item-actions">
+        <button class="btn-icon" title="עריכה" onclick="openMedModal('\${med.id}')">\${icon('pencil',14)}</button>
+        <button class="btn-icon" title="מחיקה" onclick="deleteMed('\${med.id}')">\${icon('trash-2',14)}</button>
+      </div>\`}
+    </div>\`;
   });
   return html;
 }
 
 function renderAdminNurses() {
-  let html = `<div class="section-header"><div class="section-title">מדריכות</div><button class="btn btn-orange btn-sm" onclick="openNurseModal()">+ חדש</button></div>`;
+  let html = `<div class="section-header"><div class="section-title">מדריכות</div>${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openNurseModal()">+ חדש</button>' : ''}</div>`;
   data.nurses.forEach(nurse => {
     html += `<div class="list-item">
       <div class="resident-avatar">${initials(nurse.name)}</div>
@@ -1163,10 +1175,10 @@ function renderAdminNurses() {
         <div class="list-item-title">${esc(nurse.name)}</div>
         <div class="list-item-sub">שם משתמש: ${esc(nurse.username)}</div>
       </div>
-      <div class="list-item-actions">
+      ${state.currentUser?.type !== 'dev' ? `<div class="list-item-actions">
         <button class="btn-icon" title="עריכה" onclick="openNurseModal('${nurse.id}')">${icon('pencil',14)}</button>
         <button class="btn-icon" title="מחיקה" onclick="deleteNurse('${nurse.id}')">${icon('trash-2',14)}</button>
-      </div>
+      </div>` : ''}
     </div>`;
   });
   return html;
@@ -1297,7 +1309,8 @@ function renderAdminHistory() {
 }
 
 
-function openRoundModal(id) {
+function openRoundModal(id) {  if (state.currentUser?.type === 'dev') return;
+
   state.editId = id || null;
   const round = id ? data.rounds.find(r=>r.id===id) : null;
   openModal(id ? 'עריכת סבב' : 'סבב חדש', buildRoundForm(round));
@@ -1374,13 +1387,15 @@ function saveRound() {
   }
   saveData(); closeModal(); renderAdminContent();
 }
-function deleteRound(id) {
+function deleteRound(id) {  if (state.currentUser?.type === 'dev') return;
+
   if (!confirm('למחוק את הסבב?')) return;
   data.rounds = data.rounds.filter(r=>r.id!==id);
   saveData(); renderAdminContent();
 }
 
-function openResidentModal(id) {
+function openResidentModal(id) {  if (state.currentUser?.type === 'dev') return;
+
   state.editId = id || null;
   const res = id ? data.residents.find(r=>r.id===id) : null;
   const medChecks = data.meds.map(m => {
@@ -1409,13 +1424,15 @@ function saveResident() {
   }
   saveData(); closeModal(); renderAdminContent();
 }
-function deleteResident(id) {
+function deleteResident(id) {  if (state.currentUser?.type === 'dev') return;
+
   if (!confirm('למחוק את הדייר?')) return;
   data.residents = data.residents.filter(r=>r.id!==id);
   saveData(); renderAdminContent();
 }
 
-function openMedModal(id) {
+function openMedModal(id) {  if (state.currentUser?.type === 'dev') return;
+
   state.editId = id || null;
   const med = id ? data.meds.find(m=>m.id===id) : null;
   openModal(id ? 'עריכת תרופה' : 'תרופה חדשה', `
@@ -1440,13 +1457,15 @@ function saveMed() {
   }
   saveData(); closeModal(); renderAdminContent();
 }
-function deleteMed(id) {
+function deleteMed(id) {  if (state.currentUser?.type === 'dev') return;
+
   if (!confirm('למחוק את התרופה?')) return;
   data.meds = data.meds.filter(m=>m.id!==id);
   saveData(); renderAdminContent();
 }
 
-function openNurseModal(id) {
+function openNurseModal(id) {  if (state.currentUser?.type === 'dev') return;
+
   state.editId = id || null;
   const nurse = id ? data.nurses.find(n=>n.id===id) : null;
   openModal(id ? 'עריכת מדריכה' : 'מדריכה חדשה', `
@@ -1470,7 +1489,8 @@ function saveNurse() {
   }
   saveData(); closeModal(); renderAdminContent();
 }
-function deleteNurse(id) {
+function deleteNurse(id) {  if (state.currentUser?.type === 'dev') return;
+
   if (!confirm('למחוק את המדריכה?')) return;
   data.nurses = data.nurses.filter(n=>n.id!==id);
   saveData(); renderAdminContent();
