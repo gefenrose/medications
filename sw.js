@@ -1,5 +1,5 @@
 // sw.js — network-first, always fresh
-const CACHE = 'medtrack-v8';
+const CACHE = 'medtrack-v9';
 const CDN   = ['cdnjs.cloudflare.com','fonts.gstatic.com','fonts.googleapis.com','cdn.jsdelivr.net'];
 
 self.addEventListener('install', () => self.skipWaiting());
@@ -60,4 +60,3 @@ self.addEventListener('notificationclick', e => {
     })
   );
 });
-// deployed 2026-06-09T11:25:09Z
