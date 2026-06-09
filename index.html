@@ -2057,14 +2057,14 @@ function renderAdminExport() {
         <input type="date" id="pdf_to" value="${today}">
       </div>
     </div>
-    <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+    ${state.currentUser?.type === 'dev' ? '<p style="color:var(--skip);font-size:.85rem">גישת Developer — ייצוא מושבת</p>' : `<div style="display:flex;gap:.6rem;flex-wrap:wrap">
       <button class="btn btn-orange" onclick="exportPDFRange()" style="display:flex;align-items:center;gap:.5rem;padding:.7rem 1.2rem">
         ${icon("download",16)} Excel
       </button>
       <button class="btn" style="display:flex;align-items:center;gap:.5rem;padding:.7rem 1.2rem;background:white;border:1.5px solid var(--border);color:var(--text)" onclick="exportPDF(document.getElementById('pdf_from')?.value,document.getElementById('pdf_to')?.value)">
         ${icon("download",16)} PDF שחור-לבן
       </button>
-    </div>
+    </div>`}
   </div>`;
 }
 
@@ -2295,13 +2295,13 @@ ${body}
 }
 
 function exportPDFRange() {
-  const from = document.getElementById('pdf_from')?.value || '';
+  if (state.currentUser?.type === 'dev') return; const from = document.getElementById('pdf_from')?.value || '';
   const to   = document.getElementById('pdf_to')?.value   || '';
   exportExcel(from, to);
 }
 
 function exportExcel(fromDate, toDate) {
-  if (typeof XLSX === 'undefined') {
+  if (state.currentUser?.type === 'dev') return; if (typeof XLSX === 'undefined') {
     alert('טוען את ספריית Excel... נסה שוב בעוד שנייה');
     return;
   }
