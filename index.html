@@ -2,6 +2,9 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -9,7 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="תרופות">
 <meta name="theme-color" content="#4A7C6F">
 <title>מעקב תרופות – דיור מוגן</title>
-<!-- v12 -->
+<!-- v13 -->
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -2810,17 +2813,19 @@ const origOpenModal = openModal;
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
+      // updateViaCache:'none' = browser never caches sw.js itself
       const reg = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
 
-      // ── 1. Check for updates aggressively ─────────────────────────────
-      //    Every 30s while open, and on every visibility change (app resume)
-      const checkUpdate = () => reg.update().catch(() => {});
-      setInterval(checkUpdate, 30_000);
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') checkUpdate();
-      });
+      // Check for new SW every 15 seconds
+      setInterval(() => reg.update(), 15_000);
 
-      // ── 2. New SW installing → skip waiting immediately ───────────────
+      // Also check on every tab focus / app resume
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') reg.update();
+      });
+      window.addEventListener('pageshow', e => { if (e.persisted) reg.update(); });
+
+      // New SW found → activate immediately
       reg.addEventListener('updatefound', () => {
         const sw = reg.installing;
         sw.addEventListener('statechange', () => {
@@ -2828,36 +2833,13 @@ if ('serviceWorker' in navigator) {
         });
       });
 
-      // ── 3. SW took over → reload silently ────────────────────────────
-      //    This fires on both Android and iOS when the new SW activates
+      // SW took over → reload
       let reloading = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!reloading) { reloading = true; window.location.reload(); }
       });
 
-      // ── 4. SW signals content changed (stale-while-revalidate) ───────
-      navigator.serviceWorker.addEventListener('message', e => {
-        if (e.data?.type === 'SW_UPDATED' && !reloading) {
-          reloading = true;
-          window.location.reload();
-        }
-      });
-
-      // ── 5. iOS PWA: check on every app foreground (page show) ─────────
-      //    iOS Safari fires 'pageshow' with persisted=true when resuming
-      //    from background — trigger update check then too
-      window.addEventListener('pageshow', e => {
-        if (e.persisted) checkUpdate();
-      });
-
-      // ── 6. If no controller yet (first install), claim immediately ────
-      if (!navigator.serviceWorker.controller) {
-        await reg.update();
-      }
-
-    } catch(e) {
-      console.warn('SW error', e);
-    }
+    } catch(e) { console.warn('SW:', e); }
   });
 }
 </script>
