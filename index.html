@@ -566,6 +566,7 @@
       <button class="admin-tab" onclick="adminTab('nurses')"><span class="tab-icon" data-icon="user"></span>מדריכות</button>
       <button class="admin-tab" onclick="adminTab('history')"><span class="tab-icon" data-icon="history"></span>היסטוריה</button>
       <button class="admin-tab" onclick="adminTab('export')"><span class="tab-icon" data-icon="download"></span>ייצוא</button>
+      <button class="admin-tab" onclick="adminTab('profile')"><span class="tab-icon" data-icon="settings"></span>פרופיל</button>
     </div>
     <div id="adminContent"></div>
     <div class="page-hint" style="padding-bottom:env(safe-area-inset-bottom)"><a href="#" onclick="showNurseViewFromAdmin()" style="color:var(--text-muted);text-decoration:none;font-size:.8rem">← מעבר לתצוגת מדריכה</a></div>
@@ -988,7 +989,7 @@ function doLogin() {
         }
       });
       startSync();
-    } else if (u === 'admin' && p === '1234') {
+    } else if ((()=>{ const cr=getAdminCreds(); return u===cr.username && p===cr.password; })()) {
       state.currentUser = { type: 'admin', name: 'מנהל' };
       saveSession(state.currentUser);
       resetAdminIdleTimer();
@@ -1059,7 +1060,7 @@ function showScreen(id) {
 function adminTab(tab) {
   state.adminTab = tab;
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-  const tabs = ['rounds','residents','meds','nurses','history','export'];
+  const tabs = ['rounds','residents','meds','nurses','history','export','profile'];
   const idx = tabs.indexOf(tab);
   if (idx >= 0) document.querySelectorAll('.admin-tab')[idx].classList.add('active');
   const adminEl = document.getElementById('adminContent');
@@ -1091,6 +1092,7 @@ function renderAdminContent() {
     case 'nurses': el.innerHTML = renderAdminNurses(); break;
     case 'history': el.innerHTML = renderAdminHistory(); break;
     case 'export': el.innerHTML = renderAdminExport(); break;
+    case 'profile': el.innerHTML = renderAdminProfile(); break;
   }
 }
 
@@ -2041,6 +2043,67 @@ function checkSyncStatus() {
     if (el) el.textContent = `✓ מחובר — עדכון אחרון: ${t}`;
   }).catch(() => { if (el) el.textContent = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> שגיאת חיבור'; });
 }
+function renderAdminProfile() {
+  return `<div class="card">
+    <div class="card-title" style="margin-bottom:.8rem">פרופיל מנהל</div>
+    <div class="form-group">
+      <label>שם משתמש חדש</label>
+      <input id="prof_user" placeholder="admin" value="admin">
+    </div>
+    <div class="form-group">
+      <label>סיסמה נוכחית</label>
+      <input id="prof_cur_pass" type="password" placeholder="הכנס סיסמה נוכחית">
+    </div>
+    <div class="form-group">
+      <label>סיסמה חדשה</label>
+      <input id="prof_new_pass" type="password" placeholder="הכנס סיסמה חדשה">
+    </div>
+    <div class="form-group">
+      <label>אמת סיסמה חדשה</label>
+      <input id="prof_confirm_pass" type="password" placeholder="הכנס שוב את הסיסמה החדשה">
+    </div>
+    <div id="prof_msg" style="font-size:.85rem;margin-bottom:.5rem;display:none"></div>
+    <button class="btn btn-orange" onclick="saveAdminProfile()">שמור שינויים</button>
+  </div>`;
+}
+
+// Store admin credentials in localStorage (separate from data.json for security)
+function getAdminCreds() {
+  try {
+    const raw = localStorage.getItem('medtrack_admin_creds');
+    return raw ? JSON.parse(raw) : { username: 'admin', password: '1234' };
+  } catch(e) { return { username: 'admin', password: '1234' }; }
+}
+function setAdminCreds(u, p) {
+  localStorage.setItem('medtrack_admin_creds', JSON.stringify({ username: u, password: p }));
+}
+
+function saveAdminProfile() {
+  const newUser    = document.getElementById('prof_user').value.trim();
+  const curPass    = document.getElementById('prof_cur_pass').value;
+  const newPass    = document.getElementById('prof_new_pass').value;
+  const confirmPass= document.getElementById('prof_confirm_pass').value;
+  const msg        = document.getElementById('prof_msg');
+
+  const show = (text, ok) => {
+    msg.textContent = text;
+    msg.style.color = ok ? 'var(--success)' : 'var(--skip)';
+    msg.style.display = 'block';
+  };
+
+  const creds = getAdminCreds();
+  if (curPass !== creds.password) { show('סיסמה נוכחית שגויה', false); return; }
+  if (!newUser) { show('שם משתמש לא יכול להיות ריק', false); return; }
+  if (newPass && newPass !== confirmPass) { show('הסיסמאות החדשות אינן תואמות', false); return; }
+  if (newPass && newPass.length < 4) { show('הסיסמה חייבת להכיל לפחות 4 תווים', false); return; }
+
+  setAdminCreds(newUser, newPass || creds.password);
+  show('✓ השינויים נשמרו בהצלחה', true);
+  document.getElementById('prof_cur_pass').value = '';
+  document.getElementById('prof_new_pass').value = '';
+  document.getElementById('prof_confirm_pass').value = '';
+}
+
 function renderAdminExport() {
   const today = new Date().toISOString().split('T')[0];
   const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
