@@ -624,7 +624,8 @@ let state = {
   remindersEnabled: true,
   editId: null,
   selectedDate: new Date().toISOString().split('T')[0],
-  mutedRounds: {}   // roundId -> true  (per-round mute)
+  mutedRounds: {},   // roundId -> true  (per-round mute)
+  residentFilter: ''  // filter by resident name
 };
 
 const defaultData = {
@@ -1100,12 +1101,34 @@ function renderAdminContent() {
 }
 
 function renderAdminRounds() {
-  let html = `<div class="section-header"><div class="section-title">סבבי חלוקה</div>${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openRoundModal()">+ חדש</button>' : ''}</div>`;
+  let html = `<div style="margin-bottom:.8rem">
+    <div class="section-header" style="margin-bottom:.5rem">
+      <div class="section-title">סבבי חלוקה</div>
+      ${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openRoundModal()">+ חדש</button>' : ''}
+    </div>
+    <input type="text" id="adminResFilter" placeholder="סנן לפי דייר..."
+      oninput="renderAdminContent()"
+      style="font-size:14px;padding:.35rem .8rem;border:1px solid var(--border-light);border-radius:20px;
+             font-family:var(--font);direction:rtl;width:100%;background:white">
+  </div>`;
   if (!data.rounds.length) {
     html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין סבבים עדיין</p></div>`;
   }
   data.rounds.sort((a,b) => a.time.localeCompare(b.time)).forEach(round => {
     const entryCount = round.entries.length;
+    const adminResF = (document.getElementById('adminResFilter')||{}).value||'';
+    const filteredEntries = round.entries.filter(e=>{
+      if (!adminResF) return true;
+      const r = data.residents.find(x=>x.id===e.residentId);
+      return r && r.name.includes(adminResF);
+    });
+    const entriesHtml = filteredEntries.map(e=>{
+      const res = data.residents.find(r=>r.id===e.residentId);
+      const medNames = e.medIds.map(mid=>{ const m=data.meds.find(x=>x.id===mid); return m?m.name:'?'; }).join(', ');
+      const isDevR = state.currentUser?.type === 'dev';
+      const medDisp = isDevR ? '<span style="filter:blur(4px);user-select:none">'+medNames+'</span>' : medNames;
+      return res ? `<div class="flex-center gap-sm" style="padding:.3rem 0;border-bottom:1px solid var(--border-light);font-size:.83rem;color:var(--text)"><span>${esc(res.name)}</span><span class="text-muted" style="margin-right:.3rem">— ${medDisp}</span></div>` : '';
+    }).join('');
     html += `<div class="card">
       <div class="card-header">
         <div>
@@ -1117,13 +1140,7 @@ function renderAdminRounds() {
           <button class="btn-icon" title="מחיקה" onclick="deleteRound('${round.id}')">${icon('trash-2',14)}</button>
         </div>
       </div>
-      ${round.entries.map(e => {
-        const res = data.residents.find(r => r.id === e.residentId);
-        const medNames = e.medIds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name : '?'; }).join(', ');
-        const isDevR = state.currentUser?.type === 'dev';
-      const medDisp = isDevR ? `<span style="filter:blur(4px);user-select:none">${medNames}</span>` : medNames;
-      return res ? `<div class="flex-center gap-sm" style="padding:.3rem 0;border-bottom:1px solid var(--border-light);font-size:.83rem;color:var(--text)"><span>${esc(res.name)}</span><span class="text-muted" style="margin-right:.3rem">— ${medDisp}</span></div>` : '';
-      }).join('')}
+      ${entriesHtml}
     </div>`;
   });
   return html;
@@ -1203,912 +1220,82 @@ function renderAdminNurses() {
 
 function renderAdminHistory() {
   const today = new Date().toISOString().split('T')[0];
-  let html = `<div class="section-header"><div class="section-title">היסטוריה</div></div>`;
 
-  // ── Build a complete picture: what SHOULD have been given vs what WAS ──
-  // For each date that has any history, also check for rounds that were never touched
+  // Filter state stored on state object
+  if (!state.histFilters) state.histFilters = { date: '', nurse: '', resident: '' };
+  const { date: fDate, nurse: fNurse, resident: fRes } = state.histFilters;
 
-  // Collect all dates with history
-  const allDates = [...new Set(data.history.map(h => h.date.split('T')[0]))].sort().reverse();
+  // Nurses list for dropdown
+  const nurseOptions = data.nurses.map(n =>
+    `<option value="${esc(n.name)}" ${fNurse===n.name?'selected':''}>${esc(n.name)}</option>`
+  ).join('');
 
-  // Also add today if no history yet
-  if (!allDates.includes(today)) allDates.unshift(today);
-
-  if (!allDates.length || (allDates.length === 1 && allDates[0] === today && !data.history.length)) {
-    html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין היסטוריה עדיין</p></div>`;
-    return html;
-  }
-
-  allDates.forEach(date => {
-    const dayHistory = data.history.filter(h => h.date && h.date.startsWith(date));
-    if (!dayHistory.length && date !== today) return;  // skip empty past days
-
-    html += `<div class="card" style="margin-bottom:.8rem">
-      <div class="card-title" style="margin-bottom:.8rem">${icon("calendar",14)} ${formatDate(date)}</div>`;
-
-    // Group by round (chronologically)
-    const roundsSorted = data.rounds.slice().sort((a,b) => a.time.localeCompare(b.time));
-
-    roundsSorted.forEach(round => {
-      // For each entry in this round, check every med
-      const roundHistory = dayHistory.filter(h => h.roundId === round.id);
-
-      // Build per-resident per-med status map
-      const doneMap = {};  // resId_medId -> history entry
-      roundHistory.forEach(h => { doneMap[h.residentId + '_' + h.medId] = h; });
-
-      // Find all expected meds
-      const expected = [];
-      (round.entries || []).forEach(entry => {
-        const res = data.residents.find(r => r.id === entry.residentId);
-        if (!res) return;
-        (entry.medIds || []).forEach(medId => {
-          const med = data.meds.find(m => m.id === medId);
-          expected.push({ res, med, key: entry.residentId + '_' + medId });
-        });
-      });
-
-      if (!expected.length) return;
-
-      const totalMeds    = expected.length;
-      const givenCount   = expected.filter(e => doneMap[e.key]?.status === 'given').length;
-      const skippedCount = expected.filter(e => doneMap[e.key]?.status === 'skipped').length;
-      const missedCount  = expected.filter(e => !doneMap[e.key]).length;
-
-      const allDone    = missedCount === 0;
-      const allMissed  = givenCount === 0 && skippedCount === 0;
-      const partialMiss = missedCount > 0 && !allMissed;
-
-      // Round header color
-      const headerColor = allMissed
-        ? 'var(--skip)'
-        : partialMiss
-          ? '#b07d00'
-          : 'var(--success)';
-      const headerBg = allMissed
-        ? 'var(--skip-bg)'
-        : partialMiss
-          ? '#fff8e6'
-          : 'var(--success-bg)';
-      const headerBorder = allMissed
-        ? '2px solid var(--skip)'
-        : partialMiss
-          ? '2px dashed #b07d00'
-          : '2px solid var(--success)';
-      const headerIcon = allMissed ? '✕' : partialMiss ? '⚠' : '✓';
-
-      html += `<div style="margin-bottom:.6rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;
-                    background:${headerBg};border-radius:10px;padding:.45rem .7rem;margin-bottom:.3rem;
-                    border-right:4px solid ${headerColor}">
-          <div style="display:flex;align-items:center;gap:.4rem">
-            <span style="font-weight:700;font-size:.88rem;color:${headerColor}">${headerIcon} ${esc(round.name)}</span>
-            <span style="font-size:.75rem;color:var(--text-muted)">${round.time}</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:.4rem;font-size:.75rem">
-            ${givenCount > 0   ? `<span style="color:var(--success);font-weight:600">${givenCount} ניתנו</span>` : ''}
-            ${skippedCount > 0 ? `<span style="color:var(--skip);font-weight:600">${skippedCount} דולגו</span>` : ''}
-            ${missedCount > 0  ? `<span style="color:#b07d00;font-weight:700;background:#fff3cd;padding:.1rem .4rem;border-radius:6px;border:1.5px dashed #b07d00">⚠ ${missedCount} לא סומנו</span>` : ''}
-          </div>
-        </div>`;
-
-      // Resident rows
-      expected.forEach(({ res, med, key }) => {
-        const h = doneMap[key];
-        const st = h ? h.status : 'missing';
-        const rowColor = st === 'given' ? 'var(--success)' : st === 'skipped' ? 'var(--skip)' : '#b07d00';
-        const rowBg    = st === 'given' ? 'var(--success-bg)' : st === 'skipped' ? 'var(--skip-bg)' : '#fff8e6';
-        const rowLabel = st === 'given' ? '✓ ניתנה' : st === 'skipped' ? '✕ דולג' : '⚠ לא סומן';
-        const rowBorder = st === 'missing' ? '1.5px dashed #b07d00' : st === 'skipped' ? '1px solid #f2b8b5' : '1px solid #a8d5b5';
-        const nurseName = h?.nurseName || '';
-        const timeStr   = h?.time      || '';
-
-        html += `<div style="display:flex;align-items:center;justify-content:space-between;
-                             padding:.4rem .5rem;border-radius:8px;background:${rowBg};
-                             margin-bottom:.25rem;border:${rowBorder}">
-          <div style="flex:1;min-width:0">
-            <span style="font-weight:600;font-size:.84rem">${esc(res.name)}</span>
-            <span style="font-size:.75rem;color:var(--text-muted);margin-right:.4rem">— ${med ? (state.currentUser?.type==='dev'?'••••••':esc(med.name)) : '?'}</span>
-            ${nurseName ? `<span style="font-size:.72rem;color:var(--text-muted)">${esc(nurseName)} ${timeStr}</span>` : ''}
-          </div>
-          <span style="font-size:.75rem;font-weight:700;color:${rowColor};flex-shrink:0;margin-right:.4rem;
-                         padding:.15rem .45rem;border-radius:6px;background:${rowBg};border:1px solid ${rowColor}22">${rowLabel}</span>
-        </div>`;
-      });
-
-      html += `</div>`;
-    });
-
-    html += `</div>`;
-  });
-
-  return html;
-}
-
-
-function openRoundModal(id) {  if (state.currentUser?.type === 'dev') return;
-
-  state.editId = id || null;
-  const round = id ? data.rounds.find(r=>r.id===id) : null;
-  openModal(id ? 'עריכת סבב' : 'סבב חדש', buildRoundForm(round));
-}
-function buildRoundForm(round) {
-  const entries = round ? round.entries : [];
-  let resOptions = data.residents.map(r => `<option value="${r.id}">${esc(r.name)} (חדר ${r.room})</option>`).join('');
-  let medOptions = data.meds.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
-  window._resOptions = resOptions;
-  window._medOptions = medOptions;
-  let entriesHtml = '';
-  entries.forEach((e,i) => {
-    entriesHtml += buildEntryRow(i, e.residentId, e.medIds, e.notes, resOptions, medOptions);
-  });
-  return `
-    <div class="form-group"><label>שם הסבב</label><input id="rf_name" value="${round ? esc(round.name) : ''}"></div>
-    <div class="form-group"><label>שעה</label><input id="rf_time" type="time" value="${round ? round.time : '08:00'}"></div>
-    <div style="margin-bottom:.5rem;font-weight:700">דיירים בסבב</div>
-    <div id="entriesContainer">${entriesHtml}</div>
-    <button class="btn btn-outline btn-sm w-full mt-sm" onclick="addEntryRow()">+ הוסף דייר לסבב</button>
-    <button class="btn btn-orange w-full mt-md" onclick="saveRound()">שמור</button>
-  `;
-}
-function buildEntryRow(i, resId, medIds, notes, resOpts, medOpts) {
-  const ro = resOpts || window._resOptions || '';
-  const medPills = data.meds.map(m => {
-    const sel = medIds && medIds.includes(m.id) ? ' selected' : '';
-    return `<span class="med-pill${sel}" data-medid="${m.id}" data-entry="${i}" onclick="toggleEntryMedPill(this)">${esc(m.name)} <span style="font-size:.75rem;opacity:.7">${esc(m.dose)}</span></span>`;
-  }).join('');
-  return `<div class="card" id="entry_${i}" style="margin-bottom:.6rem;padding:.8rem">
-    <div class="flex-center justify-between" style="margin-bottom:.5rem">
-      <div class="text-sm font-bold">דייר ${i+1}</div>
-      <button class="btn-icon btn-sm" onclick="removeEntry(${i})">✕</button>
+  let html = `<div class="card" style="margin-bottom:.8rem;padding:.8rem 1rem">
+    <div style="font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.6rem">סינון</div>
+    <div style="display:flex;flex-direction:column;gap:.5rem">
+      <input type="date" value="${fDate}" max="${today}"
+        onchange="state.histFilters.date=this.value;renderAdminContent()"
+        style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:ltr">
+      <select onchange="state.histFilters.nurse=this.value;renderAdminContent()"
+        style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:rtl">
+        <option value="" ${!fNurse?'selected':''}>כל המדריכות</option>
+        ${nurseOptions}
+      </select>
+      <input type="text" placeholder="חיפוש דייר..." value="${fRes}"
+        oninput="state.histFilters.resident=this.value;renderAdminContent()"
+        style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);direction:rtl;background:white">
     </div>
-    <select class="full-select" id="entry_res_${i}" style="margin-bottom:.6rem">
-      <option value="">— בחר דייר —</option>${ro}
-    </select>
-    <div style="font-size:.78rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.4rem">תרופות</div>
-    <div class="checkbox-group" id="entry_pills_${i}">${medPills}</div>
-    <div class="form-group" style="margin-top:.6rem;margin-bottom:0"><input id="entry_note_${i}" placeholder="הערה (אופציונלי)" value="${notes||''}"></div>
-  </div>`;
-}
-// patch: set resident select after DOM insert
-function addEntryRow() {
-  const c = document.getElementById('entriesContainer');
-  const i = c.children.length;
-  const div = document.createElement('div');
-  div.innerHTML = buildEntryRow(i, null, [], '', window._resOptions, window._medOptions);
-  c.appendChild(div.firstElementChild);
-}
-function removeEntry(i) {
-  const el = document.getElementById('entry_'+i);
-  if (el) el.remove();
-}
-function saveRound() {
-  const name = document.getElementById('rf_name').value.trim();
-  const time = document.getElementById('rf_time').value;
-  if (!name || !time) return alert('נא למלא שם ושעה');
-  const c = document.getElementById('entriesContainer');
-  const entries = [];
-  c.querySelectorAll('[id^=entry_res_]').forEach(sel => {
-    const idx = sel.id.split('_')[2];
-    const resId = sel.value;
-    if (!resId) return;
-    const medIds = [...document.querySelectorAll(`#entry_pills_${idx} .med-pill.selected`)].map(p => p.dataset.medid);
-    const notes = document.getElementById('entry_note_'+idx)?.value || '';
-    entries.push({ residentId: resId, medIds, notes });
-  });
-  if (state.editId) {
-    const r = data.rounds.find(r=>r.id===state.editId);
-    if (r) { r.name = name; r.time = time; r.entries = entries; }
-  } else {
-    data.rounds.push({ id: genId(), name, time, entries });
-  }
-  saveData(); closeModal(); renderAdminContent();
-}
-function deleteRound(id) {  if (state.currentUser?.type === 'dev') return;
-
-  if (!confirm('למחוק את הסבב?')) return;
-  data.rounds = data.rounds.filter(r=>r.id!==id);
-  saveData(); renderAdminContent();
-}
-
-function openResidentModal(id) {  if (state.currentUser?.type === 'dev') return;
-
-  state.editId = id || null;
-  const res = id ? data.residents.find(r=>r.id===id) : null;
-  const medChecks = data.meds.map(m => {
-    const isSelected = res && res.meds.includes(m.id);
-    return `<span class="med-pill${isSelected ? ' selected' : ''}" data-medid="${m.id}" onclick="toggleMedPill(this)">${esc(m.name)} <span style="font-size:.75rem;opacity:.7">${esc(m.dose)}</span></span>`;
-  }).join('');
-  openModal(id ? 'עריכת דייר' : 'דייר חדש', `
-    <div class="form-group"><label>שם מלא</label><input id="res_name" value="${res ? esc(res.name) : ''}"></div>
-    <div class="form-group"><label>מספר חדר</label><input id="res_room" value="${res ? esc(res.room) : ''}"></div>
-    <div class="form-group"><label>הערות רפואיות / אלרגיות</label><textarea id="res_notes" rows="2">${res ? esc(res.notes) : ''}</textarea></div>
-    <div class="form-group"><label>תרופות רשומות</label><div class="checkbox-group">${medChecks}</div></div>
-    <button class="btn btn-orange w-full mt-md" onclick="saveResident()">שמור</button>
-  `);
-}
-function saveResident() {
-  const name = document.getElementById('res_name').value.trim();
-  const room = document.getElementById('res_room').value.trim();
-  const notes = document.getElementById('res_notes').value.trim();
-  const meds = [...document.querySelectorAll('.med-pill.selected')].map(p => p.dataset.medid);
-  if (!name) return alert('נא להכניס שם');
-  if (state.editId) {
-    const r = data.residents.find(r=>r.id===state.editId);
-    if (r) { r.name = name; r.room = room; r.notes = notes; r.meds = meds; }
-  } else {
-    data.residents.push({ id: genId(), name, room, notes, meds });
-  }
-  saveData(); closeModal(); renderAdminContent();
-}
-function deleteResident(id) {  if (state.currentUser?.type === 'dev') return;
-
-  if (!confirm('למחוק את הדייר?')) return;
-  data.residents = data.residents.filter(r=>r.id!==id);
-  saveData(); renderAdminContent();
-}
-
-function openMedModal(id) {  if (state.currentUser?.type === 'dev') return;
-
-  state.editId = id || null;
-  const med = id ? data.meds.find(m=>m.id===id) : null;
-  openModal(id ? 'עריכת תרופה' : 'תרופה חדשה', `
-    <div class="form-group"><label>שם תרופה</label><input id="med_name" value="${med ? esc(med.name) : ''}"></div>
-    <div class="form-group"><label>סוג</label><input id="med_type" value="${med ? esc(med.type) : 'כדורים'}"></div>
-    <div class="form-group"><label>מינון</label><input id="med_dose" value="${med ? esc(med.dose) : ''}"></div>
-    <div class="form-group"><label>הערות</label><input id="med_notes" value="${med ? esc(med.notes) : ''}"></div>
-    <button class="btn btn-orange w-full mt-md" onclick="saveMed()">שמור</button>
-  `);
-}
-function saveMed() {
-  const name = document.getElementById('med_name').value.trim();
-  const type = document.getElementById('med_type').value.trim();
-  const dose = document.getElementById('med_dose').value.trim();
-  const notes = document.getElementById('med_notes').value.trim();
-  if (!name) return alert('נא להכניס שם תרופה');
-  if (state.editId) {
-    const m = data.meds.find(m=>m.id===state.editId);
-    if (m) { m.name = name; m.type = type; m.dose = dose; m.notes = notes; }
-  } else {
-    data.meds.push({ id: genId(), name, type, dose, notes });
-  }
-  saveData(); closeModal(); renderAdminContent();
-}
-function deleteMed(id) {  if (state.currentUser?.type === 'dev') return;
-
-  if (!confirm('למחוק את התרופה?')) return;
-  data.meds = data.meds.filter(m=>m.id!==id);
-  saveData(); renderAdminContent();
-}
-
-function openNurseModal(id) {  if (state.currentUser?.type === 'dev') return;
-
-  state.editId = id || null;
-  const nurse = id ? data.nurses.find(n=>n.id===id) : null;
-  openModal(id ? 'עריכת מדריכה' : 'מדריכה חדשה', `
-    <div class="form-group"><label>שם מלא</label><input id="nurse_name" value="${nurse ? esc(nurse.name) : ''}"></div>
-    <div class="form-group"><label>שם משתמש</label><input id="nurse_username" value="${nurse ? esc(nurse.username) : ''}"></div>
-    <div class="form-group"><label>סיסמה</label><input id="nurse_password" type="password" placeholder="${nurse ? 'השאר ריק לשמירת הסיסמה הקיימת' : ''}"></div>
-    <button class="btn btn-orange w-full mt-md" onclick="saveNurse()">שמור</button>
-  `);
-}
-function saveNurse() {
-  const name = document.getElementById('nurse_name').value.trim();
-  const username = document.getElementById('nurse_username').value.trim();
-  const password = document.getElementById('nurse_password').value.trim();
-  if (!name || !username) return alert('נא למלא שם ושם משתמש');
-  if (state.editId) {
-    const n = data.nurses.find(n=>n.id===state.editId);
-    if (n) { n.name = name; n.username = username; if (password) n.password = password; }
-  } else {
-    if (!password) return alert('נא להכניס סיסמה');
-    data.nurses.push({ id: genId(), name, username, password });
-  }
-  saveData(); closeModal(); renderAdminContent();
-}
-function deleteNurse(id) {  if (state.currentUser?.type === 'dev') return;
-
-  if (!confirm('למחוק את המדריכה?')) return;
-  data.nurses = data.nurses.filter(n=>n.id!==id);
-  saveData(); renderAdminContent();
-}
-
-// ==================== NURSE ====================
-function nurseTab(tab) {
-  state.nurseTab = tab;
-  ['navRound','navHistory','navReminders'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove('active');
-  });
-  const map = { round: 'navRound', history: 'navHistory', reminders: 'navReminders' };
-  if (map[tab]) {
-    const el = document.getElementById(map[tab]);
-    if (el) el.classList.add('active');
-  }
-  // Fade content area
-  const content = document.getElementById('nurseContent');
-  if (content) {
-    content.style.opacity = '0';
-    content.style.transition = 'opacity .1s';
-    setTimeout(() => {
-      renderNurseContent();
-      content.style.opacity = '1';
-    }, 80);
-  } else {
-    renderNurseContent();
-  }
-}
-
-function renderNurseContent() {
-  const el = document.getElementById('nurseContent');
-  switch(state.nurseTab) {
-    case 'round': el.innerHTML = renderNurseRound(); break;
-    case 'history': el.innerHTML = renderNurseHistory(); break;
-    case 'reminders': el.innerHTML = renderNurseReminders(); break;
-    default: el.innerHTML = renderNurseRound();
-  }
-}
-
-function getCurrentRound() {
-  if (!data.rounds.length) return null;
-  const now = new Date();
-  const hhmm = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-  const sorted = [...data.rounds].sort((a,b) => a.time.localeCompare(b.time));
-  // Find current or next
-  let best = null;
-  for (const r of sorted) {
-    if (r.time >= hhmm) { best = r; break; }
-  }
-  if (!best) best = sorted[0]; // wrap around to first
-  return best;
-}
-
-function renderNurseRound() {
-  const today = new Date().toISOString().split('T')[0];
-  const selDate = state.selectedDate || today;
-  const isPast = selDate < today;
-
-  // For past dates — show history view
-  if (isPast) return renderNurseDateHistory(selDate);
-
-  const round = data.activeRoundSession ? data.rounds.find(r=>r.id===data.activeRoundSession.roundId) : getCurrentRound();
-  if (!round) return `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין סבבים מוגדרים</p></div>`;
-
-  const session = data.activeRoundSession && data.activeRoundSession.roundId === round.id ? data.activeRoundSession : null;
-  const statuses = session ? session.statuses : {};
-
-  // Count per-med statuses
-  let given = 0, skipped = 0, totalMeds = 0;
-  round.entries.forEach(entry => {
-    entry.medIds.forEach(mid => {
-      totalMeds++;
-      const ms = (statuses[entry.residentId] && statuses[entry.residentId].meds && statuses[entry.residentId].meds[mid]);
-      if (ms && ms.status === 'given') given++;
-      else if (ms && ms.status === 'skipped') skipped++;
-    });
-  });
-  const total = round.entries.length;
-
-  let html = `<div class="round-card">
-    <h2>${esc(round.name)}</h2>
-    <p>${total} דיירים בסבב זה</p>
-    <div class="time-badge">${round.time}</div>
+    ${(fDate||fNurse||fRes) ? `<button class="btn btn-outline btn-sm mt-sm" onclick="state.histFilters={date:'',nurse:'',resident:''};renderAdminContent()">נקה סינון</button>` : ''}
   </div>`;
 
-  html += `<div class="stats-row">
-    <div class="stat-card"><div class="stat-num" style="color:var(--success)">${given}</div><div class="stat-label">תרופות ניתנו</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--skip)">${skipped}</div><div class="stat-label">דולגו</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--text-secondary)">${totalMeds - given - skipped}</div><div class="stat-label">ממתינות</div></div>
-  </div>`;
-
-  // Date + round picker (today/selDate already declared above)
-
-  // Build history summary for selected date (which rounds were done)
-  const doneRoundIds = new Set(
-    data.history.filter(h => h.date && h.date.startsWith(selDate)).map(h => h.roundId)
-  );
-
-  const sortedRounds = data.rounds.slice().sort((a,b) => a.time.localeCompare(b.time));
-
-  // Styled select — clearly interactive, shows current round + date
-  const roundOptions = sortedRounds.map(r => {
-    const isDone = doneRoundIds.has(r.id);
-    return `<option value="${r.id}" ${r.id===round.id?'selected':''}>${r.time} — ${esc(r.name)}${isDone?' ✓':''}`;
-  }).join('');
-
-  html += `<div style="background:white;border-radius:16px;padding:.8rem 1rem;margin-bottom:.9rem;
-                       box-shadow:0 1px 4px rgba(0,0,0,.07);border:1.5px solid var(--border-light)">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:.7rem">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.35rem">סבב</div>
-        <div style="position:relative">
-          <select onchange="switchRound(this.value)"
-            style="width:100%;padding:.55rem .75rem;padding-left:2rem;font-size:1rem;font-weight:600;
-                   font-family:var(--font);direction:rtl;border:none;background:var(--bg);
-                   border-radius:10px;color:var(--text);appearance:none;-webkit-appearance:none;
-                   cursor:pointer;line-height:1.3">
-            ${roundOptions}
-          </select>
-          <svg style="position:absolute;left:.55rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted)"
-            xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </div>
-      </div>
-      <div style="flex-shrink:0">
-        <div style="font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.35rem">תאריך</div>
-        <input type="date" value="${selDate}" max="${today}"
-          onchange="nurseSelectDate(this.value)"
-          style="font-size:.88rem;padding:.5rem .65rem;border:none;border-radius:10px;
-                 font-family:var(--font);background:var(--bg);color:var(--text);direction:ltr;
-                 font-weight:500;cursor:pointer">
-      </div>
-    </div>
-  </div>`
-
-  html += `<div class="section-header"><div class="section-title">רשימת דיירים</div></div>`;
-
-  round.entries.forEach(entry => {
-    const res = data.residents.find(r=>r.id===entry.residentId);
-    if (!res) return;
-    // Per-med statuses: medStatuses[residentId][medId] = { status, note }
-    const medStatuses = (statuses[entry.residentId] && statuses[entry.residentId].meds) || {};
-    const allDone = entry.medIds.length > 0 && entry.medIds.every(mid => medStatuses[mid] && medStatuses[mid].status !== 'pending');
-    const anySkipped = entry.medIds.some(mid => medStatuses[mid] && medStatuses[mid].status === 'skipped');
-    const rowClass = allDone ? (anySkipped ? 'skipped' : 'given') : '';
-
-    let medsHtml = entry.medIds.map(mid => {
-      const med = data.meds.find(x=>x.id===mid);
-      if (!med) return '';
-      const ms = medStatuses[mid] || { status: 'pending', note: '' };
-      const isGiven = ms.status === 'given';
-      const isSkipped = ms.status === 'skipped';
-      const isPending = ms.status === 'pending';
-      return (() => {
-      const givenTime = isGiven && ms.time ? ms.time : '';
-      const rId = round.id;
-      const resId = entry.residentId;
-
-      let notePart = '';
-      if (!isPending) {
-        notePart = `<div style="padding-right:38px;margin-top:.3rem">
-          <input type="text" placeholder="הערה (אופציונלי)" value="${esc(ms.note||'')}"
-            class="med-note-input"
-            style="width:100%;border:1px solid var(--border-light);border-radius:8px;background:white;font-family:var(--font);direction:rtl"
-            data-round="${rId}" data-res="${resId}" data-med="${mid}"
-            oninput="saveMedNote(this.dataset.round,this.dataset.res,this.dataset.med,this.value)">
-        </div>`;
-      }
-
-      const circleStyle = isGiven
-        ? 'background:var(--success);color:white'
-        : isSkipped
-          ? 'background:var(--skip);color:white'
-          : 'background:var(--surface2);color:var(--text-muted)';
-      const circleIcon = isGiven ? '✓' : isSkipped ? '✕' : '·';
-
-      const nameColor = isGiven ? 'var(--success)' : isSkipped ? 'var(--skip)' : 'var(--text)';
-      const borderStyle = isGiven
-        ? '1.5px solid var(--success)'
-        : isSkipped
-          ? '1.5px solid var(--skip)'
-          : '1px solid var(--border-light)';
-      const bgStyle = isGiven ? 'var(--success-bg)' : isSkipped ? 'var(--skip-bg)' : 'white';
-
-      const btnGivenStyle  = isGiven  ? 'background:var(--success);color:white;font-weight:700' : 'background:var(--success-bg);color:var(--success);opacity:.55';
-      const btnSkipStyle   = isSkipped ? 'background:var(--skip);color:white;font-weight:700'   : 'background:var(--skip-bg);color:var(--skip);opacity:.55';
-      const btnGivenLabel  = isGiven  ? '✓ ניתנה' : 'ניתנה';
-      const btnSkipLabel   = isSkipped ? '✕ דולג'  : 'דולג';
-
-      return `<div id="medrow_${resId}_${mid}"
-        style="display:flex;flex-direction:column;gap:.3rem;padding:.6rem .7rem;border-radius:12px;border:${borderStyle};background:${bgStyle};margin-bottom:.4rem;transition:all .2s">
-        <div style="display:flex;align-items:center;gap:.5rem">
-          <div style="width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;${circleStyle}">
-            ${circleIcon}
-          </div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:600;font-size:.9rem;color:${nameColor}">${state.currentUser?.type==='dev'?'••••••':esc(med.name)}</div>
-            <div style="font-size:.75rem;color:var(--text-muted);display:flex;gap:.4rem;margin-top:.05rem;flex-wrap:wrap">
-              <span>${state.currentUser?.type==='dev'?'•••':esc(med.dose)}</span>
-              ${isGiven && givenTime ? `<span style="color:var(--success);font-weight:600">· ${givenTime}</span>` : ''}
-              ${isSkipped ? '<span style="color:var(--skip)">· דולג</span>' : ''}
-            </div>
-          </div>
-                    <div style="display:flex;gap:.3rem;flex-shrink:0">
-            ${state.currentUser?.type === 'dev' ? '<span style="font-size:.75rem;color:var(--text-muted);font-style:italic">צפייה בלבד</span>' : `<button class="btn btn-sm"
-              data-r="${rId}" data-res="${resId}" data-m="${mid}"
-              onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'given')"
-              style="${btnGivenStyle}">${btnGivenLabel}</button>
-            <button class="btn btn-sm"
-              data-r="${rId}" data-res="${resId}" data-m="${mid}"
-              onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'skipped')"
-              style="${btnSkipStyle}">${btnSkipLabel}</button>`}
-          </div>
-        </div>
-        ${notePart}
-      </div>`;
-    })();
-    }).join('');
-
-    html += `<div class="resident-row ${rowClass}" id="row_${entry.residentId}" style="flex-direction:column;align-items:stretch;padding:.9rem 1rem">
-      <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.6rem">
-        <div class="resident-avatar">${initials(res.name)}</div>
-        <div class="resident-info">
-          <div class="resident-name">${esc(res.name)}</div>
-          ${state.currentUser?.type!=='dev' ? `<div class="resident-meds">חדר ${esc(res.room)}</div>` : ''}
-          ${(state.currentUser?.type!=='dev' && res.notes) ? `<div class="resident-meds" style="color:var(--skip);font-size:.75rem">${icon("alert-circle",13)} ${esc(res.notes)}</div>` : ''}
-        </div>
-      </div>
-      ${medsHtml}
-    </div>`;
-  });
-
-  if (totalMeds > 0 && given + skipped === totalMeds) {
-    html += `<div class="info-box" style="margin-top:1rem;text-align:center"><div class="font-bold">הסבב הושלם!</div></div>`;
-    html += `<button class="btn btn-orange w-full mt-sm" onclick="finishRound('${round.id}')">סיים וסגור סבב</button>`;
-  }
-
-  return html;
-}
-
-function nurseSelectDate(dateStr) {
-  state.selectedDate = dateStr;
-  // If viewing today — keep active session; otherwise show history view for that date
-  const today = new Date().toISOString().split('T')[0];
-  if (dateStr !== today && data.activeRoundSession) {
-    // Don't clear session, just re-render with date context
-  }
-  renderNurseContent();
-}
-
-function switchRound(roundId) {
-  if (data.activeRoundSession && data.activeRoundSession.roundId !== roundId) {
-    if (!confirm('לעבור לסבב אחר? הפעולות שבוצעו לא יאבדו.')) return;
-  }
-  const today = new Date().toISOString().split('T')[0];
-  if (!data.activeRoundSession || data.activeRoundSession.roundId !== roundId) {
-    data.activeRoundSession = { roundId, statuses: {}, startTime: new Date().toISOString() };
-  }
-  renderNurseContent();
-}
-
-function ensureSession(roundId) {
-  if (!data.activeRoundSession || data.activeRoundSession.roundId !== roundId) {
-    data.activeRoundSession = { roundId, statuses: {}, startTime: new Date().toISOString() };
-  }
-}
-
-function markMedStatus(roundId, residentId, medId, status) {
-  if (state.currentUser?.type === 'dev') return;
-  ensureSession(roundId);
-  if (!data.activeRoundSession.statuses[residentId]) {
-    data.activeRoundSession.statuses[residentId] = { meds: {} };
-  }
-  const sid = data.activeRoundSession.startTime;
-  const current = (data.activeRoundSession.statuses[residentId].meds[medId] || {}).status;
-
-  // Toggle off: clicking the same status again → cancel and remove from history
-  if (current === status) {
-    delete data.activeRoundSession.statuses[residentId].meds[medId];
-    data.history = data.history.filter(h => !(h.roundId===roundId && h.residentId===residentId && h.medId===medId && h.sessionId===sid));
-    saveData();
-    renderNurseContent();
-    return;
-  }
-
-  if (status === 'pending') {
-    if (data.activeRoundSession.statuses[residentId].meds[medId]) {
-      delete data.activeRoundSession.statuses[residentId].meds[medId];
+  // Filter history
+  const filtered = data.history.filter(h => {
+    if (fDate && !(h.date||'').startsWith(fDate)) return false;
+    if (fNurse && h.nurseName !== fNurse) return false;
+    if (fRes) {
+      const r = data.residents.find(x=>x.id===h.residentId);
+      if (!r || !r.name.includes(fRes)) return false;
     }
-    data.history = data.history.filter(h => !(h.roundId===roundId && h.residentId===residentId && h.medId===medId && h.sessionId===sid));
-  } else {
-    const existing = (data.activeRoundSession.statuses[residentId].meds[medId] || {}).note || '';
-    data.activeRoundSession.statuses[residentId].meds[medId] = { status, note: existing };
-    data.history = data.history.filter(h => !(h.roundId===roundId && h.residentId===residentId && h.medId===medId && h.sessionId===sid));
-    const nowTime = new Date().toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'});
-    data.activeRoundSession.statuses[residentId].meds[medId].time = nowTime;
-    data.history.push({
-      id: genId(), roundId, residentId, medId, status,
-      date: new Date().toISOString(),
-      time: nowTime,
-      nurseName: state.currentUser?.name || '',
-      sessionId: sid,
-      note: existing
-    });
-  }
-  saveData();
-  renderNurseContent();
-}
+    return true;
+  });
 
-function saveMedNote(roundId, residentId, medId, note) {
-  ensureSession(roundId);
-  if (!data.activeRoundSession.statuses[residentId]) return;
-  if (!data.activeRoundSession.statuses[residentId].meds[medId]) return;
-  data.activeRoundSession.statuses[residentId].meds[medId].note = note;
-  // Update history entry
-  const sid = data.activeRoundSession.startTime;
-  const h = data.history.find(h => h.roundId===roundId && h.residentId===residentId && h.medId===medId && h.sessionId===sid);
-  if (h) h.note = note;
-  saveData();
-}
-
-function finishRound(roundId) {
-  data.activeRoundSession = null;
-  saveData();
-  renderNurseContent();
-}
-
-
-function renderNurseDateHistory(dateStr) {
-  const today = new Date().toISOString().split('T')[0];
-  const selDate = state.selectedDate || today;
-  const dateLabel = new Date(dateStr + 'T12:00:00').toLocaleDateString('he-IL', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-
-  const dayHistory = data.history.filter(h => h.date && h.date.startsWith(dateStr));
-
-  // Date picker (always shown)
-  let html = `<div style="display:flex;gap:.5rem;margin-bottom:.8rem;align-items:center">
-    <input type="date" value="${dateStr}" max="${today}"
-      onchange="nurseSelectDate(this.value)"
-      style="flex:1;padding:.6rem .8rem;border:1px solid var(--border-light);border-radius:var(--radius-sm);font-size:15px;font-family:var(--font);background:white;color:var(--text);direction:ltr;text-align:center">
-  </div>`;
-
-  html += `<div class="round-card" style="margin-bottom:1rem">
-    <h2>${dateLabel}</h2>
-    <p>היסטוריית חלוקה ליום זה</p>
-  </div>`;
-
-  if (!dayHistory.length) {
-    html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין רישומים ליום ${dateStr}</p></div>`;
+  if (!filtered.length) {
+    html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין רשומות</p></div>`;
     return html;
   }
 
-  // Group by round
-  const byRound = {};
-  dayHistory.forEach(h => {
-    if (!byRound[h.roundId]) byRound[h.roundId] = [];
-    byRound[h.roundId].push(h);
-  });
-
-  const sortedRounds = Object.keys(byRound).sort((a,b) => {
-    const ra = data.rounds.find(r=>r.id===a), rb = data.rounds.find(r=>r.id===b);
-    return (ra?.time||'').localeCompare(rb?.time||'');
-  });
-
-  sortedRounds.forEach(roundId => {
-    const round = data.rounds.find(r=>r.id===roundId);
-    const entries = byRound[roundId];
-    html += `<div class="card" style="margin-bottom:.7rem">
-      <div class="card-header">
-        <div class="card-title">${round ? esc(round.name) : 'סבב לא ידוע'}</div>
-        <div class="card-subtitle">${round?.time || ''}</div>
-      </div>`;
-    // Group by resident
-    const byRes = {};
-    entries.forEach(h => {
-      if (!byRes[h.residentId]) byRes[h.residentId] = [];
-      byRes[h.residentId].push(h);
-    });
-    Object.entries(byRes).forEach(([resId, hlist]) => {
-      const res = data.residents.find(r=>r.id===resId);
-      html += `<div style="display:flex;align-items:flex-start;gap:.7rem;padding:.5rem 0;border-bottom:1px solid var(--border-light)">
-        <div class="resident-avatar">${initials(res?.name||'?')}</div>
-        <div style="flex:1">
-          <div class="resident-name">${res ? esc(res.name) : '?'}</div>
-          ${hlist.map(h => {
-            const med = data.meds.find(m=>m.id===h.medId);
-            const badge = h.status==='given'
-              ? '<span class="badge badge-given">ניתנה ✓</span>'
-              : '<span class="badge badge-skipped">דולג</span>';
-            return `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:.3rem;font-size:.82rem">
-              <span>${med ? (state.currentUser?.type==='dev' ? '•••••• •••' : esc(med.name)+' '+esc(med.dose)) : '?'}</span>
-              <div style="display:flex;align-items:center;gap:.4rem">${badge}<span style="color:var(--text-muted);font-size:.75rem">${h.time||''}</span></div>
-            </div>
-            ${h.note ? `<div style="font-size:.75rem;color:var(--text-muted);margin-top:.1rem">הערה: ${esc(h.note)}</div>` : ''}`;
-          }).join('')}
-        </div>
-      </div>`;
-    });
-    html += `</div>`;
-  });
-
-  return html;
-}
-
-function renderNurseHistory() {
-  let html = `<div class="section-header"><div class="section-title">היסטוריית חלוקה</div></div>`;
-  const myHistory = data.history.filter(h => h.nurseName === state.currentUser?.name);
-  if (!myHistory.length) return html + `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין היסטוריה עדיין</p></div>`;
+  // Group by date
   const byDate = {};
-  myHistory.forEach(h => {
-    const d = h.date.split('T')[0];
+  filtered.forEach(h => {
+    const d = (h.date||'').split('T')[0];
     if (!byDate[d]) byDate[d] = [];
     byDate[d].push(h);
   });
+
   Object.keys(byDate).sort().reverse().forEach(date => {
     html += `<div class="card"><div class="card-title" style="margin-bottom:.6rem">${icon("calendar",14)} ${formatDate(date)}</div>`;
     byDate[date].forEach(h => {
-      const res = data.residents.find(r=>r.id===h.residentId);
-      const med = data.meds.find(m=>m.id===h.medId);
+      const res   = data.residents.find(r=>r.id===h.residentId);
+      const med   = data.meds.find(m=>m.id===h.medId);
       const round = data.rounds.find(r=>r.id===h.roundId);
-      const statusBadge = h.status === 'given' ? '<span class="badge badge-given">ניתנה ✓</span>' : '<span class="badge badge-skipped">דולג</span>';
-      html += `<div class="flex-center justify-between" style="padding:.4rem 0;border-bottom:1px solid var(--border)">
+      const statusBadge = h.status==='given'
+        ? '<span class="badge badge-given">ניתנה ✓</span>'
+        : '<span class="badge badge-skipped">✕ דולג</span>';
+      html += `<div class="flex-center justify-between" style="padding:.45rem 0;border-bottom:1px solid var(--border-light)">
         <div>
-          <div class="text-sm font-bold">${res ? res.name : '?'} — ${med ? (state.currentUser?.type==='dev'?'••••••':med.name) : '?'}</div>
-          <div class="text-muted" style="font-size:.75rem">${h.time} | ${round ? round.name : ''}</div>
+          <div class="text-sm font-bold">${res?res.name:'?'} — ${med?esc(med.name):'?'}</div>
+          <div class="text-muted" style="font-size:.75rem">${h.time||''} | ${round?round.name:''} | <strong>${h.nurseName||'—'}</strong></div>
+          ${h.note ? `<div class="text-muted" style="font-size:.73rem;font-style:italic">* ${esc(h.note)}</div>` : ''}
         </div>
         ${statusBadge}
       </div>`;
     });
     html += `</div>`;
   });
-  return html;
-}
-
-function renderNurseReminders() {
-  const notifSupported = 'Notification' in window;
-  const notifGranted   = notifSupported && Notification.permission === 'granted';
-  const notifDenied    = notifSupported && Notification.permission === 'denied';
-  const globalOn       = state.remindersEnabled && notifGranted;
-
-  // ── Global header card ─────────────────────────────────────────────────
-  let html = `<div class="card" style="margin-bottom:.8rem">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:.8rem">
-      <div>
-        <div style="font-weight:700;font-size:.95rem">התראות Push</div>
-        <div style="font-size:.78rem;color:var(--text-muted);margin-top:.2rem">
-          ${notifDenied  ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> נחסמו בהגדרות הדפדפן' :
-            !notifGranted ? 'אפשרי התראות לקבל תזכורת לפני כל סבב' :
-            globalOn      ? 'פועל — התראות מתוזמנות לפי הסבבים' :
-                            'כבוי — לא יישלחו התראות'}
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:.5rem">
-        ${notifDenied ? '' :
-          !notifGranted
-            ? `<button class="btn btn-orange btn-sm" onclick="enableNotifications()">הפעל</button>`
-            : `<label class="toggle" title="${globalOn ? 'כבה הכל' : 'הפעל הכל'}">
-                <input type="checkbox" ${globalOn ? 'checked' : ''} onchange="toggleGlobalNotif(this.checked)">
-                <span class="toggle-slider"></span>
-               </label>`
-        }
-      </div>
-    </div>
-  </div>`;
-
-  if (!notifGranted) return html;
-
-  // ── Per-round rows ─────────────────────────────────────────────────────
-  html += `<div class="section-title" style="margin-bottom:.6rem">לפי סבב</div>`;
-
-  const sorted = [...data.rounds].sort((a,b) => a.time.localeCompare(b.time));
-
-  if (!sorted.length) {
-    html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין סבבים מוגדרים</p></div>`;
-    return html;
-  }
-
-  sorted.forEach(round => {
-    const isMuted    = !!state.mutedRounds[round.id];
-    const isScheduled = !!_scheduledNotifs[round.id];
-    const roundOn    = globalOn && !isMuted;
-
-    const names = (round.entries || []).map(e => {
-      const res = data.residents.find(r => r.id === e.residentId);
-      return res ? res.name : null;
-    }).filter(Boolean);
-
-    const statusColor = !globalOn ? 'var(--text-muted)' : roundOn ? 'var(--success)' : 'var(--skip)';
-    const statusText  = !globalOn ? 'גלובלי כבוי' : roundOn ? (isScheduled ? 'מתוזמן' : 'עבר') : 'מושתק';
-
-    html += `<div class="card" style="margin-bottom:.5rem;padding:.9rem 1rem">
-      <div style="display:flex;align-items:center;gap:.7rem">
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:.5rem">
-            <span style="font-weight:700;font-size:.92rem">${esc(round.name)}</span>
-            <span style="font-size:.8rem;font-weight:700;color:var(--primary)">${round.time}</span>
-            <span style="font-size:.72rem;color:${statusColor};margin-right:auto">${statusText}</span>
-          </div>
-          <div style="font-size:.75rem;color:var(--text-muted);margin-top:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-            ${names.length ? names.join(' · ') : 'אין דיירים'}
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:.5rem">
-          ${notifGranted ? `<button class="btn btn-outline btn-sm"
-            data-rid="${round.id}"
-            onclick="testNotification(this.dataset.rid)"
-            style="font-size:.72rem;padding:.28rem .6rem">בדוק</button>` : ''}
-          <label class="toggle">
-            <input type="checkbox" ${roundOn ? 'checked' : ''} ${!globalOn ? 'disabled' : ''}
-              data-rid="${round.id}"
-              onchange="toggleRoundNotif(this.dataset.rid, !this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-      </div>
-    </div>`;
-  });
 
   return html;
 }
 
-
-function toggleReminders() {
-  toggleGlobalNotif(!state.remindersEnabled);
-}
-
-function checkSyncStatus() {
-  const el = document.getElementById('syncStatus');
-  if (el) el.textContent = 'בודק...';
-  ghRead().then(remote => {
-    if (!remote) { if (el) el.textContent = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> אין חיבור'; return; }
-    const t = remote._ts ? new Date(remote._ts).toLocaleTimeString('he-IL') : '—';
-    if (el) el.textContent = `✓ מחובר — עדכון אחרון: ${t}`;
-  }).catch(() => { if (el) el.textContent = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> שגיאת חיבור'; });
-}
-function renderAdminProfile() {
-  if (state.currentUser?.type === 'dev') return '<div class="empty-state"><p>גישה לא מורשית</p></div>';
-  return `<div class="card">
-    <div class="card-title" style="margin-bottom:.8rem">פרופיל מנהל</div>
-    <div class="form-group">
-      <label>שם משתמש חדש</label>
-      <input id="prof_user" placeholder="admin" value="admin">
-    </div>
-    <div class="form-group">
-      <label>סיסמה נוכחית</label>
-      <input id="prof_cur_pass" type="password" placeholder="הכנס סיסמה נוכחית">
-    </div>
-    <div class="form-group">
-      <label>סיסמה חדשה</label>
-      <input id="prof_new_pass" type="password" placeholder="הכנס סיסמה חדשה">
-    </div>
-    <div class="form-group">
-      <label>אמת סיסמה חדשה</label>
-      <input id="prof_confirm_pass" type="password" placeholder="הכנס שוב את הסיסמה החדשה">
-    </div>
-    <div id="prof_msg" style="font-size:.85rem;margin-bottom:.5rem;display:none"></div>
-    <button class="btn btn-orange" onclick="saveAdminProfile()">שמור שינויים</button>
-  </div>`;
-}
-
-// Store admin credentials in localStorage (separate from data.json for security)
-function getAdminCreds() {
-  try {
-    const raw = localStorage.getItem('medtrack_admin_creds');
-    return raw ? JSON.parse(raw) : { username: 'admin', password: '1234' };
-  } catch(e) { return { username: 'admin', password: '1234' }; }
-}
-function setAdminCreds(u, p) {
-  localStorage.setItem('medtrack_admin_creds', JSON.stringify({ username: u, password: p }));
-}
-
-function saveAdminProfile() {
-  if (state.currentUser?.type === 'dev') return;
-  const newUser    = document.getElementById('prof_user').value.trim();
-  const curPass    = document.getElementById('prof_cur_pass').value;
-  const newPass    = document.getElementById('prof_new_pass').value;
-  const confirmPass= document.getElementById('prof_confirm_pass').value;
-  const msg        = document.getElementById('prof_msg');
-
-  const show = (text, ok) => {
-    msg.textContent = text;
-    msg.style.color = ok ? 'var(--success)' : 'var(--skip)';
-    msg.style.display = 'block';
-  };
-
-  const creds = getAdminCreds();
-  if (curPass !== creds.password) { show('סיסמה נוכחית שגויה', false); return; }
-  if (!newUser) { show('שם משתמש לא יכול להיות ריק', false); return; }
-  if (newPass && newPass !== confirmPass) { show('הסיסמאות החדשות אינן תואמות', false); return; }
-  if (newPass && newPass.length < 4) { show('הסיסמה חייבת להכיל לפחות 4 תווים', false); return; }
-
-  setAdminCreds(newUser, newPass || creds.password);
-  show('✓ השינויים נשמרו בהצלחה', true);
-  document.getElementById('prof_cur_pass').value = '';
-  document.getElementById('prof_new_pass').value = '';
-  document.getElementById('prof_confirm_pass').value = '';
-}
 
 function renderAdminExport() {
   const today = new Date().toISOString().split('T')[0];
