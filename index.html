@@ -2032,4 +2032,253 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 </body>
-</html>
+</html>function openRoundModal(id) {  if (state.currentUser?.type === 'dev') return;
+
+  state.editId = id || null;
+  const round = id ? data.rounds.find(r=>r.id===id) : null;
+  openModal(id ? 'עריכת סבב' : 'סבב חדש', buildRoundForm(round));
+}
+function buildRoundForm(round) {
+  const entries = round ? round.entries : [];
+  let resOptions = data.residents.map(r => `<option value="${r.id}">${esc(r.name)} (חדר ${r.room})</option>`).join('');
+  let medOptions = data.meds.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
+  window._resOptions = resOptions;
+  window._medOptions = medOptions;
+  let entriesHtml = '';
+  entries.forEach((e,i) => {
+    entriesHtml += buildEntryRow(i, e.residentId, e.medIds, e.notes, resOptions, medOptions);
+  });
+  return `
+    <div class="form-group"><label>שם הסבב</label><input id="rf_name" value="${round ? esc(round.name) : ''}"></div>
+    <div class="form-group"><label>שעה</label><input id="rf_time" type="time" value="${round ? round.time : '08:00'}"></div>
+    <div style="margin-bottom:.5rem;font-weight:700">דיירים בסבב</div>
+    <div id="entriesContainer">${entriesHtml}</div>
+    <button class="btn btn-outline btn-sm w-full mt-sm" onclick="addEntryRow()">+ הוסף דייר לסבב</button>
+    <button class="btn btn-orange w-full mt-md" onclick="saveRound()">שמור</button>
+  `;
+}
+function buildEntryRow(i, resId, medIds, notes, resOpts, medOpts) {
+  const ro = resOpts || window._resOptions || '';
+  // Show all meds initially; filtered dynamically when resident selected
+  const res = resId ? data.residents.find(r=>r.id===resId) : null;
+  const resMedIds = res ? res.meds : [];
+  // Show resident's meds if resident selected, otherwise all meds
+  const medsToShow = resMedIds.length > 0
+    ? data.meds.filter(m => resMedIds.includes(m.id))
+    : data.meds;
+  const medPills = medsToShow.map(m => {
+    const sel = medIds && medIds.includes(m.id) ? ' selected' : '';
+    return `<span class="med-pill${sel}" data-medid="${m.id}" data-entry="${i}" onclick="toggleEntryMedPill(this)">${esc(m.name)} <span style="font-size:.75rem;opacity:.7">${esc(m.dose)}</span></span>`;
+  }).join('');
+  const noResMsg = resId ? '' : '<span class="text-muted" style="font-size:.8rem">בחר דייר כדי לראות התרופות שלו</span>';
+  return `<div class="card" id="entry_${i}" style="margin-bottom:.6rem;padding:.8rem">
+    <div class="flex-center justify-between" style="margin-bottom:.5rem">
+      <div class="text-sm font-bold">דייר ${i+1}</div>
+      <button class="btn-icon btn-sm" onclick="removeEntry(${i})">✕</button>
+    </div>
+    <select class="full-select" id="entry_res_${i}" style="margin-bottom:.6rem"
+      onchange="onEntryResidentChange(${i}, this.value)">
+      <option value="">— בחר דייר —</option>${ro}
+    </select>
+    <div style="font-size:.78rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.4rem">תרופות</div>
+    <div class="checkbox-group" id="entry_pills_${i}">${resId ? medPills : noResMsg}</div>
+    <div class="form-group" style="margin-top:.6rem;margin-bottom:0"><input id="entry_note_${i}" placeholder="הערה (אופציונלי)" value="${notes||''}"></div>
+  </div>`;
+}
+
+
+function onEntryResidentChange(i, resId) {
+  // Rebuild med pills for the newly selected resident
+  const pillsDiv = document.getElementById('entry_pills_'+i);
+  if (!pillsDiv) return;
+  const res = resId ? data.residents.find(r=>r.id===resId) : null;
+  const resMedIds = res ? res.meds : [];
+  const medsToShow = resMedIds.length > 0
+    ? data.meds.filter(m => resMedIds.includes(m.id))
+    : data.meds;
+  if (!resId) {
+    pillsDiv.innerHTML = '<span class="text-muted" style="font-size:.8rem">בחר דייר כדי לראות התרופות שלו</span>';
+    return;
+  }
+  pillsDiv.innerHTML = medsToShow.map(m =>
+    `<span class="med-pill" data-medid="${m.id}" data-entry="${i}" onclick="toggleEntryMedPill(this)">${esc(m.name)} <span style="font-size:.75rem;opacity:.7">${esc(m.dose)}</span></span>`
+  ).join('');
+}
+
+function addEntryRow() {
+  const c = document.getElementById('entriesContainer');
+  const i = c.children.length;
+  const div = document.createElement('div');
+  div.innerHTML = buildEntryRow(i, null, [], '', window._resOptions, window._medOptions);
+  c.appendChild(div.firstElementChild);
+}
+function removeEntry(i) {
+  const el = document.getElementById('entry_'+i);
+  if (el) el.remove();
+}
+function saveRound() {
+  const name = document.getElementById('rf_name').value.trim();
+  const time = document.getElementById('rf_time').value;
+  if (!name || !time) return alert('נא למלא שם ושעה');
+  const c = document.getElementById('entriesContainer');
+  const entries = [];
+  c.querySelectorAll('[id^=entry_res_]').forEach(sel => {
+    const idx = sel.id.split('_')[2];
+    const resId = sel.value;
+    if (!resId) return;
+    const medIds = [...document.querySelectorAll(`#entry_pills_${idx} .med-pill.selected`)].map(p => p.dataset.medid);
+    const notes = document.getElementById('entry_note_'+idx)?.value || '';
+    entries.push({ residentId: resId, medIds, notes });
+  });
+  if (state.editId) {
+    const r = data.rounds.find(r=>r.id===state.editId);
+    if (r) { r.name = name; r.time = time; r.entries = entries; }
+  } else {
+    data.rounds.push({ id: genId(), name, time, entries });
+  }
+  saveData(); closeModal(); renderAdminContent();
+}
+function deleteRound(id) {  if (state.currentUser?.type === 'dev') return;
+
+  if (!confirm('למחוק את הסבב?')) return;
+  data.rounds = data.rounds.filter(r=>r.id!==id);
+  saveData(); renderAdminContent();
+}
+
+function openResidentModal(id) {  if (state.currentUser?.type === 'dev') return;
+
+  state.editId = id || null;
+  const res = id ? data.residents.find(r=>r.id===id) : null;
+  const selectedMeds = res ? [...res.meds] : [];
+  const selectedPills = selectedMeds.map(mid => {
+    const m = data.meds.find(x=>x.id===mid);
+    return m ? `<span class="med-pill selected" data-medid="${m.id}" onclick="toggleMedPill(this)">${esc(m.name)} <span style="font-size:.75rem;opacity:.7">${esc(m.dose)}</span></span>` : '';
+  }).join('');
+
+  const allMedOptions = data.meds.map(m =>
+    `<option value="${m.id}">${esc(m.name)} — ${esc(m.dose)}</option>`
+  ).join('');
+
+  openModal(id ? 'עריכת דייר' : 'דייר חדש', `
+    <div class="form-group"><label>שם מלא</label><input id="res_name" value="${res ? esc(res.name) : ''}"></div>
+    <div class="form-group"><label>מספר חדר</label><input id="res_room" value="${res ? esc(res.room) : ''}"></div>
+    <div class="form-group"><label>הערות רפואיות / אלרגיות</label><textarea id="res_notes" rows="2">${res ? esc(res.notes) : ''}</textarea></div>
+    <div class="form-group">
+      <label>תרופות רשומות</label>
+      <div style="display:flex;gap:.5rem;margin-bottom:.5rem">
+        <select id="med_add_select" class="full-select" style="flex:1">
+          <option value="">+ הוסף תרופה...</option>
+          ${allMedOptions}
+        </select>
+        <button class="btn btn-orange btn-sm" onclick="addMedToResident()">הוסף</button>
+      </div>
+      <div class="checkbox-group" id="res_med_pills">${selectedPills}</div>
+    </div>
+    <button class="btn btn-orange w-full mt-md" onclick="saveResident()">שמור</button>
+  `);
+}
+function addMedToResident() {
+  const sel = document.getElementById('med_add_select');
+  const medId = sel.value;
+  if (!medId) return;
+  const container = document.getElementById('res_med_pills');
+  // Check if already added
+  if (container.querySelector(`[data-medid="${medId}"]`)) { sel.value=''; return; }
+  const m = data.meds.find(x=>x.id===medId);
+  if (!m) return;
+  const span = document.createElement('span');
+  span.className = 'med-pill selected';
+  span.dataset.medid = medId;
+  span.setAttribute('onclick','toggleMedPill(this)');
+  span.innerHTML = esc(m.name)+' <span style="font-size:.75rem;opacity:.7">'+esc(m.dose)+'</span>';
+  container.appendChild(span);
+  sel.value = '';
+}
+
+function saveResident() {
+  const name = document.getElementById('res_name').value.trim();
+  const room = document.getElementById('res_room').value.trim();
+  const notes = document.getElementById('res_notes').value.trim();
+  const meds = [...document.querySelectorAll('#res_med_pills .med-pill.selected')].map(p => p.dataset.medid);
+  if (!name) return alert('נא להכניס שם');
+  if (state.editId) {
+    const r = data.residents.find(r=>r.id===state.editId);
+    if (r) { r.name = name; r.room = room; r.notes = notes; r.meds = meds; }
+  } else {
+    data.residents.push({ id: genId(), name, room, notes, meds });
+  }
+  saveData(); closeModal(); renderAdminContent();
+}
+function deleteResident(id) {  if (state.currentUser?.type === 'dev') return;
+
+  if (!confirm('למחוק את הדייר?')) return;
+  data.residents = data.residents.filter(r=>r.id!==id);
+  saveData(); renderAdminContent();
+}
+
+function openMedModal(id) {  if (state.currentUser?.type === 'dev') return;
+
+  state.editId = id || null;
+  const med = id ? data.meds.find(m=>m.id===id) : null;
+  openModal(id ? 'עריכת תרופה' : 'תרופה חדשה', `
+    <div class="form-group"><label>שם תרופה</label><input id="med_name" value="${med ? esc(med.name) : ''}"></div>
+    <div class="form-group"><label>סוג</label><input id="med_type" value="${med ? esc(med.type) : 'כדורים'}"></div>
+    <div class="form-group"><label>מינון</label><input id="med_dose" value="${med ? esc(med.dose) : ''}"></div>
+    <div class="form-group"><label>הערות</label><input id="med_notes" value="${med ? esc(med.notes) : ''}"></div>
+    <button class="btn btn-orange w-full mt-md" onclick="saveMed()">שמור</button>
+  `);
+}
+function saveMed() {
+  const name = document.getElementById('med_name').value.trim();
+  const type = document.getElementById('med_type').value.trim();
+  const dose = document.getElementById('med_dose').value.trim();
+  const notes = document.getElementById('med_notes').value.trim();
+  if (!name) return alert('נא להכניס שם תרופה');
+  if (state.editId) {
+    const m = data.meds.find(m=>m.id===state.editId);
+    if (m) { m.name = name; m.type = type; m.dose = dose; m.notes = notes; }
+  } else {
+    data.meds.push({ id: genId(), name, type, dose, notes });
+  }
+  saveData(); closeModal(); renderAdminContent();
+}
+function deleteMed(id) {  if (state.currentUser?.type === 'dev') return;
+
+  if (!confirm('למחוק את התרופה?')) return;
+  data.meds = data.meds.filter(m=>m.id!==id);
+  saveData(); renderAdminContent();
+}
+
+function openNurseModal(id) {  if (state.currentUser?.type === 'dev') return;
+
+  state.editId = id || null;
+  const nurse = id ? data.nurses.find(n=>n.id===id) : null;
+  openModal(id ? 'עריכת מדריכה' : 'מדריכה חדשה', `
+    <div class="form-group"><label>שם מלא</label><input id="nurse_name" value="${nurse ? esc(nurse.name) : ''}"></div>
+    <div class="form-group"><label>שם משתמש</label><input id="nurse_username" value="${nurse ? esc(nurse.username) : ''}"></div>
+    <div class="form-group"><label>סיסמה</label><input id="nurse_password" type="password" placeholder="${nurse ? 'השאר ריק לשמירת הסיסמה הקיימת' : ''}"></div>
+    <button class="btn btn-orange w-full mt-md" onclick="saveNurse()">שמור</button>
+  `);
+}
+function saveNurse() {
+  const name = document.getElementById('nurse_name').value.trim();
+  const username = document.getElementById('nurse_username').value.trim();
+  const password = document.getElementById('nurse_password').value.trim();
+  if (!name || !username) return alert('נא למלא שם ושם משתמש');
+  if (state.editId) {
+    const n = data.nurses.find(n=>n.id===state.editId);
+    if (n) { n.name = name; n.username = username; if (password) n.password = password; }
+  } else {
+    if (!password) return alert('נא להכניס סיסמה');
+    data.nurses.push({ id: genId(), name, username, password });
+  }
+  saveData(); closeModal(); renderAdminContent();
+}
+function deleteNurse(id) {  if (state.currentUser?.type === 'dev') return;
+
+  if (!confirm('למחוק את המדריכה?')) return;
+  data.nurses = data.nurses.filter(n=>n.id!==id);
+  saveData(); renderAdminContent();
+}
+
+
