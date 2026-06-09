@@ -2078,10 +2078,8 @@ function exportPDF(fromDate, toDate) {
   // hb: Hebrew text — visually reordered, right-aligned
   function hb(txt, x, yy, sz, bold) {
     doc.setFont('NH', bold?'bold':'normal'); doc.setFontSize(sz||10);
-    const vis = rtlVisual(String(txt||''));
-    // Draw LTR (pre-reversed) starting at x - textWidth so it ends at x
-    const w = doc.getTextWidth(vis);
-    doc.text(vis, x - w, yy);
+    // rtlVisual reverses Hebrew to visual order; align:'right' places right edge at x
+    doc.text(rtlVisual(String(txt||'')), x, yy, {align:'right'});
   }
   // en: Latin/symbols — plain left-aligned
   function en(txt, x, yy, sz, bold) {
