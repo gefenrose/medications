@@ -2193,9 +2193,37 @@ function exportPDF(fromDate, toDate) {
 ${body}
 <div class="legend">
   <h3>מקרא</h3>
-  <div class="legend-row"><span class="legend-sym">[v]</span><span>ניתנה — התרופה ניתנה לדייר</span></div>
-  <div class="legend-row"><span class="legend-sym">[x]</span><span>דולג — התרופה דולגה</span></div>
-  <div class="legend-row"><span class="legend-sym">[!]</span><span>לא סומן — לא נרשמה פעולה (מסומן בגבול צהוב)</span></div>
+
+  <div class="legend-row">
+    <span class="legend-sym">[v]</span>
+    <span><strong>ניתנה</strong> — התרופה ניתנה לדייר</span>
+  </div>
+  <div class="legend-row">
+    <span class="legend-sym">[x]</span>
+    <span><strong>דולג</strong> — התרופה דולגה</span>
+  </div>
+  <div class="legend-row">
+    <span class="legend-sym">[!]</span>
+    <span><strong><s>שם דייר</s></strong> — לא סומן — לא נרשמה פעולה</span>
+  </div>
+
+  <hr style="border:none;border-top:0.4pt solid #999;margin:3mm 0">
+  <p style="font-size:9pt;font-weight:bold;margin-bottom:2mm">עמודות בכל שורה:</p>
+
+  <div class="legend-row">
+    <span class="legend-sym" style="min-width:8mm">[סטטוס]</span>
+    <span><strong>שם דייר</strong></span>
+    <span>תרופה ומינון</span>
+    <span><em style="text-decoration:underline">מדריכה</em></span>
+    <span><strong>שעה בפועל</strong></span>
+  </div>
+
+  <hr style="border:none;border-top:0.4pt solid #999;margin:3mm 0">
+  <p style="font-size:9pt;font-weight:bold;margin-bottom:2mm">אמצעי הדגשה:</p>
+  <div class="legend-row"><span style="min-width:32mm"><strong>Bold</strong></span><span>שם דייר, סטטוס, שעת נתינה בפועל</span></div>
+  <div class="legend-row"><span style="min-width:32mm"><em style="text-decoration:underline">Italic + קו תחתון</em></span><span>שם המדריכה שנתנה את התרופה</span></div>
+  <div class="legend-row"><span style="min-width:32mm"><s>Strikethrough</s></span><span>שם דייר שתרופתו לא סומנה [!]</span></div>
+  <div class="legend-row"><span style="min-width:32mm"><em>Italic</em></span><span>הערות, תיאור כללי</span></div>
 </div>
 </body>
 </html>`;
