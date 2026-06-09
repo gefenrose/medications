@@ -2084,7 +2084,10 @@ function exportPDF(fromDate, toDate) {
             <span class="sym">${sym}</span>
             <span class="res">${rn}</span>
             <span class="med">${mfull}</span>
-            <span class="nurse">${nurse} ${atime}</span>
+            ${(nurse||atime) ? `<span class="nurse-block">
+              ${nurse ? `<span class="nurse-name">${nurse}</span>` : ''}
+              ${atime ? `<span class="atime">${atime}</span>` : ''}
+            </span>` : '<span class="nurse-block missing-nurse">לא סומן</span>'}
             ${note?`<span class="note">* ${note}</span>`:''}
           </div>`;
         });
@@ -2120,7 +2123,11 @@ function exportPDF(fromDate, toDate) {
   .missing .sym { color:#7a4f00; }
   .res  { font-weight:bold; min-width:30mm; }
   .med  { color:#333; min-width:28mm; }
-  .nurse{ color:#777; font-size:8pt; margin-right:auto; }
+  .nurse-block { display:inline-flex; align-items:center; gap:2mm; margin-right:auto; }
+  .nurse-name { font-weight:700; font-size:9pt; color:#222; border-bottom:0.8pt solid #999; padding-bottom:0.3mm; }
+  .missing-nurse .nurse-name { display:none; }
+  .atime { font-size:10pt; font-weight:900; color:#000; letter-spacing:0.03em; background:#f0f0f0; padding:0.3mm 1.5mm; border-radius:2pt; border:0.5pt solid #bbb; }
+  .missing-nurse { color:#bbb; font-size:8pt; font-style:italic; }
   .note { color:#555; font-size:8pt; font-style:italic; }
   .legend { margin-top:8mm; border-top:0.4pt solid #999; padding-top:4mm; page-break-before:always; }
   .legend h3 { font-size:11pt; margin-bottom:3mm; }
