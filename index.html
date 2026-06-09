@@ -2013,29 +2013,37 @@ function exportPDFRange() {
 }
 
 function exportExcel(fromDate, toDate) {
-  const rows = data.history.filter(h => {
+  if (typeof XLSX === 'undefined') {
+    alert('טוען את ספריית Excel... נסה שוב בעוד שנייה');
+    return;
+  }
+
+  const wb   = XLSX.utils.book_new();
+  const today = new Date().toISOString().split('T')[0];
+
+  // ── Sheet 1: Full log (sorted chronologically) ─────────────────────────
+  const logRows = data.history.filter(h => {
     if (!fromDate && !toDate) return true;
     const d = h.date.split('T')[0];
     return (!fromDate || d >= fromDate) && (!toDate || d <= toDate);
-  });
-
-  rows.sort((a, b) => {
+  }).sort((a, b) => {
     const da = a.date.split('T')[0], db = b.date.split('T')[0];
     if (da !== db) return da < db ? -1 : 1;
     const ra = data.rounds.find(r=>r.id===a.roundId), rb = data.rounds.find(r=>r.id===b.roundId);
-    const ta = ra?.time || '', tb = rb?.time || '';
+    const ta = ra?.time||'', tb = rb?.time||'';
     if (ta !== tb) return ta < tb ? -1 : 1;
     return (a.time||'') < (b.time||'') ? -1 : 1;
   });
 
-  const headers = ['תאריך','שעת סבב','שם מדריכה','שם דייר','תרופה','מינון','שעת נתינה בפועל','סטטוס','הערות'];
+  const logHeaders = ['תאריך','שעת סבב','שם מדריכה','שם דייר','תרופה','מינון','שעת נתינה בפועל','סטטוס','הערות'];
+  const logData = [logHeaders];
 
-  const wsData = [headers];
-  rows.forEach(h => {
+  logRows.forEach(h => {
     const res   = data.residents.find(r=>r.id===h.residentId);
     const med   = data.meds.find(m=>m.id===h.medId);
     const round = data.rounds.find(r=>r.id===h.roundId);
-    wsData.push([
+    const status = h.status === 'given' ? '✓ ניתנה' : '✕ דולג';
+    logData.push([
       h.date ? new Date(h.date).toLocaleDateString('he-IL') : '',
       round?.time  || '',
       h.nurseName  || '',
@@ -2043,46 +2051,119 @@ function exportExcel(fromDate, toDate) {
       med?.name    || '',
       med?.dose    || '',
       h.time       || '',
-      h.status === 'given' ? 'ניתנה' : 'דולג',
+      status,
       h.note       || ''
     ]);
   });
 
-  // Build XLSX using SheetJS (loaded via CDN below)
-  if (typeof XLSX === 'undefined') {
-    alert('טוען את ספריית Excel... נסה שוב בעוד שנייה');
-    return;
-  }
-
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-  // ── RTL direction ──────────────────────────────────────────────────────
-  if (!ws['!sheetView']) ws['!sheetView'] = {};
-  ws['!views'] = [{ rightToLeft: true }];
-
-  // ── Column widths ──────────────────────────────────────────────────────
-  ws['!cols'] = [
-    { wch: 14 }, // תאריך
-    { wch: 10 }, // שעת סבב
-    { wch: 16 }, // מדריכה
-    { wch: 16 }, // דייר
-    { wch: 18 }, // תרופה
-    { wch: 10 }, // מינון
-    { wch: 14 }, // שעת נתינה
-    { wch: 10 }, // סטטוס
-    { wch: 24 }, // הערות
+  const ws1 = XLSX.utils.aoa_to_sheet(logData);
+  ws1['!views'] = [{ rightToLeft: true }];
+  ws1['!cols'] = [
+    {wch:14},{wch:10},{wch:16},{wch:16},{wch:18},{wch:10},{wch:14},{wch:10},{wch:24}
   ];
 
-  // ── Bold header row ────────────────────────────────────────────────────
-  headers.forEach((_, ci) => {
-    const cellAddr = XLSX.utils.encode_cell({ r: 0, c: ci });
-    if (!ws[cellAddr]) return;
-    ws[cellAddr].s = { font: { bold: true } };
+  // Style header row + status column
+  logData[0].forEach((_, ci) => {
+    const addr = XLSX.utils.encode_cell({r:0, c:ci});
+    if (ws1[addr]) ws1[addr].s = { font:{bold:true}, fill:{fgColor:{rgb:'D9E8E4'}}, alignment:{horizontal:'center'} };
   });
 
-  const dateLabel = fromDate && toDate ? `${fromDate}_${toDate}` : new Date().toISOString().split('T')[0];
-  XLSX.utils.book_append_sheet(wb, ws, 'מעקב תרופות');
+  // Color status cells
+  for (let ri = 1; ri < logData.length; ri++) {
+    const statusAddr = XLSX.utils.encode_cell({r:ri, c:7}); // col 7 = סטטוס
+    const cell = ws1[statusAddr];
+    if (!cell) continue;
+    if (logRows[ri-1]?.status === 'given') {
+      cell.s = { font:{bold:true, color:{rgb:'1A5C34'}}, fill:{fgColor:{rgb:'E8F5EE'}} };
+    } else {
+      cell.s = { font:{bold:true, color:{rgb:'7B1C1C'}}, fill:{fgColor:{rgb:'F9EAEA'}} };
+    }
+  }
+
+  XLSX.utils.book_append_sheet(wb, ws1, 'רשומות חלוקה');
+
+  // ── Sheet 2: Missing meds summary ─────────────────────────────────────
+  // For each date+round, list every expected med and its status (including missing)
+  const allDates = [...new Set([
+    ...data.history.map(h => h.date.split('T')[0]),
+    today
+  ])].filter(d => (!fromDate || d >= fromDate) && (!toDate || d <= toDate)).sort();
+
+  const sumHeaders = ['תאריך','שעת סבב','שם סבב','שם דייר','תרופה','מינון','סטטוס','שם מדריכה','שעת נתינה','הערות'];
+  const sumData = [sumHeaders];
+
+  allDates.forEach(date => {
+    const dayHistory = data.history.filter(h => h.date && h.date.startsWith(date));
+    const doneMap = {};
+    dayHistory.forEach(h => { doneMap[h.residentId + '_' + h.medId + '_' + h.roundId] = h; });
+
+    const sortedRounds = data.rounds.slice().sort((a,b) => a.time.localeCompare(b.time));
+    sortedRounds.forEach(round => {
+      (round.entries || []).forEach(entry => {
+        const res = data.residents.find(r => r.id === entry.residentId);
+        if (!res) return;
+        (entry.medIds || []).forEach(medId => {
+          const med = data.meds.find(m => m.id === medId);
+          const key = entry.residentId + '_' + medId + '_' + round.id;
+          const h   = doneMap[key];
+          const status = h
+            ? (h.status === 'given' ? '✓ ניתנה' : '✕ דולג')
+            : '⚠ לא סומן';
+          sumData.push([
+            new Date(date + 'T12:00:00').toLocaleDateString('he-IL'),
+            round.time,
+            round.name,
+            res.name,
+            med?.name || '',
+            med?.dose || '',
+            status,
+            h?.nurseName || '',
+            h?.time      || '',
+            h?.note      || ''
+          ]);
+        });
+      });
+    });
+  });
+
+  const ws2 = XLSX.utils.aoa_to_sheet(sumData);
+  ws2['!views'] = [{ rightToLeft: true }];
+  ws2['!cols'] = [
+    {wch:13},{wch:9},{wch:14},{wch:15},{wch:16},{wch:9},{wch:12},{wch:15},{wch:12},{wch:22}
+  ];
+
+  // Header style
+  sumData[0].forEach((_, ci) => {
+    const addr = XLSX.utils.encode_cell({r:0, c:ci});
+    if (ws2[addr]) ws2[addr].s = { font:{bold:true}, fill:{fgColor:{rgb:'D9E8E4'}}, alignment:{horizontal:'center'} };
+  });
+
+  // Color every row by status
+  for (let ri = 1; ri < sumData.length; ri++) {
+    const statusVal  = sumData[ri][6]; // col 6 = סטטוס
+    const statusAddr = XLSX.utils.encode_cell({r:ri, c:6});
+    const cell = ws2[statusAddr];
+    if (!cell) continue;
+    if (statusVal.includes('ניתנה')) {
+      cell.s = { font:{bold:true, color:{rgb:'1A5C34'}}, fill:{fgColor:{rgb:'E8F5EE'}} };
+    } else if (statusVal.includes('דולג')) {
+      cell.s = { font:{bold:true, color:{rgb:'7B1C1C'}}, fill:{fgColor:{rgb:'F9EAEA'}} };
+    } else {
+      // Missing — bold, dark amber, striped bg
+      cell.s = { font:{bold:true, color:{rgb:'7A4F00'}}, fill:{fgColor:{rgb:'FFF3CD'}} };
+      // Also mark entire row cols lightly
+      [0,1,2,3,4,5].forEach(ci => {
+        const a = XLSX.utils.encode_cell({r:ri, c:ci});
+        if (ws2[a]) ws2[a].s = { fill:{fgColor:{rgb:'FFFBF0'}} };
+      });
+    }
+  }
+
+  XLSX.utils.book_append_sheet(wb, ws2, 'מעקב מלא כולל חסרים');
+
+  const dateLabel = fromDate && toDate
+    ? `${fromDate}_${toDate}`
+    : today;
   XLSX.writeFile(wb, `מעקב-תרופות-${dateLabel}.xlsx`);
 }
 
