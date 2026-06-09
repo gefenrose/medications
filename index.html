@@ -1092,7 +1092,7 @@ function renderAdminContent() {
     case 'nurses': el.innerHTML = renderAdminNurses(); break;
     case 'history': el.innerHTML = renderAdminHistory(); break;
     case 'export': el.innerHTML = renderAdminExport(); break;
-    case 'profile': el.innerHTML = renderAdminProfile(); break;
+    case 'profile': if (state.currentUser?.type === 'dev') { adminTab('rounds'); return; } el.innerHTML = renderAdminProfile(); break;
   }
 }
 
@@ -2044,6 +2044,7 @@ function checkSyncStatus() {
   }).catch(() => { if (el) el.textContent = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> שגיאת חיבור'; });
 }
 function renderAdminProfile() {
+  if (state.currentUser?.type === 'dev') return '<div class="empty-state"><p>גישה לא מורשית</p></div>';
   return `<div class="card">
     <div class="card-title" style="margin-bottom:.8rem">פרופיל מנהל</div>
     <div class="form-group">
@@ -2079,6 +2080,7 @@ function setAdminCreds(u, p) {
 }
 
 function saveAdminProfile() {
+  if (state.currentUser?.type === 'dev') return;
   const newUser    = document.getElementById('prof_user').value.trim();
   const curPass    = document.getElementById('prof_cur_pass').value;
   const newPass    = document.getElementById('prof_new_pass').value;
@@ -2725,6 +2727,14 @@ function toggleRoundNotif(roundId, mute) {
 
 // ==================== INIT ====================
 function initNavIcons() {
+  // Hide profile tab for dev
+  document.querySelectorAll('.admin-tab').forEach(btn => {
+    if (btn.textContent.includes('פרופיל') && state.currentUser?.type === 'dev') {
+      btn.style.display = 'none';
+    } else {
+      btn.style.display = '';
+    }
+  });
   const ni = {'ni-round':'pill','ni-hist':'history','ni-bell':'bell'};
   Object.entries(ni).forEach(([id,name]) => {
     const el = document.getElementById(id);
