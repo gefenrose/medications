@@ -1715,15 +1715,15 @@ function renderNurseRound() {
               ${isSkipped ? '<span style="color:var(--skip)">· דולג</span>' : ''}
             </div>
           </div>
-          <div style="display:flex;gap:.3rem;flex-shrink:0">
-            <button class="btn btn-sm"
+                    <div style="display:flex;gap:.3rem;flex-shrink:0">
+            ${state.currentUser?.type === 'dev' ? '<span style="font-size:.75rem;color:var(--text-muted);font-style:italic">צפייה בלבד</span>' : `<button class="btn btn-sm"
               data-r="${rId}" data-res="${resId}" data-m="${mid}"
               onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'given')"
               style="${btnGivenStyle}">${btnGivenLabel}</button>
             <button class="btn btn-sm"
               data-r="${rId}" data-res="${resId}" data-m="${mid}"
               onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'skipped')"
-              style="${btnSkipStyle}">${btnSkipLabel}</button>
+              style="${btnSkipStyle}">${btnSkipLabel}</button>`}
           </div>
         </div>
         ${notePart}
@@ -1780,6 +1780,7 @@ function ensureSession(roundId) {
 }
 
 function markMedStatus(roundId, residentId, medId, status) {
+  if (state.currentUser?.type === 'dev') return;
   ensureSession(roundId);
   if (!data.activeRoundSession.statuses[residentId]) {
     data.activeRoundSession.statuses[residentId] = { meds: {} };
