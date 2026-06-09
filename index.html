@@ -1951,12 +1951,18 @@ function renderNurseReminders() {
             ${names.length ? names.join(' · ') : 'אין דיירים'}
           </div>
         </div>
-        <label class="toggle">
-          <input type="checkbox" ${roundOn ? 'checked' : ''} ${!globalOn ? 'disabled' : ''}
+        <div style="display:flex;align-items:center;gap:.5rem">
+          ${globalOn && roundOn ? `<button class="btn btn-outline btn-sm"
             data-rid="${round.id}"
-            onchange="toggleRoundNotif(this.dataset.rid, !this.checked)">
-          <span class="toggle-slider"></span>
-        </label>
+            onclick="testNotification(this.dataset.rid)"
+            style="font-size:.72rem;padding:.28rem .6rem">בדוק</button>` : ''}
+          <label class="toggle">
+            <input type="checkbox" ${roundOn ? 'checked' : ''} ${!globalOn ? 'disabled' : ''}
+              data-rid="${round.id}"
+              onchange="toggleRoundNotif(this.dataset.rid, !this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
     </div>`;
   });
@@ -1981,13 +1987,7 @@ function checkSyncStatus() {
 function renderAdminExport() {
   const today = new Date().toISOString().split('T')[0];
   const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
-  return `<div class="card" style="margin-bottom:.8rem;border-right:3px solid var(--primary-mid)">
-    <div class="card-title" style="margin-bottom:.4rem">סנכרון בין מכשירים</div>
-    <p class="text-muted" style="margin-bottom:.8rem;font-size:.82rem">המערכת מסתנכרנת אוטומטית כל 5 שניות דרך GitHub.<br>כל שינוי מנהל/מדריכה מופיע לכולן תוך שניות.</p>
-    <div id="syncStatus" style="font-size:.82rem;color:var(--text-secondary)">בודק חיבור...</div>
-    <button class="btn btn-outline btn-sm mt-sm" onclick="checkSyncStatus()">בדוק חיבור</button>
-  </div>
-  <div class="card">
+  return `<div class="card">
     <div class="card-title" style="margin-bottom:.3rem">ייצוא דוח חלוקה — Excel</div>
     <p class="text-muted" style="margin-bottom:1.2rem">הדוח יכלול: תאריך, שעת סבב, מדריכה, דייר, תרופה, מינון, שעת נתינה, סטטוס, הערות — לפי סדר כרונולוגי. ניתן לפתוח ישירות ב-Excel.</p>
     <div style="display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.2rem">
@@ -2568,6 +2568,12 @@ function toggleGlobalNotif(enabled) {
     _scheduledNotifs = {};
   }
   renderNurseContent();
+}
+
+function testNotification(roundId) {
+  const round = data.rounds.find(r => r.id === roundId);
+  if (!round) return;
+  triggerRoundNotification(round);
 }
 
 function toggleRoundNotif(roundId, mute) {
