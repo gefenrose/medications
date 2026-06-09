@@ -1303,7 +1303,7 @@ function renderAdminHistory() {
                              margin-bottom:.25rem;border:${rowBorder}">
           <div style="flex:1;min-width:0">
             <span style="font-weight:600;font-size:.84rem">${esc(res.name)}</span>
-            <span style="font-size:.75rem;color:var(--text-muted);margin-right:.4rem">— ${med ? esc(med.name) : '?'}</span>
+            <span style="font-size:.75rem;color:var(--text-muted);margin-right:.4rem">— ${med ? (state.currentUser?.type==='dev'?'••••••':esc(med.name)) : '?'}</span>
             ${nurseName ? `<span style="font-size:.72rem;color:var(--text-muted)">${esc(nurseName)} ${timeStr}</span>` : ''}
           </div>
           <span style="font-size:.75rem;font-weight:700;color:${rowColor};flex-shrink:0;margin-right:.4rem;
@@ -1703,9 +1703,9 @@ function renderNurseRound() {
             ${circleIcon}
           </div>
           <div style="flex:1;min-width:0">
-            <div style="font-weight:600;font-size:.9rem;color:${nameColor}">${esc(med.name)}</div>
+            <div style="font-weight:600;font-size:.9rem;color:${nameColor}">${state.currentUser?.type==='dev'?'••••••':esc(med.name)}</div>
             <div style="font-size:.75rem;color:var(--text-muted);display:flex;gap:.4rem;margin-top:.05rem;flex-wrap:wrap">
-              <span>${esc(med.dose)}</span>
+              <span>${state.currentUser?.type==='dev'?'•••':esc(med.dose)}</span>
               ${isGiven && givenTime ? `<span style="color:var(--success);font-weight:600">· ${givenTime}</span>` : ''}
               ${isSkipped ? '<span style="color:var(--skip)">· דולג</span>' : ''}
             </div>
@@ -1896,7 +1896,7 @@ function renderNurseDateHistory(dateStr) {
               ? '<span class="badge badge-given">ניתנה ✓</span>'
               : '<span class="badge badge-skipped">דולג</span>';
             return `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:.3rem;font-size:.82rem">
-              <span>${med ? esc(med.name)+' '+esc(med.dose) : '?'}</span>
+              <span>${med ? (state.currentUser?.type==='dev' ? '•••••• •••' : esc(med.name)+' '+esc(med.dose)) : '?'}</span>
               <div style="display:flex;align-items:center;gap:.4rem">${badge}<span style="color:var(--text-muted);font-size:.75rem">${h.time||''}</span></div>
             </div>
             ${h.note ? `<div style="font-size:.75rem;color:var(--text-muted);margin-top:.1rem">הערה: ${esc(h.note)}</div>` : ''}`;
@@ -1929,7 +1929,7 @@ function renderNurseHistory() {
       const statusBadge = h.status === 'given' ? '<span class="badge badge-given">ניתנה ✓</span>' : '<span class="badge badge-skipped">דולג</span>';
       html += `<div class="flex-center justify-between" style="padding:.4rem 0;border-bottom:1px solid var(--border)">
         <div>
-          <div class="text-sm font-bold">${res ? res.name : '?'} — ${med ? med.name : '?'}</div>
+          <div class="text-sm font-bold">${res ? res.name : '?'} — ${med ? (state.currentUser?.type==='dev'?'••••••':med.name) : '?'}</div>
           <div class="text-muted" style="font-size:.75rem">${h.time} | ${round ? round.name : ''}</div>
         </div>
         ${statusBadge}
