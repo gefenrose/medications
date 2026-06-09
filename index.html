@@ -1124,36 +1124,123 @@ function renderAdminNurses() {
 }
 
 function renderAdminHistory() {
+  const today = new Date().toISOString().split('T')[0];
   let html = `<div class="section-header"><div class="section-title">היסטוריה</div></div>`;
-  if (!data.history.length) {
+
+  // ── Build a complete picture: what SHOULD have been given vs what WAS ──
+  // For each date that has any history, also check for rounds that were never touched
+
+  // Collect all dates with history
+  const allDates = [...new Set(data.history.map(h => h.date.split('T')[0]))].sort().reverse();
+
+  // Also add today if no history yet
+  if (!allDates.includes(today)) allDates.unshift(today);
+
+  if (!allDates.length || (allDates.length === 1 && allDates[0] === today && !data.history.length)) {
     html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין היסטוריה עדיין</p></div>`;
-  } else {
-    const byDate = {};
-    data.history.forEach(h => {
-      const d = h.date.split('T')[0];
-      if (!byDate[d]) byDate[d] = [];
-      byDate[d].push(h);
-    });
-    Object.keys(byDate).sort().reverse().forEach(date => {
-      html += `<div class="card"><div class="card-title" style="margin-bottom:.6rem">${icon("calendar",14)} ${formatDate(date)}</div>`;
-      byDate[date].forEach(h => {
-        const res = data.residents.find(r => r.id === h.residentId);
-        const med = data.meds.find(m => m.id === h.medId);
-        const round = data.rounds.find(r => r.id === h.roundId);
-        const status = h.status === 'given' ? 'ניתנה ✓' : 'דולג';
-        html += `<div class="history-entry">
-          <div class="history-date">${h.time} | ${round ? round.name : ''} | ${h.nurseName || ''}</div>
-          <div class="history-detail">${res ? res.name : '?'} — ${med ? med.name : '?'} — ${status}</div>
-          ${h.note ? `<div class="text-muted text-sm">הערה: ${esc(h.note)}</div>` : ''}
+    return html;
+  }
+
+  allDates.forEach(date => {
+    const dayHistory = data.history.filter(h => h.date && h.date.startsWith(date));
+    if (!dayHistory.length && date !== today) return;  // skip empty past days
+
+    html += `<div class="card" style="margin-bottom:.8rem">
+      <div class="card-title" style="margin-bottom:.8rem">${icon("calendar",14)} ${formatDate(date)}</div>`;
+
+    // Group by round (chronologically)
+    const roundsSorted = data.rounds.slice().sort((a,b) => a.time.localeCompare(b.time));
+
+    roundsSorted.forEach(round => {
+      // For each entry in this round, check every med
+      const roundHistory = dayHistory.filter(h => h.roundId === round.id);
+
+      // Build per-resident per-med status map
+      const doneMap = {};  // resId_medId -> history entry
+      roundHistory.forEach(h => { doneMap[h.residentId + '_' + h.medId] = h; });
+
+      // Find all expected meds
+      const expected = [];
+      (round.entries || []).forEach(entry => {
+        const res = data.residents.find(r => r.id === entry.residentId);
+        if (!res) return;
+        (entry.medIds || []).forEach(medId => {
+          const med = data.meds.find(m => m.id === medId);
+          expected.push({ res, med, key: entry.residentId + '_' + medId });
+        });
+      });
+
+      if (!expected.length) return;
+
+      const totalMeds    = expected.length;
+      const givenCount   = expected.filter(e => doneMap[e.key]?.status === 'given').length;
+      const skippedCount = expected.filter(e => doneMap[e.key]?.status === 'skipped').length;
+      const missedCount  = expected.filter(e => !doneMap[e.key]).length;
+
+      const allDone    = missedCount === 0;
+      const allMissed  = givenCount === 0 && skippedCount === 0;
+      const partialMiss = missedCount > 0 && !allMissed;
+
+      // Round header color
+      const headerColor = allMissed
+        ? 'var(--skip)'
+        : partialMiss
+          ? '#b07d00'
+          : 'var(--success)';
+      const headerBg = allMissed
+        ? 'var(--skip-bg)'
+        : partialMiss
+          ? '#fff8e6'
+          : 'var(--success-bg)';
+      const headerIcon = allMissed ? '!' : partialMiss ? '△' : '✓';
+
+      html += `<div style="margin-bottom:.6rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;
+                    background:${headerBg};border-radius:10px;padding:.45rem .7rem;margin-bottom:.3rem">
+          <div style="display:flex;align-items:center;gap:.4rem">
+            <span style="font-weight:700;font-size:.88rem;color:${headerColor}">${esc(round.name)}</span>
+            <span style="font-size:.75rem;color:var(--text-muted)">${round.time}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.4rem;font-size:.75rem">
+            ${givenCount > 0   ? `<span style="color:var(--success);font-weight:600">${givenCount} ניתנו</span>` : ''}
+            ${skippedCount > 0 ? `<span style="color:var(--skip);font-weight:600">${skippedCount} דולגו</span>` : ''}
+            ${missedCount > 0  ? `<span style="color:#b07d00;font-weight:700;background:#fff3cd;padding:.1rem .4rem;border-radius:6px">${missedCount} לא סומנו</span>` : ''}
+          </div>
+        </div>`;
+
+      // Resident rows
+      expected.forEach(({ res, med, key }) => {
+        const h = doneMap[key];
+        const st = h ? h.status : 'missing';
+        const rowColor = st === 'given' ? 'var(--success)' : st === 'skipped' ? 'var(--skip)' : '#b07d00';
+        const rowBg    = st === 'given' ? 'var(--success-bg)' : st === 'skipped' ? 'var(--skip-bg)' : '#fff8e6';
+        const rowLabel = st === 'given' ? 'ניתנה ✓' : st === 'skipped' ? 'דולג' : '! לא סומן';
+        const rowBorder = st === 'missing' ? '1.5px solid #f0c040' : 'none';
+        const nurseName = h?.nurseName || '';
+        const timeStr   = h?.time      || '';
+
+        html += `<div style="display:flex;align-items:center;justify-content:space-between;
+                             padding:.4rem .5rem;border-radius:8px;background:${rowBg};
+                             margin-bottom:.25rem;border:${rowBorder}">
+          <div style="flex:1;min-width:0">
+            <span style="font-weight:600;font-size:.84rem">${esc(res.name)}</span>
+            <span style="font-size:.75rem;color:var(--text-muted);margin-right:.4rem">— ${med ? esc(med.name) : '?'}</span>
+            ${nurseName ? `<span style="font-size:.72rem;color:var(--text-muted)">${esc(nurseName)} ${timeStr}</span>` : ''}
+          </div>
+          <span style="font-size:.75rem;font-weight:700;color:${rowColor};flex-shrink:0;margin-right:.4rem">${rowLabel}</span>
         </div>`;
       });
+
       html += `</div>`;
     });
-  }
+
+    html += `</div>`;
+  });
+
   return html;
 }
 
-// ==================== ADMIN MODALS ====================
+
 function openRoundModal(id) {
   state.editId = id || null;
   const round = id ? data.rounds.find(r=>r.id===id) : null;
