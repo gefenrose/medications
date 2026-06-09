@@ -1141,6 +1141,7 @@ function renderAdminResidents() {
         <div class="list-item-title">${esc(res.name)}${isDev ? '' : ` — חדר ${esc(res.room)}`}</div>
         <div class="list-item-sub">${medDisplay}</div>
         ${(!isDev && res.notes) ? `<div class="list-item-sub" style="color:var(--skip)">${icon('alert-circle',13)} ${esc(res.notes)}</div>` : ''}
+      </div>
       ${isDev ? '' : `<div class="list-item-actions">
         <button class="btn-icon" title="עריכה" onclick="openResidentModal('${res.id}')">${icon('pencil',14)}</button>
         <button class="btn-icon" title="מחיקה" onclick="deleteResident('${res.id}')">${icon('trash-2',14)}</button>
