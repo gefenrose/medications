@@ -2239,7 +2239,6 @@ function exportExcel(fromDate, toDate) {
   const today = new Date().toISOString().split('T')[0];
 
   // ── Sheet 1: Complete log — all expected meds + status (incl. missing) ──
-  const today = new Date().toISOString().split('T')[0];
 
   // Collect all dates that are in range AND have any round data
   const histDates = new Set(data.history.map(h => (h.date||'').split('T')[0]));
