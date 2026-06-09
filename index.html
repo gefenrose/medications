@@ -1952,7 +1952,7 @@ function renderNurseReminders() {
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:.5rem">
-          ${globalOn && roundOn ? `<button class="btn btn-outline btn-sm"
+          ${notifGranted ? `<button class="btn btn-outline btn-sm"
             data-rid="${round.id}"
             onclick="testNotification(this.dataset.rid)"
             style="font-size:.72rem;padding:.28rem .6rem">בדוק</button>` : ''}
