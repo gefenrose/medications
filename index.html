@@ -526,8 +526,6 @@
     <div class="login-tabs" style="animation:fadeSlideUp .35s .1s ease both">
       <button class="login-tab active" onclick="setLoginType('nurse')">מדריכה</button>
       <button class="login-tab" onclick="setLoginType('admin')">מנהל</button>
-      <button class="login-tab" onclick="setLoginType('dev')"
-        style="font-size:.65rem;opacity:.35;padding:.3rem .5rem;flex:0 0 auto">dev</button>
     </div>
     <div class="form-group">
       <label>שם משתמש</label>
@@ -540,6 +538,12 @@
     <div class="error-msg" id="loginError">שם משתמש או סיסמה שגויים</div>
     <button class="btn-primary mt-md" onclick="doLogin()">כניסה</button>
     <p style="text-align:center;margin-top:1.2rem;font-size:.78rem;color:var(--text-muted)">מנהל: admin / 1234 &nbsp;|&nbsp; מדריכה: sarah / 1234</p>
+    <p style="text-align:center;margin-top:.8rem">
+      <button onclick="setLoginType('dev')" id="devTabBtn"
+        style="background:none;border:none;font-size:.65rem;color:var(--text-muted);opacity:.25;cursor:pointer;font-family:var(--font);padding:.2rem .5rem;letter-spacing:.04em">
+        developer
+      </button>
+    </p>
     <p style="text-align:center;margin-top:2rem;font-size:.7rem;color:var(--text-muted);opacity:.55;letter-spacing:.02em">נוצר על ידי גפן רוזנבליט גולני</p>
   </div>
 </div>
@@ -950,8 +954,11 @@ window.addEventListener('pageshow', e => {
 function setLoginType(type) {
   state.loginType = type;
   document.querySelectorAll('.login-tab').forEach((t,i) => t.classList.toggle('active',
-    (i===0 && type==='nurse') || (i===1 && type==='admin') || (i===2 && type==='dev')
+    (i===0 && type==='nurse') || (i===1 && type==='admin')
   ));
+  // Highlight dev button if selected
+  const devBtn = document.getElementById('devTabBtn');
+  if (devBtn) devBtn.style.opacity = type === 'dev' ? '0.8' : '0.25';
   document.getElementById('loginUsername').placeholder =
     type === 'admin' ? 'הכנס שם משתמש מנהל' :
     type === 'dev'   ? 'dev username' : 'הכניסי שם משתמש';
