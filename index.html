@@ -1605,6 +1605,17 @@ function markMedStatus(roundId, residentId, medId, status) {
     data.activeRoundSession.statuses[residentId] = { meds: {} };
   }
   const sid = data.activeRoundSession.startTime;
+  const current = (data.activeRoundSession.statuses[residentId].meds[medId] || {}).status;
+
+  // Toggle off: clicking the same status again → cancel and remove from history
+  if (current === status) {
+    delete data.activeRoundSession.statuses[residentId].meds[medId];
+    data.history = data.history.filter(h => !(h.roundId===roundId && h.residentId===residentId && h.medId===medId && h.sessionId===sid));
+    saveData();
+    renderNurseContent();
+    return;
+  }
+
   if (status === 'pending') {
     if (data.activeRoundSession.statuses[residentId].meds[medId]) {
       delete data.activeRoundSession.statuses[residentId].meds[medId];
