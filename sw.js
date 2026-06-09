@@ -4,7 +4,7 @@
 //           cache-first for static CDN assets
 //           skipWaiting always → new SW takes over immediately
 // ─────────────────────────────────────────────────────────────────────────────
-const CACHE = 'medtrack-v6';
+const CACHE = 'medtrack-v7';
 const CDN_HOSTS = ['cdnjs.cloudflare.com','fonts.gstatic.com','fonts.googleapis.com','cdn.jsdelivr.net'];
 
 // ── Install: skip waiting immediately so new SW activates without tab close ──
