@@ -1151,25 +1151,29 @@ function renderAdminResidents() {
 
 function renderAdminMeds() {
   const isDev = state.currentUser?.type === 'dev';
-  let html = `<div class="section-header"><div class="section-title">תרופות</div>${isDev ? '' : '<button class="btn btn-orange btn-sm" onclick="openMedModal()">+ חדש</button>'}</div>`;
-  ${isDev ? '<div class="info-box" style="margin-bottom:.7rem;font-size:.82rem">🔒 גישת Developer — נתוני תרופות מוסתרים</div>' : ''}
+  let html = `<div class="section-header"><div class="section-title">תרופות</div>`;
+  if (!isDev) html += `<button class="btn btn-orange btn-sm" onclick="openMedModal()">+ חדש</button>`;
+  html += `</div>`;
+  if (isDev) html += `<div class="info-box" style="margin-bottom:.7rem;font-size:.82rem">גישת Developer — נתוני תרופות מוסתרים</div>`;
   if (!data.meds.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין תרופות</p></div>`;
-  data.meds.forEach((med, i) => {
-    const maskedName = isDev ? '••••••••' : esc(med.name);
-    const maskedDose = isDev ? '•••' : esc(med.dose);
-    const maskedType = isDev ? '•••' : esc(med.type);
-    const maskedNotes= isDev ? '' : (med.notes ? ' | ' + esc(med.notes) : '');
-    html += \`<div class="list-item" style="\${isDev ? 'filter:blur(0)' : ''}">
-      <div style="width:36px;height:36px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--primary);flex-shrink:0">\${isDev ? (i+1) : 'Rx'}</div>
-      <div class="list-item-content" style="\${isDev ? 'filter:blur(3.5px);user-select:none;pointer-events:none' : ''}">
-        <div class="list-item-title">\${maskedName}</div>
-        <div class="list-item-sub">\${maskedType} | מינון: \${maskedDose}\${maskedNotes}</div>
-      </div>
-      \${isDev ? '' : \`<div class="list-item-actions">
-        <button class="btn-icon" title="עריכה" onclick="openMedModal('\${med.id}')">\${icon('pencil',14)}</button>
-        <button class="btn-icon" title="מחיקה" onclick="deleteMed('\${med.id}')">\${icon('trash-2',14)}</button>
-      </div>\`}
-    </div>\`;
+  data.meds.forEach((med, idx2) => {
+    const name  = isDev ? '••••••••' : esc(med.name);
+    const dose  = isDev ? '•••'      : esc(med.dose);
+    const type  = isDev ? '•••'      : esc(med.type);
+    const notes = isDev ? ''         : (med.notes ? ' | ' + esc(med.notes) : '');
+    const blurStyle = isDev ? 'filter:blur(4px);user-select:none;pointer-events:none' : '';
+    const avatar = isDev ? String(idx2+1) : 'Rx';
+    html += `<div class="list-item">
+      <div style="width:36px;height:36px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--primary);flex-shrink:0">${avatar}</div>
+      <div class="list-item-content" style="${blurStyle}">
+        <div class="list-item-title">${name}</div>
+        <div class="list-item-sub">${type} | מינון: ${dose}${notes}</div>
+      </div>`;
+    if (!isDev) html += `<div class="list-item-actions">
+        <button class="btn-icon" title="עריכה" onclick="openMedModal('${med.id}')">${icon('pencil',14)}</button>
+        <button class="btn-icon" title="מחיקה" onclick="deleteMed('${med.id}')">${icon('trash-2',14)}</button>
+      </div>`;
+    html += `</div>`;
   });
   return html;
 }
