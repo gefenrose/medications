@@ -526,6 +526,7 @@
     <div class="login-tabs" style="animation:fadeSlideUp .35s .1s ease both">
       <button class="login-tab active" onclick="setLoginType('nurse')">מדריכה</button>
       <button class="login-tab" onclick="setLoginType('admin')">מנהל</button>
+      <button class="login-tab" onclick="setLoginType('dev')">Dev</button>
     </div>
     <div class="form-group">
       <label>שם משתמש</label>
@@ -537,7 +538,7 @@
     </div>
     <div class="error-msg" id="loginError">שם משתמש או סיסמה שגויים</div>
     <button class="btn-primary mt-md" onclick="doLogin()">כניסה</button>
-    <p style="text-align:center;margin-top:1.2rem;font-size:.78rem;color:var(--text-muted)">כניסת הדגמה — מנהל: admin / 1234</p>
+    <p style="text-align:center;margin-top:1.2rem;font-size:.78rem;color:var(--text-muted)">מנהל: admin / 1234 &nbsp;|&nbsp; מדריכה: sarah / 1234</p>
   </div>
 </div>
 
@@ -946,16 +947,39 @@ window.addEventListener('pageshow', e => {
 // ==================== LOGIN ====================
 function setLoginType(type) {
   state.loginType = type;
-  document.querySelectorAll('.login-tab').forEach((t,i) => t.classList.toggle('active', (i===0 && type==='nurse') || (i===1 && type==='admin')));
-  document.getElementById('loginUsername').placeholder = type === 'admin' ? 'הכנס שם משתמש מנהל' : 'הכניסי שם משתמש';
+  document.querySelectorAll('.login-tab').forEach((t,i) => t.classList.toggle('active',
+    (i===0 && type==='nurse') || (i===1 && type==='admin') || (i===2 && type==='dev')
+  ));
+  document.getElementById('loginUsername').placeholder =
+    type === 'admin' ? 'הכנס שם משתמש מנהל' :
+    type === 'dev'   ? 'dev username' : 'הכניסי שם משתמש';
 }
 function doLogin() {
   const u = document.getElementById('loginUsername').value.trim();
   const p = document.getElementById('loginPassword').value.trim();
   const err = document.getElementById('loginError');
   err.style.display = 'none';
-  if (state.loginType === 'admin') {
-    if (u === 'admin' && p === '1234') {
+  if (state.loginType === 'admin' || state.loginType === 'dev') {
+    if (u === 'developer' && p === 'dev1234') {
+      state.currentUser = { type: 'dev', name: 'Developer' };
+      saveSession(state.currentUser);
+      showScreen('adminScreen');
+      document.getElementById('adminTitle').textContent = '⚙ Developer Mode';
+      adminTab('rounds');
+      ghRead().then(remote => {
+        if (remote) {
+          if (remote.nurses)   data.nurses   = remote.nurses;
+          if (remote.residents) data.residents = remote.residents;
+          if (remote.meds)     data.meds      = remote.meds;
+          if (remote.rounds)   data.rounds    = remote.rounds;
+          if (remote.history)  data.history   = remote.history;
+          if (remote.activeRoundSession !== undefined) data.activeRoundSession = remote.activeRoundSession;
+          localStorage.setItem('medtrack_data', JSON.stringify(data));
+          renderAdminContent();
+        }
+      });
+      startSync();
+    } else if (u === 'admin' && p === '1234') {
       state.currentUser = { type: 'admin', name: 'מנהל' };
       saveSession(state.currentUser);
       resetAdminIdleTimer();
@@ -2620,7 +2644,7 @@ document.getElementById('loginPassword').addEventListener('keydown', e => { if (
 
   state.currentUser = saved;
 
-  if (saved.type === 'admin') {
+  if (saved.type === 'admin' || saved.type === 'dev') {
     showScreen('adminScreen');
     adminTab('rounds');
     resetAdminIdleTimer();
