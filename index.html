@@ -1132,9 +1132,19 @@ function renderAdminRounds() {
 }
 
 function renderAdminResidents() {
-  let html = `<div class="section-header"><div class="section-title">דיירים</div>${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openResidentModal()">+ חדש</button>' : ''}</div>`;
+  let html = `<div>
+    <div class="section-header" style="margin-bottom:.5rem">
+      <div class="section-title">דיירים</div>
+      ${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openResidentModal()">+ חדש</button>' : ''}
+    </div>
+    <input type="text" id="resSearchInput" placeholder="חיפוש לפי שם דייר..."
+      oninput="renderAdminContent()"
+      style="font-size:14px;padding:.35rem .8rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.6rem">
+  </div>`;
   if (!data.residents.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין דיירים</p></div>`;
-  data.residents.forEach(res => {
+  const resQ = (document.getElementById('resSearchInput')||{}).value||'';
+  const resFiltered = resQ ? data.residents.filter(r=>r.name.toLowerCase().includes(resQ.toLowerCase())) : data.residents;
+  resFiltered.forEach(res => {
     const isDev = state.currentUser?.type === 'dev';
     const medNames = res.meds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name : '?'; }).join(', ');
     const medDisplay = isDev
@@ -1158,12 +1168,20 @@ function renderAdminResidents() {
 
 function renderAdminMeds() {
   const isDev = state.currentUser?.type === 'dev';
-  let html = `<div class="section-header"><div class="section-title">תרופות</div>`;
-  if (!isDev) html += `<button class="btn btn-orange btn-sm" onclick="openMedModal()">+ חדש</button>`;
-  html += `</div>`;
+  let html = `<div>
+    <div class="section-header" style="margin-bottom:.5rem">
+      <div class="section-title">תרופות</div>
+      ${!isDev ? '<button class="btn btn-orange btn-sm" onclick="openMedModal()">+ חדש</button>' : ''}
+    </div>
+    <input type="text" id="medSearchInput" placeholder="חיפוש לפי שם / מינון..."
+      oninput="renderAdminContent()"
+      style="font-size:14px;padding:.35rem .8rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.6rem">
+  </div>`;
   if (isDev) html += `<div class="info-box" style="margin-bottom:.7rem;font-size:.82rem">גישת Developer — נתוני תרופות מוסתרים</div>`;
   if (!data.meds.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין תרופות</p></div>`;
-  data.meds.forEach((med, idx2) => {
+  const medQ = (document.getElementById('medSearchInput')||{}).value||'';
+  const medsFiltered = medQ ? data.meds.filter(m=>(m.name+' '+m.dose).toLowerCase().includes(medQ.toLowerCase())) : data.meds;
+  medsFiltered.forEach((med, idx2) => {
     const name  = isDev ? '••••••••' : esc(med.name);
     const dose  = isDev ? '•••'      : esc(med.dose);
     const type  = isDev ? '•••'      : esc(med.type);
@@ -1186,8 +1204,18 @@ function renderAdminMeds() {
 }
 
 function renderAdminNurses() {
-  let html = `<div class="section-header"><div class="section-title">מדריכות</div>${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openNurseModal()">+ חדש</button>' : ''}</div>`;
-  data.nurses.forEach(nurse => {
+  let html = `<div>
+    <div class="section-header" style="margin-bottom:.5rem">
+      <div class="section-title">מדריכות</div>
+      ${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openNurseModal()">+ חדש</button>' : ''}
+    </div>
+    <input type="text" id="nurseSearchInput" placeholder="חיפוש לפי שם מדריכה..."
+      oninput="renderAdminContent()"
+      style="font-size:14px;padding:.35rem .8rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.6rem">
+  </div>`;
+  const nurseQ = (document.getElementById('nurseSearchInput')||{}).value||'';
+  const nursesFiltered = nurseQ ? data.nurses.filter(n=>n.name.toLowerCase().includes(nurseQ.toLowerCase())) : data.nurses;
+  nursesFiltered.forEach(nurse => {
     html += `<div class="list-item">
       <div class="resident-avatar">${initials(nurse.name)}</div>
       <div class="list-item-content">
@@ -1270,9 +1298,11 @@ function buildRoundForm(round) {
     <div class="form-group"><label>שם הסבב</label><input id="rf_name" value="${round ? esc(round.name) : ''}"></div>
     <div class="form-group"><label>שעה</label><input id="rf_time" type="time" value="${round ? round.time : '08:00'}"></div>
     <div style="margin-bottom:.5rem;font-weight:700">דיירים בסבב</div>
+    <div style="display:flex;gap:.5rem;margin-bottom:.8rem">
+      <button class="btn btn-orange" onclick="saveRound()" style="flex:1">שמור</button>
+      <button class="btn btn-outline" onclick="addEntryRow()">+ הוסף דייר</button>
+    </div>
     <div id="entriesContainer">${entriesHtml}</div>
-    <button class="btn btn-outline btn-sm w-full mt-sm" onclick="addEntryRow()">+ הוסף דייר לסבב</button>
-    <button class="btn btn-orange w-full mt-md" onclick="saveRound()">שמור</button>
   `;
 }
 function buildEntryRow(i, resId, medIds, notes, resOpts, medOpts) {
@@ -1572,7 +1602,7 @@ function renderNurseRound() {
       </div>
 
     </div>
-  </div>`
+  </div>`;
 
   const filterVal = (state.residentFilter||'').trim().toLowerCase();
   const resFilterVal = state.residentFilter || '';
