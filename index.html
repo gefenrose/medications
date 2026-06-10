@@ -58,7 +58,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: var(--font); background: var(--bg); color: var(--text); direction: rtl; min-height: 100vh; font-size: 15px; }
 
-  .screen { display: none; height: 100vh; flex-direction: column; overflow: hidden; }
+  .screen { display: none; height: 100%; min-height: 100vh; flex-direction: column; overflow: hidden; }
   .screen.active { display: flex; }
 
   /* LOGIN */
@@ -92,12 +92,12 @@
   .topbar-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--primary-light); border: 2px solid var(--primary-mid); display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; color: var(--primary); flex-shrink: 0; cursor: default; }
 
   /* BOTTOM NAV */
-  .bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(244,246,244,0.92); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: .5px solid var(--border-light); display: flex; z-index: 99; padding-bottom: env(safe-area-inset-bottom); }
+  .bottom-nav { position: sticky; bottom: 0; width: 100%; background: rgba(244,246,244,0.92); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: .5px solid var(--border-light); display: flex; z-index: 99; padding-bottom: env(safe-area-inset-bottom); flex-shrink: 0; }
   .nav-btn { flex: 1; padding: .65rem .4rem .45rem; border: none; background: transparent; cursor: pointer; font-family: var(--font); font-size: .68rem; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 2px; transition: color .2s; font-weight: 500; }
   .nav-btn .nav-icon { font-size: 1.2rem; }
   .nav-btn.active { color: var(--primary); font-weight: 600; }
 
-  .content { flex: 1; padding: 1.2rem; padding-bottom: 80px; overflow-y: auto; max-width: 700px; margin: 0 auto; width: 100%; height: 0; }
+  .content { flex: 1; padding: 1.2rem; padding-bottom: 1.2rem; overflow-y: auto; max-width: 700px; margin: 0 auto; width: 100%; min-height: 0; }
   .content-wide { flex: 1; padding: 1.2rem; padding-bottom: 30px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
   /* CARDS */
@@ -1361,6 +1361,13 @@ function buildEntryRow(i, resId, medIds, notes, resOpts, medOpts) {
   </div>`;
 }
 // patch: set resident select after DOM insert
+function nurseResSearch(val) {
+  state.residentFilter = val;
+  renderNurseContent();
+  const inp = document.getElementById('nurseResSearch');
+  if (inp) { inp.value = val; inp.focus(); inp.setSelectionRange(val.length, val.length); }
+}
+
 function onEntryResidentChange(i,resId){const p=document.getElementById('entry_pills_'+i);if(!p)return;const res=resId?data.residents.find(r=>r.id===resId):null;const ids=res?res.meds:[];const ms=ids.length>0?data.meds.filter(m=>ids.includes(m.id)):data.meds;if(!resId){p.innerHTML='<span class="text-muted" style="font-size:.8rem">בחר דייר</span>';return;}p.innerHTML=ms.map(m=>`<span class="med-pill" data-medid="${m.id}" data-entry="${i}" onclick="toggleEntryMedPill(this)">${esc(m.name)} <span style="font-size:.75rem;opacity:.7">${esc(m.dose)}</span></span>`).join('');}
 function addEntryRow() {
   const c = document.getElementById('entriesContainer');
@@ -1642,8 +1649,8 @@ function renderNurseRound() {
   html += `<div class="section-header" style="position:sticky;top:0;z-index:10;background:var(--bg);padding:.5rem 0;margin:0 -1rem;padding-right:1rem;padding-left:1rem;border-bottom:1px solid var(--border-light)">
     <div class="section-title">רשימת דיירים</div>
     <input type="text" placeholder="חיפוש דייר..." value="${resFilterVal}"
-      oninput="state.residentFilter=this.value;renderNurseContent()"
-      style="font-size:14px;padding:.3rem .7rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:140px;background:white">
+      oninput="nurseResSearch(this.value)"
+      style="font-size:14px;padding:.3rem .7rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:140px;background:white" id="nurseResSearch">
   </div>`;
 
   round.entries.filter(entry => {
