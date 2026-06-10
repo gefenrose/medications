@@ -1918,34 +1918,94 @@ function renderNurseDateHistory(dateStr) {
 }
 
 function renderNurseHistory() {
-  let html = `<div class="section-header"><div class="section-title">היסטוריית חלוקה</div></div>`;
-  const myHistory = data.history.filter(h => h.nurseName === state.currentUser?.name);
-  if (!myHistory.length) return html + `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין היסטוריה עדיין</p></div>`;
+  if (!state.nurseHistFilters) state.nurseHistFilters = { resident: '', nurse: '', date: '' };
+  const { resident: fRes, nurse: fNurse, date: fDate } = state.nurseHistFilters;
+  const today = new Date().toISOString().split('T')[0];
+  const isDev = state.currentUser?.type === 'dev';
+
+  // Filters UI
+  const nurseOptions = data.nurses.map(n =>
+    `<option value="${esc(n.name)}" ${fNurse===n.name?'selected':''}>${esc(n.name)}</option>`
+  ).join('');
+
+  let html = `<div class="section-header"><div class="section-title">היסטוריית חלוקה</div></div>
+  <div class="card" style="margin-bottom:.8rem;padding:.8rem 1rem">
+    <div style="display:flex;flex-direction:column;gap:.45rem">
+      <input type="text" placeholder="חיפוש לפי שם דייר..."
+        value="${fRes}"
+        oninput="state.nurseHistFilters.resident=this.value;nurseHistSearch()"
+        style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);direction:rtl;background:white" id="nhResInput">
+      <select onchange="state.nurseHistFilters.nurse=this.value;renderNurseHistContent()"
+        style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:rtl">
+        <option value="" ${!fNurse?'selected':''}>כל המדריכות</option>
+        ${nurseOptions}
+      </select>
+      <input type="date" value="${fDate}" max="${today}"
+        onchange="state.nurseHistFilters.date=this.value;renderNurseHistContent()"
+        style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:ltr">
+    </div>
+    ${(fRes||fNurse||fDate)?`<button class="btn btn-outline btn-sm mt-sm" onclick="state.nurseHistFilters={resident:'',nurse:'',date:''};renderNurseHistContent()">נקה סינון</button>`:''}
+  </div>`;
+
+  const filtered = data.history.filter(h => {
+    if (fDate && !(h.date||'').startsWith(fDate)) return false;
+    if (fNurse && h.nurseName !== fNurse) return false;
+    if (fRes) {
+      const r = data.residents.find(x=>x.id===h.residentId);
+      if (!r || !fuzzy(r.name, fRes)) return false;
+    }
+    return true;
+  });
+
+  if (!filtered.length) {
+    return html + `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין היסטוריה</p></div>`;
+  }
+
   const byDate = {};
-  myHistory.forEach(h => {
-    const d = h.date.split('T')[0];
+  filtered.forEach(h => {
+    const d = (h.date||'').split('T')[0];
     if (!byDate[d]) byDate[d] = [];
     byDate[d].push(h);
   });
+
   Object.keys(byDate).sort().reverse().forEach(date => {
     html += `<div class="card"><div class="card-title" style="margin-bottom:.6rem">${icon("calendar",14)} ${formatDate(date)}</div>`;
     byDate[date].forEach(h => {
-      const res = data.residents.find(r=>r.id===h.residentId);
-      const med = data.meds.find(m=>m.id===h.medId);
+      const res   = data.residents.find(r=>r.id===h.residentId);
+      const med   = data.meds.find(m=>m.id===h.medId);
       const round = data.rounds.find(r=>r.id===h.roundId);
-      const statusBadge = h.status === 'given' ? '<span class="badge badge-given">ניתנה ✓</span>' : '<span class="badge badge-skipped">דולג</span>';
-      html += `<div class="flex-center justify-between" style="padding:.4rem 0;border-bottom:1px solid var(--border)">
+      const medName = isDev ? '••••••' : (med ? esc(med.name) : '?');
+      const badge = h.status==='given'
+        ? '<span class="badge badge-given">ניתנה ✓</span>'
+        : '<span class="badge badge-skipped">✕ דולג</span>';
+      html += `<div class="flex-center justify-between" style="padding:.45rem 0;border-bottom:1px solid var(--border)">
         <div>
-          <div class="text-sm font-bold">${res ? res.name : '?'} — ${med ? (state.currentUser?.type==='dev'?'••••••':med.name) : '?'}</div>
-          <div class="text-muted" style="font-size:.75rem">${h.time} | ${round ? round.name : ''}</div>
+          <div class="text-sm font-bold">${res?res.name:'?'} — ${medName}</div>
+          <div class="text-muted" style="font-size:.75rem">${h.time||''} | ${round?round.name:''} | <strong>${h.nurseName||'—'}</strong></div>
+          ${h.note?`<div style="font-size:.72rem;font-style:italic;color:var(--text-muted)">* ${esc(h.note)}</div>`:''}
         </div>
-        ${statusBadge}
+        ${badge}
       </div>`;
     });
     html += `</div>`;
   });
+
   return html;
 }
+
+function renderNurseHistContent() {
+  const el = document.getElementById('nurseContent');
+  if (el) el.innerHTML = renderNurseHistory();
+}
+
+function nurseHistSearch() {
+  // Re-render history while preserving focus on the resident search input
+  const val = state.nurseHistFilters.resident;
+  renderNurseHistContent();
+  const inp = document.getElementById('nhResInput');
+  if (inp) { inp.value = val; inp.focus(); inp.setSelectionRange(val.length, val.length); }
+}
+
 
 function renderNurseReminders() {
   const notifSupported = 'Notification' in window;
