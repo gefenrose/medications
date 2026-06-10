@@ -1269,8 +1269,12 @@ function renderAdminHistory() {
   let html=`<div class="card" style="margin-bottom:.8rem;padding:.8rem 1rem">
     <div style="font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:.6rem">סינון</div>
     <div style="display:flex;flex-direction:column;gap:.5rem">
-      <input type="date" value="${fDate}" max="${today}" onchange="state.histFilters.date=this.value;renderAdminContent()"
-        style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:ltr">
+      <div style="position:relative">
+        <input type="date" value="${fDate}" max="${today}" onchange="state.histFilters.date=this.value;renderAdminContent()"
+          placeholder="תאריך"
+          style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:ltr;width:100%">
+        ${!fDate ? `<span style="position:absolute;right:.7rem;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-muted);pointer-events:none">תאריך</span>` : ''}
+      </div>
       <select onchange="state.histFilters.nurse=this.value;renderAdminContent()"
         style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:rtl">
         <option value="" ${!fNurse?'selected':''}>כל המדריכות</option>${nurseOpts}
@@ -1944,9 +1948,12 @@ function renderNurseHistory() {
         <option value="" ${!fNurse?'selected':''}>כל המדריכות</option>
         ${nurseOptions}
       </select>
-      <input type="date" value="${fDate}" max="${today}"
-        onchange="state.nurseHistFilters.date=this.value;renderNurseHistContent()"
-        style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:ltr">
+      <div style="position:relative">
+        <label style="position:absolute;right:.7rem;top:50%;transform:translateY(-50%);font-size:.72rem;color:var(--text-muted);pointer-events:none;white-space:nowrap">תאריך</label>
+        <input type="date" value="${fDate}" max="${today}"
+          onchange="state.nurseHistFilters.date=this.value;renderNurseHistContent()"
+          style="font-size:14px;padding:.4rem 3.5rem .4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:ltr;width:100%">
+      </div>
     </div>
     ${(fRes||fNurse||fDate)?`<button class="btn btn-outline btn-sm mt-sm" onclick="state.nurseHistFilters={resident:'',nurse:'',date:''};renderNurseHistContent()">נקה סינון</button>`:''}
   </div>`;
