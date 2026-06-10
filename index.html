@@ -1639,7 +1639,7 @@ function renderNurseRound() {
 
   const filterVal = (state.residentFilter||'').trim().toLowerCase();
   const resFilterVal = state.residentFilter || '';
-  html += `<div class="section-header">
+  html += `<div class="section-header" style="position:sticky;top:0;z-index:10;background:var(--bg);padding:.5rem 0;margin:0 -1rem;padding-right:1rem;padding-left:1rem;border-bottom:1px solid var(--border-light)">
     <div class="section-title">רשימת דיירים</div>
     <input type="text" placeholder="חיפוש דייר..." value="${resFilterVal}"
       oninput="state.residentFilter=this.value;renderNurseContent()"
