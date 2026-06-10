@@ -58,7 +58,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: var(--font); background: var(--bg); color: var(--text); direction: rtl; min-height: 100vh; font-size: 15px; }
 
-  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen { display: none; height: 100vh; flex-direction: column; overflow: hidden; }
   .screen.active { display: flex; }
 
   /* LOGIN */
@@ -97,7 +97,7 @@
   .nav-btn .nav-icon { font-size: 1.2rem; }
   .nav-btn.active { color: var(--primary); font-weight: 600; }
 
-  .content { flex: 1; padding: 1.2rem; padding-bottom: 80px; overflow-y: auto; max-width: 700px; margin: 0 auto; width: 100%; }
+  .content { flex: 1; padding: 1.2rem; padding-bottom: 80px; overflow-y: auto; max-width: 700px; margin: 0 auto; width: 100%; height: 0; }
   .content-wide { flex: 1; padding: 1.2rem; padding-bottom: 30px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
   /* CARDS */
@@ -492,7 +492,7 @@
   @media print {
     .topbar, .bottom-nav, .admin-tabs, .btn, .btn-icon, .topbar-btn { display: none !important; }
     .content, #adminContent { padding: 0 !important; padding-bottom: 0 !important; }
-    .screen { display: block !important; }
+    .screen { display: flex !important; }
     #adminScreen { display: block !important; }
     body { background: white !important; color: black !important; font-size: 11pt; }
     .card { box-shadow: none !important; border: 1px solid #999 !important; border-radius: 6px !important; break-inside: avoid; margin-bottom: 8pt !important; }
