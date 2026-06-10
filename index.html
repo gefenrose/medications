@@ -1513,11 +1513,7 @@ function renderNurseRound() {
 
   // Count per-med statuses
   let given = 0, skipped = 0, totalMeds = 0;
-  round.entries.filter(entry => {
-    if (!filterVal) return true;
-    const r = data.residents.find(x=>x.id===entry.residentId);
-    return r && r.name.toLowerCase().includes(filterVal);
-  }).forEach(entry => {
+  round.entries.forEach(entry => {
     entry.medIds.forEach(mid => {
       totalMeds++;
       const ms = (statuses[entry.residentId] && statuses[entry.residentId].meds && statuses[entry.residentId].meds[mid]);
@@ -1578,15 +1574,20 @@ function renderNurseRound() {
     </div>
   </div>`
 
+  const filterVal = (state.residentFilter||'').trim().toLowerCase();
+  const resFilterVal = state.residentFilter || '';
   html += `<div class="section-header">
     <div class="section-title">רשימת דיירים</div>
-    <input type="text" placeholder="חיפוש דייר..." value="${state.residentFilter||''}"
+    <input type="text" placeholder="חיפוש דייר..." value="${resFilterVal}"
       oninput="state.residentFilter=this.value;renderNurseContent()"
       style="font-size:14px;padding:.3rem .7rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:140px;background:white">
   </div>`;
-  const filterVal = (state.residentFilter||'').trim().toLowerCase();
 
-  round.entries.forEach(entry => {
+  round.entries.filter(entry => {
+    if (!filterVal) return true;
+    const r = data.residents.find(x=>x.id===entry.residentId);
+    return r && r.name.toLowerCase().includes(filterVal);
+  }).forEach(entry => {
     const res = data.residents.find(r=>r.id===entry.residentId);
     if (!res) return;
     // Per-med statuses: medStatuses[residentId][medId] = { status, note }
