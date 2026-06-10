@@ -1207,20 +1207,19 @@ function renderAdminMeds() {
       oninput="adminSearchUpdate('meds',this.value,renderAdminMeds)"
       style="font-size:14px;padding:.35rem .8rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.6rem">
   </div>`;
-  if (isDev) html += `<div class="info-box" style="margin-bottom:.7rem;font-size:.82rem">גישת Developer — נתוני תרופות מוסתרים</div>`;
+
   if (!data.meds.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין תרופות</p></div>`;
   const medQ = state.adminSearch.meds||'';
   const medsFiltered = medQ ? data.meds.filter(m=>fuzzy(m.name+' '+m.dose,medQ)) : data.meds;
   medsFiltered.forEach((med, idx2) => {
-    const name  = isDev ? '••••••••' : esc(med.name);
-    const dose  = isDev ? '•••'      : esc(med.dose);
-    const type  = isDev ? '•••'      : esc(med.type);
-    const notes = isDev ? ''         : (med.notes ? ' | ' + esc(med.notes) : '');
-    const blurStyle = isDev ? 'filter:blur(4px);user-select:none;pointer-events:none' : '';
-    const avatar = isDev ? String(idx2+1) : 'Rx';
+    const name  = esc(med.name);
+    const dose  = esc(med.dose);
+    const type  = esc(med.type);
+    const notes = med.notes ? ' | ' + esc(med.notes) : '';
+    const avatar = 'Rx';
     html += `<div class="list-item">
       <div style="width:36px;height:36px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--primary);flex-shrink:0">${avatar}</div>
-      <div class="list-item-content" style="${blurStyle}">
+      <div class="list-item-content">
         <div class="list-item-title">${name}</div>
         <div class="list-item-sub">${type} | מינון: ${dose}${notes}</div>
       </div>`;
@@ -1302,7 +1301,7 @@ function renderAdminHistory() {
       const badge=h.status==='given'?'<span class="badge badge-given">ניתנה ✓</span>':'<span class="badge badge-skipped">✕ דולג</span>';
       html+=`<div class="flex-center justify-between" style="padding:.45rem 0;border-bottom:1px solid var(--border-light)">
         <div>
-          <div class="text-sm font-bold">${res?res.name:'?'} — ${med?esc(med.name):'?'}</div>
+          <div class="text-sm font-bold">${res?res.name:'?'} — ${med?(state.currentUser?.type==='dev'?'••••••':esc(med.name)):'?'}</div>
           <div class="text-muted" style="font-size:.75rem">${h.time||''} | ${round?round.name:''} | <strong>${h.nurseName||'—'}</strong></div>
           ${h.note?`<div class="text-muted" style="font-size:.73rem;font-style:italic">* ${esc(h.note)}</div>`:''}
         </div>${badge}
