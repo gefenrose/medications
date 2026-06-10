@@ -640,7 +640,8 @@ let state = {
   selectedDate: new Date().toISOString().split('T')[0],
   mutedRounds: {},  // roundId -> true
   residentFilter: '',
-  histFilters: { date: '', nurse: '', resident: '' }
+  histFilters: { date: '', nurse: '', resident: '' },
+  adminSearch: { residents: '', meds: '', nurses: '' }
 };
 
 const defaultData = {
@@ -1078,6 +1079,7 @@ function showScreen(id) {
 // ==================== ADMIN ====================
 function adminTab(tab) {
   state.adminTab = tab;
+  state.adminSearch = { residents: '', meds: '', nurses: '' }; // reset search on tab change
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
   const tabs = ['rounds','residents','meds','nurses','history','export','profile'];
   const idx = tabs.indexOf(tab);
@@ -1145,18 +1147,35 @@ function renderAdminRounds() {
   return html;
 }
 
+
+function adminSearchUpdate(field, val, renderFn) {
+  state.adminSearch[field] = val;
+  // Re-render only the list portion, keeping the search input
+  const inputId = { residents:'resSearchInput', meds:'medSearchInput', nurses:'nurseSearchInput' }[field];
+  const el = document.getElementById('adminContent');
+  if (!el) return;
+  el.innerHTML = renderFn();
+  // Restore focus and cursor
+  const inp = document.getElementById(inputId);
+  if (inp) {
+    inp.value = val;
+    inp.focus();
+    inp.setSelectionRange(val.length, val.length);
+  }
+}
+
 function renderAdminResidents() {
   let html = `<div>
     <div class="section-header" style="margin-bottom:.5rem">
       <div class="section-title">דיירים</div>
       ${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openResidentModal()">+ חדש</button>' : ''}
     </div>
-    <input type="text" id="resSearchInput" placeholder="חיפוש לפי שם דייר..."
-      oninput="renderAdminContent()"
+    <input type="text" id="resSearchInput" placeholder="חיפוש לפי שם דייר..." value="${state.adminSearch.residents||''}"
+      oninput="adminSearchUpdate('residents',this.value,renderAdminResidents)"
       style="font-size:14px;padding:.35rem .8rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.6rem">
   </div>`;
   if (!data.residents.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין דיירים</p></div>`;
-  const resQ = (document.getElementById('resSearchInput')||{}).value||'';
+  const resQ = state.adminSearch.residents||'';
   const resFiltered = resQ ? data.residents.filter(r=>fuzzy(r.name,resQ)) : data.residents;
   resFiltered.forEach(res => {
     const isDev = state.currentUser?.type === 'dev';
@@ -1187,13 +1206,13 @@ function renderAdminMeds() {
       <div class="section-title">תרופות</div>
       ${!isDev ? '<button class="btn btn-orange btn-sm" onclick="openMedModal()">+ חדש</button>' : ''}
     </div>
-    <input type="text" id="medSearchInput" placeholder="חיפוש לפי שם / מינון..."
-      oninput="renderAdminContent()"
+    <input type="text" id="medSearchInput" placeholder="חיפוש לפי שם / מינון..." value="${state.adminSearch.meds||''}"
+      oninput="adminSearchUpdate('meds',this.value,renderAdminMeds)"
       style="font-size:14px;padding:.35rem .8rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.6rem">
   </div>`;
   if (isDev) html += `<div class="info-box" style="margin-bottom:.7rem;font-size:.82rem">גישת Developer — נתוני תרופות מוסתרים</div>`;
   if (!data.meds.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין תרופות</p></div>`;
-  const medQ = (document.getElementById('medSearchInput')||{}).value||'';
+  const medQ = state.adminSearch.meds||'';
   const medsFiltered = medQ ? data.meds.filter(m=>fuzzy(m.name+' '+m.dose,medQ)) : data.meds;
   medsFiltered.forEach((med, idx2) => {
     const name  = isDev ? '••••••••' : esc(med.name);
@@ -1223,11 +1242,11 @@ function renderAdminNurses() {
       <div class="section-title">מדריכות</div>
       ${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openNurseModal()">+ חדש</button>' : ''}
     </div>
-    <input type="text" id="nurseSearchInput" placeholder="חיפוש לפי שם מדריכה..."
-      oninput="renderAdminContent()"
+    <input type="text" id="nurseSearchInput" placeholder="חיפוש לפי שם מדריכה..." value="${state.adminSearch.nurses||''}"
+      oninput="adminSearchUpdate('nurses',this.value,renderAdminNurses)"
       style="font-size:14px;padding:.35rem .8rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.6rem">
   </div>`;
-  const nurseQ = (document.getElementById('nurseSearchInput')||{}).value||'';
+  const nurseQ = state.adminSearch.nurses||'';
   const nursesFiltered = nurseQ ? data.nurses.filter(n=>fuzzy(n.name,nurseQ)) : data.nurses;
   nursesFiltered.forEach(nurse => {
     html += `<div class="list-item">
