@@ -92,10 +92,10 @@
   .topbar-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--primary-light); border: 2px solid var(--primary-mid); display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; color: var(--primary); flex-shrink: 0; cursor: default; }
 
   /* BOTTOM NAV */
-  .bottom-nav { position: sticky; bottom: 0; width: 100%; background: rgba(244,246,244,0.92); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: .5px solid var(--border-light); display: flex; z-index: 99; padding-bottom: env(safe-area-inset-bottom); flex-shrink: 0; }
+  .bottom-nav { position: sticky; top: 0; width: 100%; background: rgba(244,246,244,0.96); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: .5px solid var(--border-light); border-top: none; display: flex; z-index: 99; padding-bottom: 0; flex-shrink: 0; }
   .nav-btn { flex: 1; padding: .65rem .4rem .45rem; border: none; background: transparent; cursor: pointer; font-family: var(--font); font-size: .68rem; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 2px; transition: color .2s; font-weight: 500; }
   .nav-btn .nav-icon { font-size: 1.2rem; }
-  .nav-btn.active { color: var(--primary); font-weight: 600; }
+  .nav-btn.active { color: var(--primary); font-weight: 600; border-bottom: 2px solid var(--primary); }
 
   .content { flex: 1; padding: 1.2rem; padding-bottom: 1.2rem; overflow-y: auto; max-width: 700px; margin: 0 auto; width: 100%; min-height: 0; }
   .content-wide { flex: 1; padding: 1.2rem; padding-bottom: 30px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -252,11 +252,7 @@
     padding-right: calc(1.4rem + env(safe-area-inset-right));
     padding-left: calc(1.4rem + env(safe-area-inset-left));
   }
-  .bottom-nav {
-    padding-bottom: calc(.3rem + env(safe-area-inset-bottom));
-    padding-right: env(safe-area-inset-right);
-    padding-left: env(safe-area-inset-left);
-  }
+  .bottom-nav { padding: .3rem 0; }
   .content {
     padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }
@@ -289,7 +285,7 @@
   /* Landscape phones */
   @media (max-height: 500px) and (orientation: landscape) {
     .content { padding-bottom: 70px; }
-    .bottom-nav { padding-top: .3rem; padding-bottom: calc(.3rem + env(safe-area-inset-bottom)); }
+    .bottom-nav { padding: .3rem 0; }
     .nav-btn { padding: .4rem .4rem .3rem; }
     .round-card { padding: .7rem 1rem; }
     .round-card h2 { font-size: 1rem; }
@@ -589,8 +585,7 @@
       <span>שלום</span>
     </div>
   </div>
-  <div class="content" id="nurseContent"></div>
-  <nav class="bottom-nav">
+<nav class="bottom-nav">
     <button class="nav-btn active" id="navRound" onclick="nurseTab('round')">
       <span class="nav-icon" id="ni-round"></span><span>סבב נוכחי</span>
     </button>
@@ -601,6 +596,8 @@
       <span class="nav-icon" id="ni-bell"></span><span>התראות</span>
     </button>
   </nav>
+
+  <div class="content" id="nurseContent"></div>
 </div>
 
 <!-- ===== MODAL ===== -->
