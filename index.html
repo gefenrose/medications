@@ -616,6 +616,20 @@
 
 <script>
 // ==================== STATE ====================
+
+// Fuzzy match: every character of q appears in order in s
+function fuzzy(s, q) {
+  if (!q) return true;
+  s = s.toLowerCase(); q = q.toLowerCase();
+  let si = 0;
+  for (let qi = 0; qi < q.length; qi++) {
+    si = s.indexOf(q[qi], si);
+    if (si === -1) return false;
+    si++;
+  }
+  return true;
+}
+
 let state = {
   loginType: 'nurse',
   currentUser: null,
@@ -1143,7 +1157,7 @@ function renderAdminResidents() {
   </div>`;
   if (!data.residents.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין דיירים</p></div>`;
   const resQ = (document.getElementById('resSearchInput')||{}).value||'';
-  const resFiltered = resQ ? data.residents.filter(r=>r.name.toLowerCase().includes(resQ.toLowerCase())) : data.residents;
+  const resFiltered = resQ ? data.residents.filter(r=>fuzzy(r.name,resQ)) : data.residents;
   resFiltered.forEach(res => {
     const isDev = state.currentUser?.type === 'dev';
     const medNames = res.meds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name : '?'; }).join(', ');
@@ -1180,7 +1194,7 @@ function renderAdminMeds() {
   if (isDev) html += `<div class="info-box" style="margin-bottom:.7rem;font-size:.82rem">גישת Developer — נתוני תרופות מוסתרים</div>`;
   if (!data.meds.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין תרופות</p></div>`;
   const medQ = (document.getElementById('medSearchInput')||{}).value||'';
-  const medsFiltered = medQ ? data.meds.filter(m=>(m.name+' '+m.dose).toLowerCase().includes(medQ.toLowerCase())) : data.meds;
+  const medsFiltered = medQ ? data.meds.filter(m=>fuzzy(m.name+' '+m.dose,medQ)) : data.meds;
   medsFiltered.forEach((med, idx2) => {
     const name  = isDev ? '••••••••' : esc(med.name);
     const dose  = isDev ? '•••'      : esc(med.dose);
@@ -1214,7 +1228,7 @@ function renderAdminNurses() {
       style="font-size:14px;padding:.35rem .8rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.6rem">
   </div>`;
   const nurseQ = (document.getElementById('nurseSearchInput')||{}).value||'';
-  const nursesFiltered = nurseQ ? data.nurses.filter(n=>n.name.toLowerCase().includes(nurseQ.toLowerCase())) : data.nurses;
+  const nursesFiltered = nurseQ ? data.nurses.filter(n=>fuzzy(n.name,nurseQ)) : data.nurses;
   nursesFiltered.forEach(nurse => {
     html += `<div class="list-item">
       <div class="resident-avatar">${initials(nurse.name)}</div>
@@ -1253,7 +1267,7 @@ function renderAdminHistory() {
   const filtered=data.history.filter(h=>{
     if(fDate&&!(h.date||'').startsWith(fDate))return false;
     if(fNurse&&h.nurseName!==fNurse)return false;
-    if(fRes){const r=data.residents.find(x=>x.id===h.residentId);if(!r||!r.name.includes(fRes))return false;}
+    if(fRes){const r=data.residents.find(x=>x.id===h.residentId);if(!r||!fuzzy(r.name,fRes))return false;}
     return true;
   });
   if(!filtered.length){html+=`<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין רשומות</p></div>`;return html;}
@@ -1616,7 +1630,7 @@ function renderNurseRound() {
   round.entries.filter(entry => {
     if (!filterVal) return true;
     const r = data.residents.find(x=>x.id===entry.residentId);
-    return r && r.name.toLowerCase().includes(filterVal);
+    return r && fuzzy(r.name,filterVal);
   }).forEach(entry => {
     const res = data.residents.find(r=>r.id===entry.residentId);
     if (!res) return;
