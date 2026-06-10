@@ -2674,20 +2674,26 @@ async function requestNotifPermission() {
   return result === 'granted';
 }
 
+// Track which rounds already fired today (by date)
+const _firedToday = {};
+
 function scheduleRoundNotifications() {
-  // Cancel existing
   Object.values(_scheduledNotifs).forEach(id => clearTimeout(id));
   _scheduledNotifs = {};
 
   if (!data.rounds || !data.rounds.length) return;
   if (Notification.permission !== 'granted') return;
+  if (!state.remindersEnabled) return;
 
   const now = new Date();
   const todayStr = now.toISOString().split('T')[0];
+  // Reset fired-today on a new day
+  if (_firedToday._date !== todayStr) {
+    Object.keys(_firedToday).forEach(k => delete _firedToday[k]);
+    _firedToday._date = todayStr;
+  }
 
   data.rounds.forEach(round => {
-    // Skip globally disabled or per-round muted
-    if (!state.remindersEnabled) return;
     if (state.mutedRounds[round.id]) return;
 
     const [hh, mm] = round.time.split(':').map(Number);
@@ -2695,14 +2701,25 @@ function scheduleRoundNotifications() {
     fireAt.setHours(hh, mm, 0, 0);
 
     const msUntil = fireAt - now;
-    if (msUntil < -60000) return;
+    const firedKey = round.id + '_' + todayStr;
+
     if (msUntil < 0) {
-      triggerRoundNotification(round);
+      // Round already passed today — fire if within 5 min window and not fired yet
+      if (msUntil > -5 * 60 * 1000 && !_firedToday[firedKey]) {
+        _firedToday[firedKey] = true;
+        triggerRoundNotification(round);
+      }
       return;
     }
 
+    // Schedule future notification
     _scheduledNotifs[round.id] = setTimeout(() => {
-      triggerRoundNotification(round);
+      if (!state.mutedRounds[round.id] && state.remindersEnabled) {
+        _firedToday[firedKey] = true;
+        triggerRoundNotification(round);
+      }
+      // Re-schedule for tomorrow
+      setTimeout(scheduleRoundNotifications, 60 * 1000);
     }, msUntil);
   });
 }
@@ -2893,9 +2910,20 @@ if ('serviceWorker' in navigator) {
 
       // Also check on every tab focus / app resume
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') reg.update();
+        if (document.visibilityState === 'visible') {
+          reg.update();
+          // Re-check notifications on app resume (catches missed round times)
+          if (state.currentUser?.type === 'nurse' || state.currentUser?.type === 'dev') {
+            scheduleRoundNotifications();
+          }
+        }
       });
-      window.addEventListener('pageshow', e => { if (e.persisted) reg.update(); });
+      window.addEventListener('pageshow', e => {
+        if (e.persisted) {
+          reg.update();
+          if (state.currentUser?.type === 'nurse') scheduleRoundNotifications();
+        }
+      });
 
       // New SW found → activate immediately
       reg.addEventListener('updatefound', () => {
