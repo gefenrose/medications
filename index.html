@@ -127,9 +127,19 @@
   .badge-pending { background: var(--pending-bg); color: var(--text-secondary); border: none; }
 
   /* ADMIN TABS */
-  .admin-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--surface2); border-radius: var(--radius-sm); padding: 3px; margin-bottom: 1.2rem; }
-  .admin-tab { padding: .48rem .3rem; border: none; border-radius: 8px; cursor: pointer; font-size: .78rem; font-weight: 500; white-space: nowrap; background: transparent; color: var(--text-secondary); transition: all .15s; font-family: var(--font); display: flex; align-items: center; justify-content: center; gap: .25rem; text-align: center; }
-  .admin-tab.active { background: white; color: var(--primary); font-weight: 700; box-shadow: var(--shadow); }
+  .admin-tabs { display: flex; gap: .45rem; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: .25rem; margin-bottom: 1.2rem; }
+  .admin-tabs::-webkit-scrollbar { display: none; }
+  .admin-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .28rem; padding: .7rem .9rem; min-height: 66px; min-width: 66px; border: 1.5px solid var(--border-light); border-radius: 14px; background: white; color: var(--text-secondary); cursor: pointer; font-size: .73rem; font-weight: 600; font-family: var(--font); white-space: nowrap; flex-shrink: 0; box-shadow: var(--shadow); transition: all .18s; }
+  .admin-tab.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 3px 12px rgba(61,107,94,.28); }
+  .admin-tab .tab-icon { display: flex; align-items: center; }
+  .admin-tab.active .tab-icon { opacity: 1; }
+
+  /* ADMIN ACTION BUTTONS */
+  .admin-add-btn { width: 100%; padding: .85rem 1rem; border-radius: 13px; border: 2px dashed var(--primary-mid); background: var(--primary-light); color: var(--primary); font-size: .95rem; font-weight: 700; cursor: pointer; font-family: var(--font); margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: .45rem; transition: all .15s; }
+  .admin-add-btn:active { background: var(--primary); color: white; border-style: solid; }
+  .admin-edit-btn { padding: .42rem .8rem; border-radius: 9px; border: 1.5px solid var(--primary-mid); background: var(--primary-light); color: var(--primary); font-size: .82rem; font-weight: 700; cursor: pointer; font-family: var(--font); min-height: 38px; transition: all .12s; }
+  .admin-delete-btn { padding: .42rem .8rem; border-radius: 9px; border: 1.5px solid #e5a0a0; background: #fff4f4; color: var(--skip); font-size: .82rem; font-weight: 700; cursor: pointer; font-family: var(--font); min-height: 38px; transition: all .12s; }
+  .section-desc { font-size: .76rem; color: var(--text-muted); margin-top: .12rem; font-weight: 400; }
 
   /* SECTION */
   .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .9rem; }
@@ -279,7 +289,7 @@
     .stats-row { gap: .35rem; }
     .stat-num { font-size: 1.1rem; }
     .stat-label { font-size: .65rem; }
-    .admin-tab { padding: .45rem .7rem; font-size: .78rem; }
+    .admin-tab { padding: .55rem .7rem; min-height: 58px; min-width: 58px; font-size: .7rem; }
   }
 
   /* Landscape phones */
@@ -436,10 +446,10 @@
 
   /* Admin tabs: Health-style pill active */
   .admin-tab.active {
-    background: white;
-    color: var(--primary);
-    font-weight: 700;
-    box-shadow: 0 1px 4px rgba(0,0,0,.1), 0 2px 8px rgba(0,0,0,.06);
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 3px 12px rgba(61,107,94,.28);
   }
 
   /* Stagger card animations */
@@ -677,13 +687,13 @@
   </div>
   <div style="flex:1;padding:1rem;padding-bottom:calc(1rem + env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch">
     <div class="admin-tabs" id="adminTabs">
-      <button class="admin-tab active" onclick="adminTab('rounds')"><span class="tab-icon" data-icon="rotate-ccw"></span>סבבים</button>
-      <button class="admin-tab" onclick="adminTab('residents')"><span class="tab-icon" data-icon="users"></span>דיירים</button>
-      <button class="admin-tab" onclick="adminTab('meds')"><span class="tab-icon" data-icon="pill"></span>תרופות</button>
-      <button class="admin-tab" onclick="adminTab('nurses')"><span class="tab-icon" data-icon="user"></span>מדריכות</button>
-      <button class="admin-tab" onclick="adminTab('history')"><span class="tab-icon" data-icon="history"></span>היסטוריה</button>
-      <button class="admin-tab" onclick="adminTab('export')"><span class="tab-icon" data-icon="download"></span>ייצוא</button>
-      <button class="admin-tab" onclick="adminTab('profile')"><span class="tab-icon" data-icon="settings"></span>פרופיל</button>
+      <button class="admin-tab active" onclick="adminTab('rounds')"><span class="tab-icon" data-icon="rotate-ccw"></span><span>סבבים</span></button>
+      <button class="admin-tab" onclick="adminTab('residents')"><span class="tab-icon" data-icon="users"></span><span>דיירים</span></button>
+      <button class="admin-tab" onclick="adminTab('meds')"><span class="tab-icon" data-icon="pill"></span><span>תרופות</span></button>
+      <button class="admin-tab" onclick="adminTab('nurses')"><span class="tab-icon" data-icon="user"></span><span>מדריכות</span></button>
+      <button class="admin-tab" onclick="adminTab('history')"><span class="tab-icon" data-icon="history"></span><span>היסטוריה</span></button>
+      <button class="admin-tab" onclick="adminTab('export')"><span class="tab-icon" data-icon="download"></span><span>ייצוא</span></button>
+      <button class="admin-tab" onclick="adminTab('profile')"><span class="tab-icon" data-icon="settings"></span><span>פרופיל</span></button>
     </div>
     <div id="adminContent"></div>
     <div class="page-hint" style="padding-bottom:env(safe-area-inset-bottom)"><a href="#" onclick="showNurseViewFromAdmin()" style="color:var(--text-muted);text-decoration:none;font-size:.8rem">← מעבר לתצוגת מדריכה</a></div>
@@ -996,6 +1006,7 @@ function icon(name, size=18, cls='') {
     'x-circle':     '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
     'alert-circle': '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
     'plus':         '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+    'plus-circle':  '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>',
     'rotate-ccw':   '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>',
     'settings':     '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
   };
@@ -1213,8 +1224,8 @@ function adminTab(tab) {
   // Inject tab icons
   setTimeout(() => {
     document.querySelectorAll('.tab-icon[data-icon]').forEach(el => {
-      el.innerHTML = icon(el.dataset.icon, 13);
-      el.style.cssText = 'display:inline-flex;align-items:center;margin-left:3px;opacity:.7';
+      el.innerHTML = icon(el.dataset.icon, 20);
+      el.style.cssText = 'display:inline-flex;align-items:center;opacity:.8';
     });
   }, 90);
 }
@@ -1233,7 +1244,9 @@ function renderAdminContent() {
 }
 
 function renderAdminRounds() {
-  let html = `<div class="section-header"><div class="section-title">סבבי חלוקה</div>${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openRoundModal()">+ חדש</button>' : ''}</div>`;
+  const isDev = state.currentUser?.type === 'dev';
+  let html = `<div class="section-header"><div><div class="section-title">סבבי חלוקה</div><div class="section-desc">מתי מחלקים תרופות ולמי</div></div></div>`;
+  if (!isDev) html += `<button class="admin-add-btn" onclick="openRoundModal()">${icon('plus-circle',18)} הוסף סבב חדש</button>`;
   if (!data.rounds.length) {
     html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין סבבים עדיין</p></div>`;
   }
@@ -1245,10 +1258,10 @@ function renderAdminRounds() {
           <div class="card-title">${esc(round.name)}</div>
           <div class="card-subtitle">${round.time} | ${entryCount} דיירים</div>
         </div>
-        <div class="flex gap-sm">
-          <button class="btn-icon" title="עריכה" onclick="openRoundModal('${round.id}')">${icon('pencil',14)}</button>
-          <button class="btn-icon" title="מחיקה" onclick="deleteRound('${round.id}')">${icon('trash-2',14)}</button>
-        </div>
+        ${!isDev ? `<div class="flex gap-sm">
+          <button class="admin-edit-btn" onclick="openRoundModal('${round.id}')">ערוך</button>
+          <button class="admin-delete-btn" onclick="deleteRound('${round.id}')">מחק</button>
+        </div>` : ''}
       </div>
       ${round.entries.map(e => {
         const res = data.residents.find(r => r.id === e.residentId);
@@ -1280,20 +1293,20 @@ function adminSearchUpdate(field, val, renderFn) {
 }
 
 function renderAdminResidents() {
+  const isDev = state.currentUser?.type === 'dev';
   let html = `<div>
     <div class="section-header" style="margin-bottom:.5rem">
-      <div class="section-title">דיירים</div>
-      ${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openResidentModal()">+ חדש</button>' : ''}
+      <div><div class="section-title">דיירים</div><div class="section-desc">פרטי הדיירים ותרופותיהם</div></div>
     </div>
+    ${!isDev ? '<button class="admin-add-btn" onclick="openResidentModal()">' + icon('plus-circle',18) + ' הוסף דייר חדש</button>' : ''}
     <input type="text" id="resSearchInput" placeholder="חיפוש לפי שם דייר..." value="${state.adminSearch.residents||''}"
       oninput="adminSearchUpdate('residents',this.value,renderAdminResidents)"
-      style="font-size:14px;padding:.35rem .8rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.6rem">
+      style="font-size:14px;padding:.42rem .9rem;border:1.5px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.7rem">
   </div>`;
   if (!data.residents.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין דיירים</p></div>`;
   const resQ = state.adminSearch.residents||'';
   const resFiltered = resQ ? data.residents.filter(r=>fuzzy(r.name,resQ)) : data.residents;
   resFiltered.forEach(res => {
-    const isDev = state.currentUser?.type === 'dev';
     const medNames = res.meds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name : '?'; }).join(', ');
     const medDisplay = isDev
       ? '<span style="filter:blur(4px);user-select:none;pointer-events:none">' + (medNames || 'ללא תרופות') + '</span>'
@@ -1306,8 +1319,8 @@ function renderAdminResidents() {
         ${(!isDev && res.notes) ? `<div class="list-item-sub" style="color:var(--skip)">${icon('alert-circle',13)} ${esc(res.notes)}</div>` : ''}
       </div>
       ${isDev ? '' : `<div class="list-item-actions">
-        <button class="btn-icon" title="עריכה" onclick="openResidentModal('${res.id}')">${icon('pencil',14)}</button>
-        <button class="btn-icon" title="מחיקה" onclick="deleteResident('${res.id}')">${icon('trash-2',14)}</button>
+        <button class="admin-edit-btn" onclick="openResidentModal('${res.id}')">ערוך</button>
+        <button class="admin-delete-btn" onclick="deleteResident('${res.id}')">מחק</button>
       </div>`}
     </div>`;
   });
@@ -1318,12 +1331,12 @@ function renderAdminMeds() {
   const isDev = state.currentUser?.type === 'dev';
   let html = `<div>
     <div class="section-header" style="margin-bottom:.5rem">
-      <div class="section-title">תרופות</div>
-      ${!isDev ? '<button class="btn btn-orange btn-sm" onclick="openMedModal()">+ חדש</button>' : ''}
+      <div><div class="section-title">תרופות</div><div class="section-desc">כל התרופות הקיימות במערכת</div></div>
     </div>
+    ${!isDev ? '<button class="admin-add-btn" onclick="openMedModal()">' + icon('plus-circle',18) + ' הוסף תרופה חדשה</button>' : ''}
     <input type="text" id="medSearchInput" placeholder="חיפוש לפי שם / מינון..." value="${state.adminSearch.meds||''}"
       oninput="adminSearchUpdate('meds',this.value,renderAdminMeds)"
-      style="font-size:14px;padding:.35rem .8rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.6rem">
+      style="font-size:14px;padding:.42rem .9rem;border:1.5px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.7rem">
   </div>`;
 
   if (!data.meds.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין תרופות</p></div>`;
@@ -1336,14 +1349,14 @@ function renderAdminMeds() {
     const notes = med.notes ? ' | ' + esc(med.notes) : '';
     const avatar = 'Rx';
     html += `<div class="list-item">
-      <div style="width:36px;height:36px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--primary);flex-shrink:0">${avatar}</div>
+      <div style="width:38px;height:38px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--primary);flex-shrink:0">${avatar}</div>
       <div class="list-item-content">
         <div class="list-item-title">${name}</div>
         <div class="list-item-sub">${type} | מינון: ${dose}${notes}</div>
       </div>`;
     if (!isDev) html += `<div class="list-item-actions">
-        <button class="btn-icon" title="עריכה" onclick="openMedModal('${med.id}')">${icon('pencil',14)}</button>
-        <button class="btn-icon" title="מחיקה" onclick="deleteMed('${med.id}')">${icon('trash-2',14)}</button>
+        <button class="admin-edit-btn" onclick="openMedModal('${med.id}')">ערוך</button>
+        <button class="admin-delete-btn" onclick="deleteMed('${med.id}')">מחק</button>
       </div>`;
     html += `</div>`;
   });
@@ -1351,14 +1364,15 @@ function renderAdminMeds() {
 }
 
 function renderAdminNurses() {
+  const isDev = state.currentUser?.type === 'dev';
   let html = `<div>
     <div class="section-header" style="margin-bottom:.5rem">
-      <div class="section-title">מדריכות</div>
-      ${state.currentUser?.type !== 'dev' ? '<button class="btn btn-orange btn-sm" onclick="openNurseModal()">+ חדש</button>' : ''}
+      <div><div class="section-title">מדריכות</div><div class="section-desc">פרטי ההתחברות של כל מדריכה</div></div>
     </div>
+    ${!isDev ? '<button class="admin-add-btn" onclick="openNurseModal()">' + icon('plus-circle',18) + ' הוסף מדריכה חדשה</button>' : ''}
     <input type="text" id="nurseSearchInput" placeholder="חיפוש לפי שם מדריכה..." value="${state.adminSearch.nurses||''}"
       oninput="adminSearchUpdate('nurses',this.value,renderAdminNurses)"
-      style="font-size:14px;padding:.35rem .8rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.6rem">
+      style="font-size:14px;padding:.42rem .9rem;border:1.5px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.7rem">
   </div>`;
   const nurseQ = state.adminSearch.nurses||'';
   const nursesFiltered = nurseQ ? data.nurses.filter(n=>fuzzy(n.name,nurseQ)) : data.nurses;
@@ -1369,9 +1383,9 @@ function renderAdminNurses() {
         <div class="list-item-title">${esc(nurse.name)}</div>
         <div class="list-item-sub">שם משתמש: ${esc(nurse.username)}</div>
       </div>
-      ${state.currentUser?.type !== 'dev' ? `<div class="list-item-actions">
-        <button class="btn-icon" title="עריכה" onclick="openNurseModal('${nurse.id}')">${icon('pencil',14)}</button>
-        <button class="btn-icon" title="מחיקה" onclick="deleteNurse('${nurse.id}')">${icon('trash-2',14)}</button>
+      ${!isDev ? `<div class="list-item-actions">
+        <button class="admin-edit-btn" onclick="openNurseModal('${nurse.id}')">ערוך</button>
+        <button class="admin-delete-btn" onclick="deleteNurse('${nurse.id}')">מחק</button>
       </div>` : ''}
     </div>`;
   });
@@ -1521,8 +1535,9 @@ function saveRound() {
   saveData(); closeModal(); renderAdminContent();
 }
 function deleteRound(id) {  if (state.currentUser?.type === 'dev') return;
-
-  if (!confirm('למחוק את הסבב?')) return;
+  const round = data.rounds.find(r=>r.id===id);
+  if (!round) return;
+  if (!confirm(`למחוק את הסבב "${round.name}"?\n\nפעולה זו לא ניתנת לביטול.`)) return;
   data.rounds = data.rounds.filter(r=>r.id!==id);
   saveData(); renderAdminContent();
 }
@@ -1564,8 +1579,9 @@ function saveResident() {
   saveData(); closeModal(); renderAdminContent();
 }
 function deleteResident(id) {  if (state.currentUser?.type === 'dev') return;
-
-  if (!confirm('למחוק את הדייר?')) return;
+  const res = data.residents.find(r=>r.id===id);
+  if (!res) return;
+  if (!confirm(`למחוק את הדייר "${res.name}"?\n\nפעולה זו לא ניתנת לביטול.`)) return;
   data.residents = data.residents.filter(r=>r.id!==id);
   saveData(); renderAdminContent();
 }
@@ -1597,8 +1613,9 @@ function saveMed() {
   saveData(); closeModal(); renderAdminContent();
 }
 function deleteMed(id) {  if (state.currentUser?.type === 'dev') return;
-
-  if (!confirm('למחוק את התרופה?')) return;
+  const med = data.meds.find(m=>m.id===id);
+  if (!med) return;
+  if (!confirm(`למחוק את התרופה "${med.name}"?\n\nפעולה זו לא ניתנת לביטול.`)) return;
   data.meds = data.meds.filter(m=>m.id!==id);
   saveData(); renderAdminContent();
 }
@@ -1629,8 +1646,9 @@ function saveNurse() {
   saveData(); closeModal(); renderAdminContent();
 }
 function deleteNurse(id) {  if (state.currentUser?.type === 'dev') return;
-
-  if (!confirm('למחוק את המדריכה?')) return;
+  const nurse = data.nurses.find(n=>n.id===id);
+  if (!nurse) return;
+  if (!confirm(`למחוק את המדריכה "${nurse.name}"?\n\nפעולה זו לא ניתנת לביטול.`)) return;
   data.nurses = data.nurses.filter(n=>n.id!==id);
   saveData(); renderAdminContent();
 }
