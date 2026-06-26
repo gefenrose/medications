@@ -484,6 +484,99 @@
   }
 
 
+  /* ===== INTUITIVE FLOW ENHANCEMENTS ===== */
+
+  /* Progress bar */
+  .flow-progress { background: rgba(0,0,0,.1); border-radius: 20px; height: 9px; overflow: hidden; }
+  .flow-progress-fill {
+    height: 100%; border-radius: 20px;
+    background: linear-gradient(90deg, #3A7D5C 0%, #2A9D8F 100%);
+    transition: width .5s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  /* Time context chip on round card */
+  .time-ctx { display:inline-flex;align-items:center;gap:.25rem;padding:.22rem .65rem;border-radius:20px;font-size:.76rem;font-weight:700;margin-top:.5rem; }
+  .time-ctx.current  { background:rgba(255,255,255,.3);  color:white; }
+  .time-ctx.upcoming { background:rgba(255,255,255,.18); color:rgba(255,255,255,.85); }
+  .time-ctx.past     { background:rgba(0,0,0,.2);        color:rgba(255,255,255,.65); }
+
+  /* Round chip tabs */
+  .round-chips { display:flex;gap:.4rem;margin-bottom:.85rem;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:.15rem;scrollbar-width:none; }
+  .round-chips::-webkit-scrollbar { display:none; }
+  .round-chip {
+    display:flex;flex-direction:column;align-items:center;
+    padding:.5rem .9rem;border-radius:14px;border:1.5px solid var(--border-light);
+    background:white;cursor:pointer;white-space:nowrap;transition:all .18s;
+    font-family:var(--font);flex-shrink:0;box-shadow:var(--shadow);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .round-chip .chip-time { font-size:.88rem;font-weight:700;color:var(--primary); }
+  .round-chip .chip-name { font-size:.68rem;color:var(--text-muted);margin-top:.06rem; }
+  .round-chip.done .chip-name::after { content:" ✓";color:var(--success); }
+  .round-chip.active { background:var(--primary);border-color:var(--primary);box-shadow:0 4px 12px rgba(74,124,111,.3); }
+  .round-chip.active .chip-time,
+  .round-chip.active .chip-name { color:white; }
+  .round-chip:active { transform:scale(.95); }
+
+  /* Status dot per resident */
+  .status-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:background .3s; }
+  .status-dot.pending  { background:var(--border); }
+  .status-dot.partial  { background:#F0A500; }
+  .status-dot.complete { background:var(--success); }
+  .status-dot.skipped  { background:var(--skip); }
+
+  /* Med action buttons with visual hierarchy */
+  .med-action-row { display:flex;gap:.35rem; }
+  .med-btn-given {
+    flex:3;padding:.62rem .5rem;border-radius:11px;
+    font-size:.92rem;font-weight:700;font-family:var(--font);cursor:pointer;min-height:48px;
+    border:1.5px solid var(--success);background:var(--success-bg);color:var(--success);
+    transition:all .15s;-webkit-tap-highlight-color:transparent;
+  }
+  .med-btn-given.active { background:var(--success);color:white;box-shadow:0 2px 10px rgba(58,125,92,.35); }
+  .med-btn-given:active { transform:scale(.97); }
+  .med-btn-skip {
+    flex:1;padding:.6rem .4rem;border-radius:11px;
+    font-size:.82rem;font-weight:600;font-family:var(--font);cursor:pointer;min-height:48px;
+    border:1.5px solid var(--border-light);background:transparent;color:var(--text-muted);
+    transition:all .15s;-webkit-tap-highlight-color:transparent;
+  }
+  .med-btn-skip.active { background:var(--skip-bg);color:var(--skip);border-color:var(--skip); }
+  .med-btn-skip:active { transform:scale(.97); }
+
+  /* Round complete banner */
+  .round-complete-banner {
+    background:linear-gradient(140deg,var(--success) 0%,#2A9D8F 100%);
+    border-radius:var(--radius);padding:1.4rem 1.2rem;text-align:center;color:white;
+    margin-bottom:1rem;box-shadow:0 4px 20px rgba(58,125,92,.3);
+    animation:scaleIn .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  .round-complete-banner .cpl-icon { font-size:2.4rem;margin-bottom:.35rem;line-height:1; }
+  .round-complete-banner h3 { font-size:1.25rem;font-weight:800;margin-bottom:.3rem; }
+  .round-complete-banner p { font-size:.85rem;opacity:.9; }
+
+  /* Sticky finish button */
+  .sticky-finish { position:sticky;bottom:calc(1.2rem + env(safe-area-inset-bottom));z-index:50;margin-top:.8rem; }
+  .sticky-finish .btn-primary {
+    background:linear-gradient(135deg,var(--success) 0%,#2A9D8F 100%) !important;
+    box-shadow:0 4px 24px rgba(58,125,92,.45),0 2px 8px rgba(0,0,0,.15) !important;
+    font-size:1rem;padding:.9rem;letter-spacing:.01em;
+  }
+
+  /* Login role cards */
+  .login-roles { display:flex;gap:.6rem;margin-bottom:1.4rem; }
+  .login-role-card {
+    flex:1;padding:.9rem .5rem;border-radius:14px;
+    border:2px solid var(--border-light);background:var(--bg);
+    cursor:pointer;text-align:center;transition:all .18s;font-family:var(--font);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .login-role-card .role-icon { font-size:1.5rem;display:block;margin-bottom:.3rem;line-height:1.3; }
+  .login-role-card .role-label { font-size:.9rem;font-weight:700;color:var(--text-secondary); }
+  .login-role-card.active { border-color:var(--primary);background:var(--primary-light); }
+  .login-role-card.active .role-label { color:var(--primary); }
+  .login-role-card:active { transform:scale(.97); }
+
   /* ===== PRINT — BLACK & WHITE ===== */
   @media print {
     .topbar, .bottom-nav, .admin-tabs, .btn, .btn-icon, .topbar-btn { display: none !important; }
@@ -522,9 +615,15 @@
       <h1>מעקב תרופות</h1>
       <p>מערכת ניהול תרופות לדיור מוגן</p>
     </div>
-    <div class="login-tabs" style="animation:fadeSlideUp .35s .1s ease both">
-      <button class="login-tab active" onclick="setLoginType('nurse')">מדריכה</button>
-      <button class="login-tab" onclick="setLoginType('admin')">מנהל</button>
+    <div class="login-roles" style="animation:fadeSlideUp .35s .1s ease both">
+      <button class="login-role-card active" onclick="setLoginType('nurse')">
+        <span class="role-icon">👩‍⚕️</span>
+        <span class="role-label">מדריכה</span>
+      </button>
+      <button class="login-role-card" onclick="setLoginType('admin')">
+        <span class="role-icon">⚙️</span>
+        <span class="role-label">מנהל</span>
+      </button>
     </div>
     <div class="form-group">
       <label>שם משתמש</label>
@@ -971,7 +1070,7 @@ window.addEventListener('pageshow', e => {
 // ==================== LOGIN ====================
 function setLoginType(type) {
   state.loginType = type;
-  document.querySelectorAll('.login-tab').forEach((t,i) => t.classList.toggle('active',
+  document.querySelectorAll('.login-role-card').forEach((t,i) => t.classList.toggle('active',
     (i===0 && type==='nurse') || (i===1 && type==='admin')
   ));
   // Highlight dev button if selected
@@ -1572,11 +1671,10 @@ function renderNurseRound() {
   const selDate = state.selectedDate || today;
   const isPast = selDate < today;
 
-  // For past dates — show history view
   if (isPast) return renderNurseDateHistory(selDate);
 
   const round = data.activeRoundSession ? data.rounds.find(r=>r.id===data.activeRoundSession.roundId) : getCurrentRound();
-  if (!round) return `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין סבבים מוגדרים</p></div>`;
+  if (!round) return `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)">${icon('pill',36)}</div><p>אין סבבים מוגדרים</p><p class="text-muted" style="margin-top:.4rem;font-size:.8rem">בקשי מהמנהל להוסיף סבבי חלוקה</p></div>`;
 
   const session = data.activeRoundSession && data.activeRoundSession.roundId === round.id ? data.activeRoundSession : null;
   const statuses = session ? session.statuses : {};
@@ -1586,101 +1684,163 @@ function renderNurseRound() {
   round.entries.forEach(entry => {
     entry.medIds.forEach(mid => {
       totalMeds++;
-      const ms = (statuses[entry.residentId] && statuses[entry.residentId].meds && statuses[entry.residentId].meds[mid]);
-      if (ms && ms.status === 'given') given++;
-      else if (ms && ms.status === 'skipped') skipped++;
+      const ms = statuses[entry.residentId]?.meds?.[mid];
+      if (ms?.status === 'given') given++;
+      else if (ms?.status === 'skipped') skipped++;
     });
   });
-  const total = round.entries.length;
 
+  const handled = given + skipped;
+  const pct = totalMeds > 0 ? Math.round((handled / totalMeds) * 100) : 0;
+  const isComplete = totalMeds > 0 && handled === totalMeds;
+
+  // Time context
+  const now = new Date();
+  const hhmm = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  const diffMins = timeToMinutes(round.time) - timeToMinutes(hhmm);
+  let timeCtxLabel, timeCtxClass;
+  if (diffMins > 60) {
+    timeCtxLabel = `מתחיל בעוד ${formatMinutes(diffMins)}`;
+    timeCtxClass = 'upcoming';
+  } else if (diffMins > 5) {
+    timeCtxLabel = `מתחיל בעוד ${diffMins} דקות`;
+    timeCtxClass = 'upcoming';
+  } else if (diffMins >= -30) {
+    timeCtxLabel = isComplete ? 'הושלם ✓' : 'הסבב פעיל כעת';
+    timeCtxClass = 'current';
+  } else {
+    timeCtxLabel = `הסבב היה לפני ${formatMinutes(-diffMins)}`;
+    timeCtxClass = 'past';
+  }
+
+  // ── Round header ──
   let html = `<div class="round-card">
-    <h2>${esc(round.name)}</h2>
-    <p>${total} דיירים בסבב זה</p>
-    <div class="time-badge">${round.time}</div>
-  </div>`;
-
-  html += `<div class="stats-row">
-    <div class="stat-card"><div class="stat-num" style="color:var(--success)">${given}</div><div class="stat-label">תרופות ניתנו</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--skip)">${skipped}</div><div class="stat-label">דולגו</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--text-secondary)">${totalMeds - given - skipped}</div><div class="stat-label">ממתינות</div></div>
-  </div>`;
-
-  // Date + round picker (today/selDate already declared above)
-
-  // Build history summary for selected date (which rounds were done)
-  const doneRoundIds = new Set(
-    data.history.filter(h => h.date && h.date.startsWith(selDate)).map(h => h.roundId)
-  );
-
-  const sortedRounds = data.rounds.slice().sort((a,b) => a.time.localeCompare(b.time));
-
-  // Styled select — clearly interactive, shows current round + date
-  const roundOptions = sortedRounds.map(r => {
-    const isDone = doneRoundIds.has(r.id);
-    return `<option value="${r.id}" ${r.id===round.id?'selected':''}>${r.time} — ${esc(r.name)}${isDone?' ✓':''}`;
-  }).join('');
-
-  html += `<div style="background:white;border-radius:16px;padding:.8rem 1rem;margin-bottom:.9rem;
-                       box-shadow:0 1px 4px rgba(0,0,0,.07);border:1.5px solid var(--border-light)">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:.7rem">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.35rem">סבב</div>
-        <div style="position:relative">
-          <select onchange="switchRound(this.value)"
-            style="width:100%;padding:.55rem .75rem;padding-left:2rem;font-size:1rem;font-weight:600;
-                   font-family:var(--font);direction:rtl;border:none;background:var(--bg);
-                   border-radius:10px;color:var(--text);appearance:none;-webkit-appearance:none;
-                   cursor:pointer;line-height:1.3">
-            ${roundOptions}
-          </select>
-          <svg style="position:absolute;left:.55rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted)"
-            xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem">
+      <div>
+        <h2>${esc(round.name)}</h2>
+        <p>${round.entries.length} דיירים · ${totalMeds} תרופות</p>
       </div>
+      <div class="time-badge" style="flex-shrink:0">${round.time}</div>
+    </div>
+    <div class="time-ctx ${timeCtxClass}">${timeCtxLabel}</div>
+  </div>`;
 
+  // ── Progress card ──
+  html += `<div style="background:white;border-radius:16px;padding:.9rem 1rem;margin-bottom:.85rem;box-shadow:var(--shadow)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+      <div style="font-size:.82rem;font-weight:700;color:var(--text)">התקדמות</div>
+      <div style="font-size:.88rem;font-weight:800;color:${isComplete ? 'var(--success)' : pct > 0 ? 'var(--primary)' : 'var(--text-muted)'}">${pct}%</div>
+    </div>
+    <div class="flow-progress">
+      <div class="flow-progress-fill" style="width:${Math.max(pct, pct > 0 ? 3 : 0)}%"></div>
+    </div>
+    <div style="display:flex;gap:1.2rem;margin-top:.5rem;font-size:.75rem;font-weight:600">
+      <span style="color:var(--success)">✓ ${given} ניתנו</span>
+      <span style="color:var(--skip)">✕ ${skipped} דולגו</span>
+      <span style="color:var(--text-muted)">◦ ${totalMeds - handled} ממתינות</span>
     </div>
   </div>`;
 
-  const filterVal = (state.residentFilter||'').trim().toLowerCase();
+  // ── Round chip tabs ──
+  const sortedRounds = data.rounds.slice().sort((a,b) => a.time.localeCompare(b.time));
+  const doneRoundIds = new Set(data.history.filter(h => h.date?.startsWith(selDate)).map(h => h.roundId));
+
+  html += `<div class="round-chips">`;
+  sortedRounds.forEach(r => {
+    const isActive = r.id === round.id;
+    const isDone = doneRoundIds.has(r.id) && !isActive;
+    html += `<button class="round-chip${isActive ? ' active' : ''}${isDone ? ' done' : ''}"
+      onclick="switchRound('${r.id}')">
+      <span class="chip-time">${r.time}</span>
+      <span class="chip-name">${esc(r.name)}</span>
+    </button>`;
+  });
+  html += `</div>`;
+
+  // ── Completion banner (shows at top of list when done) ──
+  if (isComplete) {
+    html += `<div class="round-complete-banner">
+      <div class="cpl-icon">✓</div>
+      <h3>הסבב הושלם!</h3>
+      <p>${given} תרופות ניתנו${skipped > 0 ? ` · ${skipped} דולגו` : ''} · עכשיו סגרי את הסבב</p>
+    </div>`;
+  }
+
+  // ── Resident search ──
   const resFilterVal = state.residentFilter || '';
-  html += `<div class="section-header" style="position:sticky;top:0;z-index:10;background:var(--bg);padding:.5rem 0;margin:0 -1rem;padding-right:1rem;padding-left:1rem;border-bottom:1px solid var(--border-light)">
-    <div class="section-title">רשימת דיירים</div>
+  const filterVal = resFilterVal.trim().toLowerCase();
+  html += `<div style="margin-bottom:.65rem">
     <input type="text" placeholder="חיפוש דייר..." value="${resFilterVal}"
       oninput="nurseResSearch(this.value)"
-      style="font-size:14px;padding:.3rem .7rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:140px;background:white" id="nurseResSearch">
+      style="font-size:14px;padding:.45rem .9rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white" id="nurseResSearch">
   </div>`;
 
+  // ── Resident list ──
   round.entries.filter(entry => {
     if (!filterVal) return true;
     const r = data.residents.find(x=>x.id===entry.residentId);
-    return r && fuzzy(r.name,filterVal);
+    return r && fuzzy(r.name, filterVal);
   }).forEach(entry => {
     const res = data.residents.find(r=>r.id===entry.residentId);
     if (!res) return;
-    // Per-med statuses: medStatuses[residentId][medId] = { status, note }
-    const medStatuses = (statuses[entry.residentId] && statuses[entry.residentId].meds) || {};
-    const allDone = entry.medIds.length > 0 && entry.medIds.every(mid => medStatuses[mid] && medStatuses[mid].status !== 'pending');
-    const anySkipped = entry.medIds.some(mid => medStatuses[mid] && medStatuses[mid].status === 'skipped');
+
+    const medStatuses = statuses[entry.residentId]?.meds || {};
+    let resGiven = 0, resSkipped = 0;
+    entry.medIds.forEach(mid => {
+      const ms = medStatuses[mid];
+      if (ms?.status === 'given') resGiven++;
+      else if (ms?.status === 'skipped') resSkipped++;
+    });
+    const resHandled = resGiven + resSkipped;
+    const allDone = resHandled === entry.medIds.length && entry.medIds.length > 0;
+    const anySkipped = resSkipped > 0;
     const rowClass = allDone ? (anySkipped ? 'skipped' : 'given') : '';
+
+    let dotClass = 'pending';
+    if (allDone) dotClass = anySkipped ? 'skipped' : 'complete';
+    else if (resHandled > 0) dotClass = 'partial';
 
     let medsHtml = entry.medIds.map(mid => {
       const med = data.meds.find(x=>x.id===mid);
       if (!med) return '';
       const ms = medStatuses[mid] || { status: 'pending', note: '' };
-      const isGiven = ms.status === 'given';
+      const isGiven   = ms.status === 'given';
       const isSkipped = ms.status === 'skipped';
       const isPending = ms.status === 'pending';
-      return (() => {
-      const givenTime = isGiven && ms.time ? ms.time : '';
-      const rId = round.id;
+      const rId  = round.id;
       const resId = entry.residentId;
+      const medName = state.currentUser?.type === 'dev' ? '••••••' : esc(med.name);
+      const medDose = state.currentUser?.type === 'dev' ? '•••'    : esc(med.dose);
+      const givenTime = isGiven && ms.time ? ms.time : '';
+
+      const borderBg = isGiven
+        ? 'border:2px solid var(--success);background:var(--success-bg)'
+        : isSkipped
+          ? 'border:2px solid var(--skip);background:var(--skip-bg)'
+          : 'border:1.5px solid var(--border-light);background:white';
+      const nameColor = isGiven ? 'var(--success)' : isSkipped ? 'var(--skip)' : 'var(--text)';
+
+      let actionsHtml;
+      if (state.currentUser?.type === 'dev') {
+        actionsHtml = '<span style="font-size:.75rem;color:var(--text-muted);font-style:italic">צפייה בלבד</span>';
+      } else {
+        actionsHtml = `<div class="med-action-row">
+          <button class="med-btn-given${isGiven ? ' active' : ''}"
+            data-r="${rId}" data-res="${resId}" data-m="${mid}"
+            onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'given')">
+            ${isGiven ? `✓ ניתנה${givenTime ? ' · '+givenTime : ''}` : 'ניתנה ✓'}
+          </button>
+          <button class="med-btn-skip${isSkipped ? ' active' : ''}"
+            data-r="${rId}" data-res="${resId}" data-m="${mid}"
+            onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'skipped')">
+            ${isSkipped ? '✕' : 'דולג'}
+          </button>
+        </div>`;
+      }
 
       let notePart = '';
       if (!isPending) {
-        notePart = `<div style="padding-right:38px;margin-top:.3rem">
+        notePart = `<div style="margin-top:.3rem">
           <input type="text" placeholder="הערה (אופציונלי)" value="${esc(ms.note||'')}"
             class="med-note-input"
             style="width:100%;border:1px solid var(--border-light);border-radius:8px;background:white;font-family:var(--font);direction:rtl"
@@ -1689,72 +1849,39 @@ function renderNurseRound() {
         </div>`;
       }
 
-      const circleStyle = isGiven
-        ? 'background:var(--success);color:white'
-        : isSkipped
-          ? 'background:var(--skip);color:white'
-          : 'background:var(--surface2);color:var(--text-muted)';
-      const circleIcon = isGiven ? '✓' : isSkipped ? '✕' : '·';
-
-      const nameColor = isGiven ? 'var(--success)' : isSkipped ? 'var(--skip)' : 'var(--text)';
-      const borderStyle = isGiven
-        ? '1.5px solid var(--success)'
-        : isSkipped
-          ? '1.5px solid var(--skip)'
-          : '1px solid var(--border-light)';
-      const bgStyle = isGiven ? 'var(--success-bg)' : isSkipped ? 'var(--skip-bg)' : 'white';
-
-      const btnGivenStyle  = isGiven  ? 'background:var(--success);color:white;font-weight:700' : 'background:var(--success-bg);color:var(--success);opacity:.55';
-      const btnSkipStyle   = isSkipped ? 'background:var(--skip);color:white;font-weight:700'   : 'background:var(--skip-bg);color:var(--skip);opacity:.55';
-      const btnGivenLabel  = isGiven  ? '✓ ניתנה' : 'ניתנה';
-      const btnSkipLabel   = isSkipped ? '✕ דולג'  : 'דולג';
-
       return `<div id="medrow_${resId}_${mid}"
-        style="display:flex;flex-direction:column;gap:.3rem;padding:.6rem .7rem;border-radius:12px;border:${borderStyle};background:${bgStyle};margin-bottom:.4rem;transition:all .2s">
-        <div style="display:flex;align-items:center;gap:.5rem">
-          <div style="width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;${circleStyle}">
-            ${circleIcon}
-          </div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:600;font-size:.9rem;color:${nameColor}">${state.currentUser?.type==='dev'?'••••••':esc(med.name)}</div>
-            <div style="font-size:.75rem;color:var(--text-muted);display:flex;gap:.4rem;margin-top:.05rem;flex-wrap:wrap">
-              <span>${state.currentUser?.type==='dev'?'•••':esc(med.dose)}</span>
-              ${isGiven && givenTime ? `<span style="color:var(--success);font-weight:600">· ${givenTime}</span>` : ''}
-              ${isSkipped ? '<span style="color:var(--skip)">· דולג</span>' : ''}
-            </div>
-          </div>
-                    <div style="display:flex;gap:.3rem;flex-shrink:0">
-            ${state.currentUser?.type === 'dev' ? '<span style="font-size:.75rem;color:var(--text-muted);font-style:italic">צפייה בלבד</span>' : `<button class="btn btn-sm"
-              data-r="${rId}" data-res="${resId}" data-m="${mid}"
-              onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'given')"
-              style="${btnGivenStyle}">${btnGivenLabel}</button>
-            <button class="btn btn-sm"
-              data-r="${rId}" data-res="${resId}" data-m="${mid}"
-              onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'skipped')"
-              style="${btnSkipStyle}">${btnSkipLabel}</button>`}
-          </div>
+        style="display:flex;flex-direction:column;gap:.3rem;padding:.65rem .7rem;border-radius:12px;${borderBg};margin-bottom:.4rem;transition:all .25s ease">
+        <div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:.2rem">
+          <span style="font-weight:700;font-size:.92rem;color:${nameColor};flex:1">${medName}</span>
+          <span style="font-size:.75rem;color:var(--text-muted)">${medDose}</span>
         </div>
+        ${actionsHtml}
         ${notePart}
       </div>`;
-    })();
     }).join('');
 
-    html += `<div class="resident-row ${rowClass}" id="row_${entry.residentId}" style="flex-direction:column;align-items:stretch;padding:.9rem 1rem">
-      <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.6rem">
+    html += `<div class="resident-row ${rowClass}" id="row_${entry.residentId}"
+      style="flex-direction:column;align-items:stretch;padding:.9rem 1rem;margin-bottom:.55rem">
+      <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.65rem">
         <div class="resident-avatar">${initials(res.name)}</div>
-        <div class="resident-info">
+        <div style="flex:1">
           <div class="resident-name">${esc(res.name)}</div>
-          ${state.currentUser?.type!=='dev' ? `<div class="resident-meds">חדר ${esc(res.room)}</div>` : ''}
-          ${(state.currentUser?.type!=='dev' && res.notes) ? `<div class="resident-meds" style="color:var(--skip);font-size:.75rem">${icon("alert-circle",13)} ${esc(res.notes)}</div>` : ''}
+          ${state.currentUser?.type !== 'dev' ? `<div class="resident-meds">חדר ${esc(res.room)}</div>` : ''}
+          ${(state.currentUser?.type !== 'dev' && res.notes) ? `<div class="resident-meds" style="color:var(--skip);font-size:.75rem">${icon("alert-circle",12)} ${esc(res.notes)}</div>` : ''}
         </div>
+        <div class="status-dot ${dotClass}" title="${dotClass === 'complete' ? 'הושלם' : dotClass === 'partial' ? 'חלקי' : dotClass === 'skipped' ? 'דולג' : 'ממתין'}"></div>
       </div>
       ${medsHtml}
     </div>`;
   });
 
-  if (totalMeds > 0 && given + skipped === totalMeds) {
-    html += `<div class="info-box" style="margin-top:1rem;text-align:center"><div class="font-bold">הסבב הושלם!</div></div>`;
-    html += `<button class="btn btn-orange w-full mt-sm" onclick="finishRound('${round.id}')">סיים וסגור סבב</button>`;
+  // ── Sticky finish button when complete ──
+  if (isComplete) {
+    html += `<div class="sticky-finish">
+      <button class="btn-primary w-full" onclick="finishRound('${round.id}')">
+        סיים וסגור סבב ✓
+      </button>
+    </div>`;
   }
 
   return html;
@@ -2639,6 +2766,18 @@ function closeModal() { document.getElementById('modalOverlay').classList.remove
 function closeModalOverlay(e) { if (e.target.id === 'modalOverlay') closeModal(); }
 
 // ==================== UTILS ====================
+function timeToMinutes(hhmm) {
+  if (!hhmm) return 0;
+  const [hh, mm] = hhmm.split(':').map(Number);
+  return hh * 60 + mm;
+}
+function formatMinutes(mins) {
+  if (mins <= 0) return '';
+  if (mins < 60) return `${mins} דקות`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m ? `${h}ש' ${m}ד'` : `${h} שעות`;
+}
 function toggleMedPill(el) {
   el.classList.toggle('selected');
 }
