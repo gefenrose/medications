@@ -920,7 +920,7 @@ function startSync() {
   _pollInterval = setInterval(async () => {
     if (!_syncEnabled || _writing) return;
     const remote = await ghRead();
-    if (!remote) { showSyncBadge('<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> אין חיבור', true); return; }
+    if (!remote) { showSyncBadge('✕ אין חיבור', true); return; }
     if ((remote._ts || 0) > _lastTs) {
       _lastTs = remote._ts;
       mergeRemote(remote);
@@ -2279,10 +2279,10 @@ function checkSyncStatus() {
   const el = document.getElementById('syncStatus');
   if (el) el.textContent = 'בודק...';
   ghRead().then(remote => {
-    if (!remote) { if (el) el.textContent = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> אין חיבור'; return; }
+    if (!remote) { if (el) el.textContent = '✕ אין חיבור'; return; }
     const t = remote._ts ? new Date(remote._ts).toLocaleTimeString('he-IL') : '—';
     if (el) el.textContent = `✓ מחובר — עדכון אחרון: ${t}`;
-  }).catch(() => { if (el) el.textContent = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> שגיאת חיבור'; });
+  }).catch(() => { if (el) el.textContent = '✕ שגיאת חיבור'; });
 }
 function renderAdminProfile() {
   if (state.currentUser?.type === 'dev') return '<div class="empty-state"><p>גישה לא מורשית</p></div>';
