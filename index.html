@@ -825,60 +825,81 @@ const GH_TOKEN = "ghp_q0rgqERADyZyE1Dd" + "5e2C89cB8gTKif24QSi1";
 const GH_REPO  = "gefenrose/medications";
 const GH_FILE  = "data.json";
 const GH_API   = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+const GH_RAW   = `https://raw.githubusercontent.com/${GH_REPO}/main/${GH_FILE}`;
 
-let _fileSha   = null;   // current SHA of data.json on GitHub
-let _lastTs    = 0;      // last seen _ts from remote
+let _fileSha      = null;  // SHA needed for PUT (updated after each write)
+let _lastTs       = 0;     // last seen _ts from remote
 let _pollInterval = null;
-let _writeQueue   = null; // debounce timer
+let _writeQueue   = null;  // debounce timer
 let _syncEnabled  = false;
 let _writing      = false;
 
+// Reads via CDN raw URL — no auth, no API rate-limit, simpler decoding
 async function ghRead() {
   try {
-    const r = await fetch(GH_API + '?t=' + Date.now(), {
-      headers: { Authorization: 'token ' + GH_TOKEN, Accept: 'application/vnd.github.v3+json' }
-    });
+    const r = await fetch(GH_RAW + '?cb=' + Date.now(), { cache: 'no-store' });
     if (!r.ok) return null;
-    const meta = await r.json();
-    _fileSha = meta.sha;
-    const raw = meta.content.replace(/\n/g, '');
-    const bytes = Uint8Array.from(atob(raw), ch => ch.charCodeAt(0));
-    const decoded = JSON.parse(new TextDecoder('utf-8').decode(bytes));
-    return decoded;
+    return await r.json();
   } catch(e) { return null; }
 }
 
-async function ghWrite(payload) {
-  if (_writing) return;
+// Fetches current SHA from API — only called when we need to write
+async function ghGetSha() {
+  try {
+    const r = await fetch(GH_API, {
+      headers: { Authorization: 'token ' + GH_TOKEN, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j.sha || null;
+  } catch(e) { return null; }
+}
+
+// Safe UTF-8 → base64 for any size payload
+function toBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
+async function ghWrite(payload, retrying) {
+  if (_writing && !retrying) return;
   _writing = true;
   try {
+    // Always fetch a fresh SHA before writing to avoid stale-SHA conflicts
+    const sha = await ghGetSha();
+    if (!sha) { showSyncBadge('✕ שגיאת חיבור', true); return; }
+    _fileSha = sha;
+
     payload._ts = Date.now();
-    const body = JSON.stringify({
-      message: 'sync ' + new Date().toLocaleTimeString('he-IL'),
-      content: btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(payload)))),
-      sha: _fileSha
-    });
     const r = await fetch(GH_API, {
       method: 'PUT',
       headers: { Authorization: 'token ' + GH_TOKEN, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
-      body
+      body: JSON.stringify({
+        message: 'sync ' + new Date().toLocaleTimeString('he-IL'),
+        content: toBase64(JSON.stringify(payload)),
+        sha: _fileSha
+      })
     });
     if (r.ok) {
       const j = await r.json();
       _fileSha = j.content?.sha || _fileSha;
       _lastTs  = payload._ts;
       showSyncBadge('✓ מסונכרן');
-    } else {
-      // SHA conflict — re-read and retry once
+    } else if (r.status === 409 && !retrying) {
+      // Conflict: another device wrote between our ghGetSha() and PUT — merge and retry once
       const fresh = await ghRead();
       if (fresh) mergeRemote(fresh);
+      await ghWrite(payload, true);
+    } else {
+      showSyncBadge('✕ שגיאת שמירה', true);
     }
-  } catch(e) { console.warn('ghWrite', e); }
+  } catch(e) { console.warn('ghWrite', e); showSyncBadge('✕ שגיאת חיבור', true); }
   finally { _writing = false; }
 }
 
 function saveDataRemote() {
-  // Debounce writes — wait 400ms after last change
   if (_writeQueue) clearTimeout(_writeQueue);
   _writeQueue = setTimeout(() => {
     const payload = {
@@ -887,7 +908,7 @@ function saveDataRemote() {
       activeRoundSession: data.activeRoundSession || null
     };
     ghWrite(payload);
-  }, 400);
+  }, 600);
 }
 
 function mergeRemote(remote) {
@@ -925,7 +946,7 @@ function startSync() {
       _lastTs = remote._ts;
       mergeRemote(remote);
     }
-  }, 5000);  // poll every 5s (GitHub rate limit: 60 req/hr unauthenticated, 5000 authenticated)
+  }, 10000); // poll every 10s — raw CDN reads, no API rate-limit concern
 }
 
 function stopSync() {
