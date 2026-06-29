@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="תרופות">
-<meta name="theme-color" content="#4B86A8">
+<meta name="theme-color" content="#2D8B74">
 <title>מעקב תרופות – דיור מוגן</title>
 <!-- v16 -->
 <link rel="manifest" href="./manifest.json">
@@ -270,7 +270,7 @@
   }
   .bottom-nav { padding: .3rem 0; }
   .content {
-    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    padding-bottom: 0;
   }
   #loginScreen {
     padding-top: calc(2rem + env(safe-area-inset-top));
@@ -608,26 +608,90 @@
   .note-save-btn:active { transform:scale(.96); }
   .note-save-btn.saved { border-color:var(--success);background:var(--success-bg);color:var(--success); }
 
-  /* Compact login polish */
-  #loginScreen { background: var(--bg); padding: 1rem; }
-  .login-box { max-width: 360px; padding: 1.4rem; border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 12px 34px rgba(15, 40, 36, .08); }
-  .login-logo { display: grid; grid-template-columns: 1fr 42px; gap: .75rem; align-items: center; text-align: right; margin-bottom: 1.1rem; }
-  .login-logo .icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; grid-column: 2; grid-row: 1 / span 2; }
-  .login-logo .icon svg { width: 42px; height: 42px; }
-  .login-logo h1 { font-size: 1.2rem; margin: 0; line-height: 1.2; grid-column: 1; letter-spacing: 0; }
-  .login-logo p { font-size: .78rem; margin-top: .18rem; line-height: 1.35; grid-column: 1; max-width: 16rem; }
-  .login-roles { display: grid; grid-template-columns: repeat(2, 1fr); gap: .35rem; margin-bottom: 1rem; padding: .25rem; border: 1px solid var(--border-light); border-radius: 8px; background: var(--surface1); }
-  .login-role-card { border-radius: 7px; min-height: 42px; padding: .55rem .4rem; border: 0; background: transparent; box-shadow: none; }
+  /* Login redesign */
+  #loginScreen {
+    background: linear-gradient(160deg, var(--primary-light) 0%, #f0f8f5 55%, white 100%);
+    padding: 1.5rem 1rem;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-box {
+    max-width: 360px;
+    width: 100%;
+    padding: 2rem 1.5rem 1.5rem;
+    border: 1.5px solid rgba(45,139,116,.15);
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 8px 40px rgba(45,139,116,.12);
+  }
+  .login-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 1.6rem;
+    gap: 0;
+  }
+  .login-logo .icon {
+    width: 64px; height: 64px;
+    background: var(--primary-light);
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: .85rem;
+    border: 1.5px solid rgba(45,139,116,.2);
+  }
+  .login-logo .icon svg { width: 36px; height: 36px; }
+  .login-logo h1 {
+    font-size: 1.25rem; font-weight: 800;
+    color: var(--text-primary); margin: 0;
+    letter-spacing: -.02em; line-height: 1.2;
+  }
+  .login-logo p {
+    font-size: .78rem; margin-top: .3rem;
+    color: var(--text-secondary); line-height: 1.4;
+  }
+  .login-roles {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: .4rem; margin-bottom: 1.1rem;
+    padding: .3rem; border: 1.5px solid var(--border-light);
+    border-radius: 12px; background: var(--primary-light);
+  }
+  .login-role-card {
+    border-radius: 9px; min-height: 40px; padding: .5rem .4rem;
+    border: 0; background: transparent; box-shadow: none;
+    cursor: pointer; font-family: var(--font);
+    -webkit-tap-highlight-color: transparent; transition: all .15s;
+  }
   .login-role-card .role-icon { display: none; }
-  .login-role-card .role-label { font-size: .88rem; color: var(--text-secondary); }
-  .login-role-card.active { background: white; border-color: transparent; box-shadow: 0 1px 2px rgba(15, 40, 36, .08); }
-  .login-role-card.active .role-label { color: var(--primary); }
-  .login-box .form-group { margin-bottom: .85rem; }
-  .login-box .form-group label { font-size: .74rem; margin-bottom: .3rem; text-transform: none; font-weight: 700; }
-  .login-box .form-group input { min-height: 46px; border: 1px solid var(--border-light); background: white; }
-  .login-box .btn-primary { margin-top: .35rem; min-height: 46px; }
-  .login-help { margin-top: .8rem; border-top: 1px solid var(--border-light); padding-top: .65rem; color: var(--text-muted); font-size: .74rem; }
-  .login-help summary { cursor: pointer; list-style: none; text-align: center; font-weight: 700; }
+  .login-role-card .role-label { font-size: .86rem; font-weight: 600; color: var(--text-secondary); }
+  .login-role-card.active {
+    background: white;
+    box-shadow: 0 1px 6px rgba(45,139,116,.15);
+  }
+  .login-role-card.active .role-label { color: var(--primary); font-weight: 700; }
+  .login-role-card:active { transform: scale(.97); }
+  .login-box .form-group { margin-bottom: .9rem; }
+  .login-box .form-group label {
+    font-size: .73rem; margin-bottom: .3rem;
+    font-weight: 700; color: var(--text-secondary);
+    text-transform: none; letter-spacing: 0;
+  }
+  .login-box .form-group input {
+    min-height: 46px; border: 1.5px solid var(--border-light);
+    background: var(--primary-light); border-radius: 10px;
+    font-size: .95rem; transition: border-color .18s, background .18s;
+  }
+  .login-box .form-group input:focus {
+    border-color: var(--primary-mid); background: white;
+  }
+  .login-box .btn-primary {
+    margin-top: .4rem; min-height: 48px;
+    border-radius: 12px; font-size: .95rem; letter-spacing: .01em;
+    background: var(--primary); transition: background .15s;
+  }
+  .login-box .btn-primary:active { background: var(--primary-dark); }
+  .login-help { margin-top: .9rem; border-top: 1px solid var(--border-light); padding-top: .65rem; color: var(--text-muted); font-size: .74rem; }
+  .login-help summary { cursor: pointer; list-style: none; text-align: center; font-weight: 700; color: var(--text-secondary); }
   .login-help summary::-webkit-details-marker { display: none; }
   .login-help-content { margin-top: .6rem; display: grid; gap: .35rem; text-align: center; line-height: 1.45; }
   #devTabBtn { background: none; border: none; color: var(--text-muted); opacity: .45; cursor: pointer; font-family: var(--font); font-size: .68rem; padding: .15rem .4rem; }
@@ -680,9 +744,735 @@
     .resident-row[onclick], .list-item[onclick], .card[onclick] { cursor: pointer; }
   }
 
+  /* ===== NEW INTUITIVE DESIGN v2 ===== */
+
+  /* Updated color palette — warm teal matching mockup */
+  :root {
+    --primary:        #2D8B74;
+    --primary-dark:   #1E6357;
+    --primary-light:  #E8F5F1;
+    --primary-mid:    #7DC4B0;
+    --accent-orange:  #D97706;
+    --accent-orange-bg: #FFF8ED;
+    --accent-orange-border: #F0D080;
+  }
+
+  /* Nurse topbar v2 */
+  .nurse-topbar-v2 {
+    background: white;
+    border-bottom: 1px solid var(--border-light);
+    padding: calc(.8rem + env(safe-area-inset-top)) 1.1rem .8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 .5px 0 rgba(0,0,0,.08);
+  }
+  .nurse-topbar-v2 .ntb-brand {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .nurse-topbar-v2 .ntb-actions {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+  }
+  .ntb-icon-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s;
+  }
+  .ntb-icon-btn:active { background: var(--bg2); }
+  .ntb-notif-dot {
+    position: absolute;
+    top: 5px; left: 5px;
+    width: 8px; height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+
+  /* Nurse screen nav — at bottom via flex order */
+  #nurseScreen .bottom-nav {
+    position: relative !important;
+    top: auto !important;
+    border-top: .5px solid var(--border-light);
+    border-bottom: none;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: rgba(255,255,255,.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  #nurseScreen {
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #nurseScreen .content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Round header card v2 */
+  .round-header-v2 {
+    background: white;
+    padding: .85rem 1rem .7rem;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: .55rem;
+  }
+  .round-header-toprow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .75rem;
+  }
+  .round-header-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .round-selector-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: .4rem .7rem;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    font-family: var(--font);
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s;
+  }
+  .round-selector-btn:active { background: var(--bg2); }
+
+  /* Stats grid */
+  .round-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr 1fr;
+    gap: .4rem;
+  }
+  .rsg-box {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: .55rem .5rem;
+    text-align: center;
+  }
+  .rsg-box .rsg-main {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .rsg-box .rsg-main.teal { color: var(--primary); }
+  .rsg-box .rsg-label {
+    font-size: .65rem;
+    color: var(--text-muted);
+    margin-top: .18rem;
+    font-weight: 600;
+  }
+  .rsg-round-name {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
+  }
+  .rsg-round-time {
+    font-size: .7rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .2rem;
+    margin-top: .12rem;
+  }
+  .rsg-progress-bar {
+    height: 5px;
+    background: var(--border-light);
+    border-radius: 3px;
+    margin: .28rem 0 .1rem;
+    overflow: hidden;
+  }
+  .rsg-progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 3px;
+    transition: width .5s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  /* Next action card */
+  .next-action-card {
+    background: var(--accent-orange-bg);
+    border: 1px solid var(--accent-orange-border);
+    border-radius: 12px;
+    padding: .65rem .9rem;
+    margin: 0 0 .6rem;
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+  }
+  .nac-label {
+    font-size: .68rem;
+    color: #B07820;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: .08rem;
+  }
+  .nac-info { flex: 1; }
+  .nac-name {
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .nac-meds {
+    font-size: .75rem;
+    color: var(--text-muted);
+    margin-top: .06rem;
+  }
+  .nac-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--accent-orange);
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity .15s;
+  }
+  .nac-btn:active { opacity: .8; }
+
+  /* Column headers */
+  .res-col-hdrs {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 84px;
+    gap: .4rem;
+    padding: .2rem .4rem;
+    font-size: .63rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: .2rem;
+  }
+
+  /* Resident rows v2 */
+  .res-row-v2 {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: .75rem .9rem;
+    margin-bottom: .45rem;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 84px;
+    gap: .5rem;
+    align-items: center;
+    transition: box-shadow .2s, border-color .2s;
+  }
+  .res-row-v2:hover { box-shadow: 0 2px 10px rgba(45,139,116,.1); }
+  .res-row-v2.is-skipped { border-color: #FFCDD2; background: #FFF8F8; }
+  .res-row-v2.is-given   { border-color: #C8E6C9; background: #F8FFF8; }
+  .res-row-v2.is-next    { border-right: 3px solid var(--accent-orange); }
+
+  /* Resident info col */
+  .res-info-col {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    min-width: 0;
+  }
+  .res-avatar-sm {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--primary);
+    flex-shrink: 0;
+    border: 1.5px solid var(--primary-mid);
+    overflow: hidden;
+  }
+  .res-avatar-sm img { width:100%;height:100%;object-fit:cover;display:block; }
+  .res-room-num {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .res-name-v2 {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .res-warn-tag {
+    font-size: .67rem;
+    color: var(--skip);
+    display: flex;
+    align-items: center;
+    gap: .18rem;
+    margin-top: .1rem;
+  }
+
+  /* Meds col */
+  .res-meds-col { font-size: .78rem; color: var(--text-secondary); }
+  .res-meds-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .28rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text);
+    font-size: .8rem;
+    background: none;
+    border: none;
+    font-family: var(--font);
+    padding: 0;
+    text-align: right;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mtb-chevron { color: var(--text-muted); transition: transform .2s; display:flex;align-items:center; }
+  .res-meds-toggle-btn.open .mtb-chevron { transform: rotate(180deg); }
+  .res-meds-expanded {
+    margin-top: .35rem;
+    font-size: .75rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    padding-right: .1rem;
+  }
+  .rme-item {
+    display: flex;
+    align-items: center;
+    gap: .38rem;
+  }
+  .rme-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .rme-dot.given   { background: var(--success); }
+  .rme-dot.skipped { background: var(--skip); }
+  .rme-dot.pending { background: var(--border); }
+
+  /* Status button col */
+  .res-status-col { display: flex; align-items: center; justify-content: flex-start; }
+  .rsb {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    padding: .42rem .6rem;
+    border-radius: 9px;
+    font-size: .78rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    min-height: 44px;
+    border: 2px solid transparent;
+    transition: all .14s;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    line-height: 1;
+  }
+  .rsb:active { transform: scale(.93); }
+  .rsb.next    { background: var(--accent-orange); color: white; border-color: var(--accent-orange); }
+  .rsb.pending { background: var(--bg); color: var(--text-muted); border-color: var(--border); }
+  .rsb.given   { background: transparent; color: var(--success); border-color: var(--success); }
+  .rsb.skipped { background: transparent; color: var(--skip); border-color: var(--skip); }
+
+  /* Bottom summary bar */
+  .round-bottom-bar {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    border-top: 1px solid var(--border-light);
+    padding: .6rem 1rem;
+    padding-bottom: calc(.6rem + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    z-index: 40;
+  }
+  .rbb-progress { flex: 1; text-align: left; }
+  .rbb-label {
+    font-size: .68rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: .22rem;
+  }
+  .rbb-bar { height: 5px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+  .rbb-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width .4s ease; }
+  .rbb-count { font-size: .72rem; color: var(--text-muted); margin-top: .18rem; }
+  .rbb-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .5rem .85rem;
+    border-radius: 10px;
+    border: 1.5px solid var(--border-light);
+    background: white;
+    color: var(--text);
+    font-size: .82rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    white-space: nowrap;
+    min-height: 42px;
+    -webkit-tap-highlight-color: transparent;
+    transition: all .15s;
+  }
+  .rbb-btn.finish-btn { background: var(--primary); color: white; border-color: var(--primary); }
+  .rbb-btn:active { transform: scale(.96); }
+
+  /* ===== ADMIN REDESIGN ===== */
+
+  /* Admin topbar — same visual language as nurse */
+  .admin-topbar-v2 {
+    background: white;
+    border-bottom: 1px solid var(--border-light);
+    padding: calc(.8rem + env(safe-area-inset-top)) 1.1rem .8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 .5px 0 rgba(0,0,0,.08);
+    flex-shrink: 0;
+  }
+  .admin-topbar-v2 .atb-brand {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .admin-topbar-v2 .atb-actions {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+  }
+  .admin-topbar-v2 .atb-user {
+    font-size: .78rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+  }
+
+  /* Admin tab bar — slim underline style */
+  .admin-tab-bar {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    background: white;
+    border-bottom: 1.5px solid var(--border-light);
+    padding: 0 .8rem;
+    flex-shrink: 0;
+    position: sticky;
+    top: calc(53px + env(safe-area-inset-top));
+    z-index: 90;
+  }
+  .admin-tab-bar::-webkit-scrollbar { display: none; }
+  .atb-tab {
+    padding: .7rem .85rem;
+    border: none;
+    border-bottom: 2.5px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: .83rem;
+    white-space: nowrap;
+    color: var(--text-muted);
+    font-family: var(--font);
+    margin-bottom: -1.5px;
+    transition: color .18s, border-color .18s;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    min-height: 44px;
+  }
+  .atb-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .atb-tab:active { opacity: .7; }
+  .atb-more-wrap { position: relative; margin-right: auto; }
+  .atb-more-btn { gap: .25rem; }
+  .atb-more-btn.menu-open { color: var(--primary); }
+  .atb-more-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 2px);
+    right: 0;
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.12);
+    min-width: 130px;
+    z-index: 200;
+    overflow: hidden;
+    animation: menuFadeIn .15s ease;
+  }
+  .atb-more-menu.open { display: block; }
+  @keyframes menuFadeIn { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
+  .atb-menu-item {
+    display: block;
+    width: 100%;
+    padding: .75rem 1.1rem;
+    border: none;
+    background: transparent;
+    font-family: var(--font);
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: right;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-light);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .atb-menu-item:last-child { border-bottom: none; }
+  .atb-menu-item:active { background: var(--primary-light); }
+  .atb-menu-item.active { color: var(--primary); background: var(--primary-light); }
+
+  /* Admin content wrapper */
+  .admin-content-wrap {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: .9rem 1rem;
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    background: var(--bg);
+  }
+
+  /* Admin section header */
+  .adm-section-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .8rem;
+  }
+  .adm-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .adm-section-sub {
+    font-size: .75rem;
+    color: var(--text-muted);
+    margin-top: .12rem;
+  }
+  .adm-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .48rem .9rem;
+    border-radius: 10px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-size: .82rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    white-space: nowrap;
+    min-height: 38px;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s;
+  }
+  .adm-add-btn:active { background: var(--primary-dark); }
+
+  /* Admin search input */
+  .adm-search {
+    font-size: 14px !important;
+    padding: .42rem .9rem;
+    border: 1.5px solid var(--border-light);
+    border-radius: 20px;
+    font-family: var(--font);
+    direction: rtl;
+    width: 100%;
+    background: white;
+    margin-bottom: .7rem;
+    display: block;
+    transition: border-color .2s;
+  }
+  .adm-search:focus { outline: none; border-color: var(--primary-mid); }
+
+  /* Admin list item v2 */
+  .adm-list-item {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: .75rem .9rem;
+    margin-bottom: .45rem;
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    transition: box-shadow .18s;
+  }
+  .adm-list-item:hover { box-shadow: 0 2px 10px rgba(45,139,116,.1); }
+  .adm-item-body { flex: 1; min-width: 0; }
+  .adm-item-title {
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .adm-item-sub { font-size: .75rem; color: var(--text-secondary); margin-top: .15rem; line-height: 1.5; }
+  .adm-item-actions { display: flex; gap: .35rem; flex-shrink: 0; }
+  .adm-edit-btn {
+    padding: .38rem .7rem;
+    border-radius: 8px;
+    border: 1.5px solid var(--primary-mid);
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: .78rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    min-height: 36px;
+    transition: all .12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .adm-edit-btn:active { background: var(--primary); color: white; }
+  .adm-del-btn {
+    padding: .38rem .7rem;
+    border-radius: 8px;
+    border: 1.5px solid #e5a0a0;
+    background: #fff4f4;
+    color: var(--skip);
+    font-size: .78rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    min-height: 36px;
+    transition: all .12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .adm-del-btn:active { background: var(--skip); color: white; border-color: var(--skip); }
+
+  /* Round card in admin */
+  .adm-round-card {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    margin-bottom: .5rem;
+    overflow: hidden;
+  }
+  .adm-round-header {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .8rem .9rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .adm-round-time-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--primary-light);
+    flex-shrink: 0;
+  }
+  .adm-round-time-badge .badge-time { font-size: .82rem; font-weight: 800; color: var(--primary); line-height: 1.1; }
+  .adm-round-time-badge .badge-icon { color: var(--primary); margin-bottom: .1rem; }
+  .adm-round-entries { padding: .4rem .9rem .6rem; }
+  .adm-round-entry-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .3rem 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: .82rem;
+  }
+  .adm-round-entry-row:last-child { border-bottom: none; }
+
+  /* History entry v2 */
+  .adm-hist-entry {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .5rem 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .adm-hist-entry:last-child { border-bottom: none; }
+
+  /* Admin stats summary at top */
+  .adm-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .5rem;
+    margin-bottom: 1rem;
+  }
+  .adm-sum-box {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: .7rem .5rem;
+    text-align: center;
+  }
+  .adm-sum-val {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .adm-sum-label {
+    font-size: .67rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: .22rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+
   /* ===== PRINT — BLACK & WHITE ===== */
   @media print {
-    .topbar, .bottom-nav, .admin-tabs, .btn, .btn-icon, .topbar-btn { display: none !important; }
+    .topbar, .bottom-nav, .admin-tabs, .admin-tab-bar, .btn, .btn-icon, .topbar-btn { display: none !important; }
     .content, #adminContent { padding: 0 !important; padding-bottom: 0 !important; }
     .screen { display: flex !important; }
     #adminScreen { display: block !important; }
@@ -710,15 +1500,7 @@
 <div id="loginScreen" class="screen active">
   <div class="login-box">
     <div class="login-logo" style="animation:fadeSlideDown .4s ease">
-      <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none" aria-hidden="true">
-  <g transform="rotate(-34 32 32)">
-    <rect x="7" y="22" width="50" height="20" rx="10" fill="#FFFFFF" stroke="#4B86A8" stroke-width="2.5"/>
-    <path d="M32 22h15a10 10 0 0 1 0 20H32V22Z" fill="#4B86A8"/>
-    <path d="M17 30h10" stroke="#B7D8E8" stroke-width="2.5" stroke-linecap="round"/>
-    <path d="M32 23.5v17" stroke="#4B86A8" stroke-width="2" stroke-linecap="round" opacity=".35"/>
-  </g>
-  <circle cx="47" cy="18" r="3" fill="#9FC7DD"/>
-</svg></div>
+      <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
       <h1>מעקב תרופות</h1>
       <p>מערכת ניהול תרופות לדיור מוגן</p>
     </div>
@@ -758,56 +1540,91 @@
 </div>
 
 <!-- ===== ADMIN SCREEN ===== -->
-<div id="adminScreen" class="screen">
-  <div class="topbar">
-    <button class="topbar-btn" onclick="doLogout()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> יציאה</button>
-    <div class="topbar-title" id="adminTitle">לוח ניהול <span id="syncBadge" style="font-size:.7rem;background:var(--success-bg);color:var(--success);border-radius:10px;padding:.15rem .4rem;opacity:0;transition:opacity .4s;margin-right:.3rem">✓ מסונכרן</span></div>
-    <div class="topbar-user" id="adminUserInfo">
-      <strong>מנהל</strong>
-      <span>שלום, מנהל</span>
+<div id="adminScreen" class="screen" style="flex-direction:column;overflow:hidden">
+  <!-- Topbar v2 -->
+  <div class="admin-topbar-v2">
+    <div class="atb-actions">
+      <button class="ntb-icon-btn" onclick="doLogout()" title="יציאה">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="17" r="1"/></svg>
+      </button>
+    </div>
+    <div class="atb-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+      <span id="adminTitle">לוח ניהול</span>
+      <span id="adminSyncBadge" style="font-size:.68rem;background:var(--primary-light);color:var(--primary);border-radius:10px;padding:.12rem .38rem;opacity:0;transition:opacity .4s;font-weight:700">✓</span>
+    </div>
+    <div style="width:80px;display:flex;justify-content:flex-end;align-items:center;gap:.35rem">
+      <button class="ntb-icon-btn" onclick="showNurseViewFromAdmin()" id="toNurseBtn" title="תצוגת מדריכה" style="display:none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+      <div class="atb-user" id="adminUserInfo">
+        <span id="adminUserName">מנהל</span>
+      </div>
     </div>
   </div>
-  <div style="flex:1;padding:1rem;padding-bottom:calc(1rem + env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch">
-    <div class="admin-tabs" id="adminTabs">
-      <button class="admin-tab active" onclick="adminTab('rounds')"><span class="tab-icon" data-icon="rotate-ccw"></span><span>סבבים</span></button>
-      <button class="admin-tab" onclick="adminTab('residents')"><span class="tab-icon" data-icon="users"></span><span>דיירים</span></button>
-      <button class="admin-tab" onclick="adminTab('meds')"><span class="tab-icon" data-icon="pill"></span><span>תרופות</span></button>
-      <button class="admin-tab" onclick="adminTab('nurses')"><span class="tab-icon" data-icon="user"></span><span>מדריכות</span></button>
-      <button class="admin-tab" onclick="adminTab('history')"><span class="tab-icon" data-icon="history"></span><span>היסטוריה</span></button>
-      <button class="admin-tab" onclick="adminTab('export')"><span class="tab-icon" data-icon="download"></span><span>ייצוא</span></button>
-      <button class="admin-tab" onclick="adminTab('profile')"><span class="tab-icon" data-icon="settings"></span><span>פרופיל</span></button>
+
+  <!-- Tab bar -->
+  <div class="admin-tab-bar" id="adminTabs">
+    <button class="atb-tab active" onclick="adminTab('rounds')" data-tab="rounds">סבבים</button>
+    <button class="atb-tab" onclick="adminTab('residents')" data-tab="residents">דיירים</button>
+    <button class="atb-tab" onclick="adminTab('meds')" data-tab="meds">תרופות</button>
+    <div class="atb-more-wrap" id="atbMoreWrap">
+      <button class="atb-tab atb-more-btn" id="atbMoreBtn" onclick="toggleAdminMoreMenu(event)" aria-label="עוד">
+        <span id="atbMoreLabel">עוד</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="atbMoreChevron"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="atb-more-menu" id="atbMoreMenu">
+        <button class="atb-menu-item" onclick="adminTab('nurses');closeAdminMoreMenu()" data-tab="nurses">מדריכות</button>
+        <button class="atb-menu-item" onclick="adminTab('history');closeAdminMoreMenu()" data-tab="history">היסטוריה</button>
+        <button class="atb-menu-item" onclick="adminTab('export');closeAdminMoreMenu()" data-tab="export">ייצוא</button>
+        <button class="atb-menu-item" onclick="adminTab('profile');closeAdminMoreMenu()" data-tab="profile" id="adminProfileTab">פרופיל</button>
+      </div>
     </div>
-    <div id="adminContent"></div>
-    <div class="page-hint" style="padding-bottom:env(safe-area-inset-bottom)"><a href="#" onclick="showNurseViewFromAdmin()" style="color:var(--text-muted);text-decoration:none;font-size:.8rem">← מעבר לתצוגת מדריכה</a></div>
   </div>
+
+  <!-- Scrollable content -->
+  <div class="admin-content-wrap" id="adminContent"></div>
 </div>
 
 <!-- ===== NURSE SCREEN ===== -->
 <div id="nurseScreen" class="screen">
-  <div class="topbar">
-    <div style="display:flex;gap:.5rem">
-      <button class="topbar-btn" onclick="doLogout()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> יציאה</button>
-      <button class="topbar-btn accent" onclick="showAdminFromNurse()" id="toAdminBtn" style="display:none">לניהול</button>
+  <!-- New topbar v2 -->
+  <div class="nurse-topbar-v2">
+    <div class="ntb-actions">
+      <button class="ntb-icon-btn" onclick="doLogout()" title="יציאה">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="17" r="1"/></svg>
+      </button>
+      <button class="ntb-icon-btn" onclick="nurseTab('reminders')" id="nurseNotifBtn" title="התראות">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="ntb-notif-dot" id="nurseNotifDot" style="display:none"></span>
+      </button>
     </div>
-    <div class="topbar-title" id="nurseTitle">חלוקת תרופות <span id="syncBadge" style="font-size:.7rem;background:var(--success-bg);color:var(--success);border-radius:10px;padding:.15rem .4rem;opacity:0;transition:opacity .4s">✓</span></div>
-    <div class="topbar-user" id="nurseUserInfo">
-      <strong></strong>
-      <span>שלום</span>
+    <div class="ntb-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+      <span id="nurseTitle">מעקב תרופות</span>
+      <span id="syncBadge" style="font-size:.68rem;background:var(--primary-light);color:var(--primary);border-radius:10px;padding:.12rem .38rem;opacity:0;transition:opacity .4s;font-weight:700">✓</span>
+    </div>
+    <div style="width:80px;display:flex;justify-content:flex-end">
+      <button class="ntb-icon-btn" onclick="showAdminFromNurse()" id="toAdminBtn" style="display:none" title="ניהול">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </button>
+      <div id="nurseUserInfo" style="display:none"><strong></strong><span></span></div>
     </div>
   </div>
-<nav class="bottom-nav">
-    <button class="nav-btn active" id="navRound" onclick="nurseTab('round')">
-      <span class="nav-icon" id="ni-round"></span><span>סבב נוכחי</span>
+
+  <div class="content" id="nurseContent" style="padding-bottom:0"></div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn" id="navReminders" onclick="nurseTab('reminders')">
+      <span class="nav-icon" id="ni-bell"></span><span>התראות</span>
     </button>
     <button class="nav-btn" id="navHistory" onclick="nurseTab('history')">
       <span class="nav-icon" id="ni-hist"></span><span>היסטוריה</span>
     </button>
-    <button class="nav-btn" id="navReminders" onclick="nurseTab('reminders')">
-      <span class="nav-icon" id="ni-bell"></span><span>התראות</span>
+    <button class="nav-btn active" id="navRound" onclick="nurseTab('round')">
+      <span class="nav-icon" id="ni-round"></span><span>סבב</span>
     </button>
   </nav>
-
-  <div class="content" id="nurseContent"></div>
 </div>
 
 <!-- ===== MODAL ===== -->
@@ -1037,13 +1854,16 @@ function stopSync() {
 }
 
 function showSyncBadge(msg, warn) {
-  const el = document.getElementById('syncBadge');
-  if (!el) return;
-  el.textContent = msg || '✓ מסונכרן';
-  el.style.background = warn ? '#fff3cd' : 'var(--success-bg)';
-  el.style.color = warn ? '#856404' : 'var(--success)';
-  el.style.opacity = '1';
-  setTimeout(() => { el.style.opacity = '0'; }, 2000);
+  // Update both possible sync badge elements
+  ['syncBadge','adminSyncBadge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = (msg || '✓') + (id === 'adminSyncBadge' ? ' מסונכרן' : '');
+    el.style.background = warn ? '#fff3cd' : 'var(--primary-light)';
+    el.style.color = warn ? '#856404' : 'var(--primary)';
+    el.style.opacity = '1';
+    setTimeout(() => { el.style.opacity = '0'; }, 2500);
+  });
 }
 
 function rerenderCurrent() {
@@ -1110,8 +1930,18 @@ function icon(name, size=18, cls='') {
     'alert-circle': '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
     'plus':         '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
     'plus-circle':  '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>',
-    'rotate-ccw':   '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>',
-    'settings':     '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+    'rotate-ccw':     '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>',
+    'settings':       '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+    'chevron-down':   '<polyline points="6 9 12 15 18 9"/>',
+    'chevron-right':  '<polyline points="9 18 15 12 9 6"/>',
+    'chevron-left':   '<polyline points="15 18 9 12 15 6"/>',
+    'clipboard':      '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>',
+    'sun':            '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+    'file-text':      '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>',
+    'x':              '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+    'info':           '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+    'moon':           '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+    'sunset':         '<path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="8 6 12 2 16 6"/>',
   };
   const path = icons[name] || '<circle cx="12" cy="12" r="4"/>';
   const clsAttr = cls ? ` class="${cls}"` : '';
@@ -1312,13 +2142,50 @@ function showScreen(id) {
 }
 
 // ==================== ADMIN ====================
+const ADMIN_OVERFLOW_TABS = new Set(['nurses','history','export','profile']);
+function toggleAdminMoreMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('atbMoreMenu');
+  const btn  = document.getElementById('atbMoreBtn');
+  const open = menu.classList.toggle('open');
+  btn.classList.toggle('menu-open', open);
+  document.getElementById('atbMoreChevron').style.transform = open ? 'rotate(180deg)' : '';
+  if (open) {
+    setTimeout(() => document.addEventListener('click', _closeAdminMoreOnOutside, { once: true }), 0);
+  }
+}
+function _closeAdminMoreOnOutside() { closeAdminMoreMenu(); }
+function closeAdminMoreMenu() {
+  const menu = document.getElementById('atbMoreMenu');
+  const btn  = document.getElementById('atbMoreBtn');
+  if (!menu) return;
+  menu.classList.remove('open');
+  btn && btn.classList.remove('menu-open');
+  const chev = document.getElementById('atbMoreChevron');
+  if (chev) chev.style.transform = '';
+}
+
 function adminTab(tab) {
   state.adminTab = tab;
-  state.adminSearch = { residents: '', meds: '', nurses: '' }; // reset search on tab change
-  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-  const tabs = ['rounds','residents','meds','nurses','history','export','profile'];
-  const idx = tabs.indexOf(tab);
-  if (idx >= 0) document.querySelectorAll('.admin-tab')[idx].classList.add('active');
+  state.adminSearch = { residents: '', meds: '', nurses: '' };
+  closeAdminMoreMenu();
+  // Primary tabs
+  document.querySelectorAll('.atb-tab[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  // Overflow menu items
+  document.querySelectorAll('.atb-menu-item[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  // Show "עוד" button as active when an overflow tab is selected
+  const moreBtn = document.getElementById('atbMoreBtn');
+  if (moreBtn) moreBtn.classList.toggle('active', ADMIN_OVERFLOW_TABS.has(tab));
+  // Update "עוד" label to show selected overflow tab name, or reset
+  const moreLabel = document.getElementById('atbMoreLabel');
+  if (moreLabel) {
+    if (ADMIN_OVERFLOW_TABS.has(tab)) {
+      const item = document.querySelector(`.atb-menu-item[data-tab="${tab}"]`);
+      moreLabel.textContent = item ? item.textContent.trim() : 'עוד';
+    } else {
+      moreLabel.textContent = 'עוד';
+    }
+  }
   const adminEl = document.getElementById('adminContent');
   if (adminEl) {
     adminEl.style.opacity = '0';
@@ -1326,17 +2193,11 @@ function adminTab(tab) {
     setTimeout(() => {
       renderAdminContent();
       adminEl.style.opacity = '1';
+      adminEl.scrollTop = 0;
     }, 80);
   } else {
     renderAdminContent();
   }
-  // Inject tab icons
-  setTimeout(() => {
-    document.querySelectorAll('.tab-icon[data-icon]').forEach(el => {
-      el.innerHTML = icon(el.dataset.icon, 20);
-      el.style.cssText = 'display:inline-flex;align-items:center;opacity:.8';
-    });
-  }, 90);
 }
 
 function renderAdminContent() {
@@ -1354,31 +2215,56 @@ function renderAdminContent() {
 
 function renderAdminRounds() {
   const isDev = state.currentUser?.type === 'dev';
-  let html = `<div class="section-header"><div><div class="section-title">סבבי חלוקה</div><div class="section-desc">מתי מחלקים תרופות ולמי</div></div></div>`;
-  if (!isDev) html += `<button class="admin-add-btn" onclick="openRoundModal()">${icon('plus-circle',18)} הוסף סבב חדש</button>`;
+  // Summary stats
+  const totalMeds = data.meds.length;
+  const totalRes  = data.residents.length;
+  const totalRounds = data.rounds.length;
+  let html = `<div class="adm-summary-grid">
+    <div class="adm-sum-box"><div class="adm-sum-val">${totalRounds}</div><div class="adm-sum-label">סבבים</div></div>
+    <div class="adm-sum-box"><div class="adm-sum-val">${totalRes}</div><div class="adm-sum-label">דיירים</div></div>
+    <div class="adm-sum-box"><div class="adm-sum-val">${totalMeds}</div><div class="adm-sum-label">תרופות</div></div>
+  </div>`;
+
+  html += `<div class="adm-section-hdr">
+    <div><div class="adm-section-title">${icon('rotate-ccw',16)} סבבי חלוקה</div><div class="adm-section-sub">מתי מחלקים תרופות ולמי</div></div>
+    ${!isDev ? `<button class="adm-add-btn" onclick="openRoundModal()">${icon('plus',14)} הוסף</button>` : ''}
+  </div>`;
+
   if (!data.rounds.length) {
-    html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין סבבים עדיין</p></div>`;
+    html += `<div class="empty-state"><p>אין סבבים עדיין</p></div>`;
+    return html;
   }
+
   data.rounds.sort((a,b) => a.time.localeCompare(b.time)).forEach(round => {
-    const entryCount = round.entries.length;
-    html += `<div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">${esc(round.name)}</div>
-          <div class="card-subtitle">${round.time} | ${entryCount} דיירים</div>
+    const roundIconName = round.time < '11:00' ? 'sun' : round.time < '17:00' ? 'sun' : 'moon';
+    const medCount = round.entries.reduce((s,e) => s + e.medIds.length, 0);
+    html += `<div class="adm-round-card">
+      <div class="adm-round-header">
+        <div class="adm-round-time-badge">
+          <span class="badge-icon">${icon(roundIconName,14)}</span>
+          <span class="badge-time">${round.time}</span>
         </div>
-        ${!isDev ? `<div class="flex gap-sm">
-          <button class="admin-edit-btn" onclick="openRoundModal('${round.id}')">ערוך</button>
-          <button class="admin-delete-btn" onclick="deleteRound('${round.id}')">מחק</button>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:.92rem;color:var(--text)">${esc(round.name)}</div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-top:.1rem">${round.entries.length} דיירים · ${medCount} תרופות</div>
+        </div>
+        ${!isDev ? `<div style="display:flex;gap:.35rem">
+          <button class="adm-edit-btn" onclick="openRoundModal('${round.id}')">ערוך</button>
+          <button class="adm-del-btn" onclick="deleteRound('${round.id}')">מחק</button>
         </div>` : ''}
       </div>
-      ${round.entries.map(e => {
-        const res = data.residents.find(r => r.id === e.residentId);
-        const medNames = e.medIds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name : '?'; }).join(', ');
-        const isDevR = state.currentUser?.type === 'dev';
-      const medDisp = isDevR ? `<span style="filter:blur(4px);user-select:none">${medNames}</span>` : medNames;
-      return res ? `<div class="flex-center gap-sm" style="padding:.3rem 0;border-bottom:1px solid var(--border-light);font-size:.83rem;color:var(--text)"><span>${esc(res.name)}</span><span class="text-muted" style="margin-right:.3rem">— ${medDisp}</span></div>` : '';
-      }).join('')}
+      <div class="adm-round-entries">
+        ${round.entries.map(e => {
+          const res = data.residents.find(r => r.id === e.residentId);
+          const medNames = e.medIds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name+' '+m.dose : '?'; }).join(', ');
+          const medDisp = isDev ? `<span style="filter:blur(4px);user-select:none">${medNames}</span>` : medNames;
+          return res ? `<div class="adm-round-entry-row">
+            <span style="font-weight:700;color:var(--primary);min-width:2.5rem">${esc(res.room)}</span>
+            <span style="flex:1;font-weight:600">${esc(res.name)}</span>
+            <span style="color:var(--text-muted);font-size:.78rem">${medDisp}</span>
+          </div>` : '';
+        }).join('')}
+      </div>
     </div>`;
   });
   return html;
@@ -1403,16 +2289,13 @@ function adminSearchUpdate(field, val, renderFn) {
 
 function renderAdminResidents() {
   const isDev = state.currentUser?.type === 'dev';
-  let html = `<div>
-    <div class="section-header" style="margin-bottom:.5rem">
-      <div><div class="section-title">דיירים</div><div class="section-desc">פרטי הדיירים ותרופותיהם</div></div>
-    </div>
-    ${!isDev ? '<button class="admin-add-btn" onclick="openResidentModal()">' + icon('plus-circle',18) + ' הוסף דייר חדש</button>' : ''}
-    <input type="text" id="resSearchInput" placeholder="חיפוש לפי שם דייר..." value="${state.adminSearch.residents||''}"
-      oninput="adminSearchUpdate('residents',this.value,renderAdminResidents)"
-      style="font-size:14px;padding:.42rem .9rem;border:1.5px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.7rem">
-  </div>`;
-  if (!data.residents.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין דיירים</p></div>`;
+  let html = `<div class="adm-section-hdr">
+    <div><div class="adm-section-title">דיירים</div><div class="adm-section-sub">פרטי הדיירים ותרופותיהם</div></div>
+    ${!isDev ? `<button class="adm-add-btn" onclick="openResidentModal()">${icon('plus-circle',15)} הוסף</button>` : ''}
+  </div>
+  <input type="text" id="resSearchInput" class="adm-search" placeholder="חיפוש לפי שם דייר..." value="${state.adminSearch.residents||''}"
+    oninput="adminSearchUpdate('residents',this.value,renderAdminResidents)">`;
+  if (!data.residents.length) html += `<div class="empty-state"><p>אין דיירים</p></div>`;
   const resQ = state.adminSearch.residents||'';
   const resFiltered = resQ ? data.residents.filter(r=>fuzzy(r.name,resQ)) : data.residents;
   resFiltered.forEach(res => {
@@ -1420,16 +2303,19 @@ function renderAdminResidents() {
     const medDisplay = isDev
       ? '<span style="filter:blur(4px);user-select:none;pointer-events:none">' + (medNames || 'ללא תרופות') + '</span>'
       : (medNames || 'ללא תרופות');
-    html += `<div class="list-item">
-      ${residentAvatar(res)}
-      <div class="list-item-content">
-        <div class="list-item-title">${esc(res.name)}${isDev ? '' : ` — חדר ${esc(res.room)}`}</div>
-        <div class="list-item-sub">${medDisplay}</div>
-        ${(!isDev && res.notes) ? `<div class="list-item-sub" style="color:var(--skip)">${icon('alert-circle',13)} ${esc(res.notes)}</div>` : ''}
+    html += `<div class="adm-list-item">
+      <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">
+        ${!isDev ? `<div class="res-room-num">${esc(res.room)}</div>` : ''}
+        <div class="resident-avatar" style="width:34px;height:34px;font-size:.75rem">${initials(res.name)}</div>
       </div>
-      ${isDev ? '' : `<div class="list-item-actions">
-        <button class="admin-edit-btn" onclick="openResidentModal('${res.id}')">ערוך</button>
-        <button class="admin-delete-btn" onclick="deleteResident('${res.id}')">מחק</button>
+      <div class="adm-item-body">
+        <div class="adm-item-title">${esc(res.name)}</div>
+        <div class="adm-item-sub">${medDisplay}</div>
+        ${(!isDev && res.notes) ? `<div class="adm-item-sub" style="color:var(--skip)">${icon('alert-circle',12)} ${esc(res.notes)}</div>` : ''}
+      </div>
+      ${isDev ? '' : `<div class="adm-item-actions">
+        <button class="adm-edit-btn" onclick="openResidentModal('${res.id}')">ערוך</button>
+        <button class="adm-del-btn" onclick="deleteResident('${res.id}')">מחק</button>
       </div>`}
     </div>`;
   });
@@ -1438,63 +2324,56 @@ function renderAdminResidents() {
 
 function renderAdminMeds() {
   const isDev = state.currentUser?.type === 'dev';
-  let html = `<div>
-    <div class="section-header" style="margin-bottom:.5rem">
-      <div><div class="section-title">תרופות</div><div class="section-desc">כל התרופות הקיימות במערכת</div></div>
-    </div>
-    ${!isDev ? '<button class="admin-add-btn" onclick="openMedModal()">' + icon('plus-circle',18) + ' הוסף תרופה חדשה</button>' : ''}
-    <input type="text" id="medSearchInput" placeholder="חיפוש לפי שם / מינון..." value="${state.adminSearch.meds||''}"
-      oninput="adminSearchUpdate('meds',this.value,renderAdminMeds)"
-      style="font-size:14px;padding:.42rem .9rem;border:1.5px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.7rem">
-  </div>`;
-
-  if (!data.meds.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין תרופות</p></div>`;
+  let html = `<div class="adm-section-hdr">
+    <div><div class="adm-section-title">תרופות</div><div class="adm-section-sub">כל התרופות הקיימות במערכת</div></div>
+    ${!isDev ? `<button class="adm-add-btn" onclick="openMedModal()">${icon('plus-circle',15)} הוסף</button>` : ''}
+  </div>
+  <input type="text" id="medSearchInput" class="adm-search" placeholder="חיפוש לפי שם / מינון..." value="${state.adminSearch.meds||''}"
+    oninput="adminSearchUpdate('meds',this.value,renderAdminMeds)">`;
+  if (!data.meds.length) html += `<div class="empty-state"><p>אין תרופות</p></div>`;
   const medQ = state.adminSearch.meds||'';
   const medsFiltered = medQ ? data.meds.filter(m=>fuzzy(m.name+' '+m.dose,medQ)) : data.meds;
-  medsFiltered.forEach((med, idx2) => {
+  medsFiltered.forEach(med => {
     const name  = esc(med.name);
     const dose  = esc(med.dose);
     const type  = esc(med.type);
-    const notes = med.notes ? ' | ' + esc(med.notes) : '';
-    const avatar = 'Rx';
-    html += `<div class="list-item">
-      <div style="width:38px;height:38px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--primary);flex-shrink:0">${avatar}</div>
-      <div class="list-item-content">
-        <div class="list-item-title">${name}</div>
-        <div class="list-item-sub">${type} | מינון: ${dose}${notes}</div>
-      </div>`;
-    if (!isDev) html += `<div class="list-item-actions">
-        <button class="admin-edit-btn" onclick="openMedModal('${med.id}')">ערוך</button>
-        <button class="admin-delete-btn" onclick="deleteMed('${med.id}')">מחק</button>
-      </div>`;
-    html += `</div>`;
+    const notes = med.notes ? ` | ${esc(med.notes)}` : '';
+    html += `<div class="adm-list-item">
+      <div style="width:38px;height:38px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:var(--primary);flex-shrink:0">Rx</div>
+      <div class="adm-item-body">
+        <div class="adm-item-title">${isDev ? '<span style="filter:blur(4px);user-select:none;pointer-events:none">'+name+'</span>' : name}</div>
+        <div class="adm-item-sub">${type} | מינון: ${dose}${notes}</div>
+      </div>
+      ${isDev ? '' : `<div class="adm-item-actions">
+        <button class="adm-edit-btn" onclick="openMedModal('${med.id}')">ערוך</button>
+        <button class="adm-del-btn" onclick="deleteMed('${med.id}')">מחק</button>
+      </div>`}
+    </div>`;
   });
   return html;
 }
 
 function renderAdminNurses() {
   const isDev = state.currentUser?.type === 'dev';
-  let html = `<div>
-    <div class="section-header" style="margin-bottom:.5rem">
-      <div><div class="section-title">מדריכות</div><div class="section-desc">פרטי ההתחברות של כל מדריכה</div></div>
-    </div>
-    ${!isDev ? '<button class="admin-add-btn" onclick="openNurseModal()">' + icon('plus-circle',18) + ' הוסף מדריכה חדשה</button>' : ''}
-    <input type="text" id="nurseSearchInput" placeholder="חיפוש לפי שם מדריכה..." value="${state.adminSearch.nurses||''}"
-      oninput="adminSearchUpdate('nurses',this.value,renderAdminNurses)"
-      style="font-size:14px;padding:.42rem .9rem;border:1.5px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.7rem">
-  </div>`;
+  let html = `<div class="adm-section-hdr">
+    <div><div class="adm-section-title">מדריכות</div><div class="adm-section-sub">פרטי ההתחברות של כל מדריכה</div></div>
+    ${!isDev ? `<button class="adm-add-btn" onclick="openNurseModal()">${icon('plus-circle',15)} הוסף</button>` : ''}
+  </div>
+  <input type="text" id="nurseSearchInput" class="adm-search" placeholder="חיפוש לפי שם מדריכה..." value="${state.adminSearch.nurses||''}"
+    oninput="adminSearchUpdate('nurses',this.value,renderAdminNurses)">`;
+  if (!data.nurses.length) html += `<div class="empty-state"><p>אין מדריכות</p></div>`;
   const nurseQ = state.adminSearch.nurses||'';
   const nursesFiltered = nurseQ ? data.nurses.filter(n=>fuzzy(n.name,nurseQ)) : data.nurses;
   nursesFiltered.forEach(nurse => {
-    html += `<div class="list-item">
-      <div class="resident-avatar">${initials(nurse.name)}</div>
-      <div class="list-item-content">
-        <div class="list-item-title">${esc(nurse.name)}</div>
-        <div class="list-item-sub">שם משתמש: ${esc(nurse.username)}</div>
+    html += `<div class="adm-list-item">
+      <div class="resident-avatar" style="width:36px;height:36px;font-size:.78rem">${initials(nurse.name)}</div>
+      <div class="adm-item-body">
+        <div class="adm-item-title">${esc(nurse.name)}</div>
+        <div class="adm-item-sub">שם משתמש: ${esc(nurse.username)}</div>
       </div>
-      ${!isDev ? `<div class="list-item-actions">
-        <button class="admin-edit-btn" onclick="openNurseModal('${nurse.id}')">ערוך</button>
-        <button class="admin-delete-btn" onclick="deleteNurse('${nurse.id}')">מחק</button>
+      ${!isDev ? `<div class="adm-item-actions">
+        <button class="adm-edit-btn" onclick="openNurseModal('${nurse.id}')">ערוך</button>
+        <button class="adm-del-btn" onclick="deleteNurse('${nurse.id}')">מחק</button>
       </div>` : ''}
     </div>`;
   });
@@ -1506,23 +2385,20 @@ function renderAdminHistory() {
   if(!state.histFilters)state.histFilters={date:'',nurse:'',resident:''};
   const{date:fDate,nurse:fNurse,resident:fRes}=state.histFilters;
   const nurseOpts=data.nurses.map(n=>`<option value="${esc(n.name)}" ${fNurse===n.name?'selected':''}>${esc(n.name)}</option>`).join('');
-  let html=`<div class="card" style="margin-bottom:.8rem;padding:.8rem 1rem">
-    <div style="font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:.6rem">סינון</div>
-    <div style="display:flex;flex-direction:column;gap:.5rem">
-      <div style="position:relative">
-        <input type="date" value="${fDate}" max="${today}" onchange="state.histFilters.date=this.value;renderAdminContent()"
-          placeholder="תאריך"
-          style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:ltr;width:100%">
-        ${!fDate ? `<span style="position:absolute;right:.7rem;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-muted);pointer-events:none">תאריך</span>` : ''}
-      </div>
-      <select onchange="state.histFilters.nurse=this.value;renderAdminContent()"
-        style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:rtl">
-        <option value="" ${!fNurse?'selected':''}>כל המדריכות</option>${nurseOpts}
-      </select>
-      <input type="text" placeholder="חיפוש דייר..." value="${fRes}" oninput="state.histFilters.resident=this.value;renderAdminContent()"
-        style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);direction:rtl;background:white">
-    </div>
-    ${(fDate||fNurse||fRes)?`<button class="btn btn-outline btn-sm mt-sm" onclick="state.histFilters={date:'',nurse:'',resident:''};renderAdminContent()">נקה סינון</button>`:''}
+  const hasFilter = fDate||fNurse||fRes;
+  let html=`<div class="adm-section-hdr" style="margin-bottom:.6rem">
+    <div><div class="adm-section-title">היסטוריה</div><div class="adm-section-sub">רשומות חלוקת תרופות</div></div>
+    ${hasFilter ? `<button class="adm-add-btn" style="background:var(--skip);border-color:var(--skip)" onclick="state.histFilters={date:'',nurse:'',resident:''};renderAdminContent()">נקה</button>` : ''}
+  </div>
+  <div style="display:flex;flex-direction:column;gap:.45rem;margin-bottom:.9rem">
+    <input type="date" value="${fDate}" max="${today}" onchange="state.histFilters.date=this.value;renderAdminContent()"
+      class="adm-search" style="direction:ltr">
+    <select onchange="state.histFilters.nurse=this.value;renderAdminContent()"
+      class="adm-search" style="appearance:auto">
+      <option value="" ${!fNurse?'selected':''}>כל המדריכות</option>${nurseOpts}
+    </select>
+    <input type="text" placeholder="חיפוש דייר..." value="${fRes}" oninput="state.histFilters.resident=this.value;renderAdminContent()"
+      class="adm-search">
   </div>`;
   const filtered=data.history.filter(h=>{
     if(fDate&&!(h.date||'').startsWith(fDate))return false;
@@ -1530,25 +2406,29 @@ function renderAdminHistory() {
     if(fRes){const r=data.residents.find(x=>x.id===h.residentId);if(!r||!fuzzy(r.name,fRes))return false;}
     return true;
   });
-  if(!filtered.length){html+=`<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין רשומות</p></div>`;return html;}
+  if(!filtered.length){html+=`<div class="empty-state"><p>אין רשומות</p></div>`;return html;}
   const byDate={};
   filtered.forEach(h=>{const d=(h.date||'').split('T')[0];if(!byDate[d])byDate[d]=[];byDate[d].push(h);});
   Object.keys(byDate).sort().reverse().forEach(date=>{
-    html+=`<div class="card"><div class="card-title" style="margin-bottom:.6rem">${icon("calendar",14)} ${formatDate(date)}</div>`;
+    html+=`<div class="adm-round-card" style="margin-bottom:.7rem">
+      <div class="adm-round-header">${icon('calendar',14,'',)} <span style="font-size:.82rem;font-weight:700;color:var(--text-primary)">${formatDate(date)}</span></div>
+      <div class="adm-round-entries">`;
     byDate[date].forEach(h=>{
       const res=data.residents.find(r=>r.id===h.residentId);
       const med=data.meds.find(m=>m.id===h.medId);
       const round=data.rounds.find(r=>r.id===h.roundId);
-      const badge=h.status==='given'?'<span class="badge badge-given">ניתנה ✓</span>':'<span class="badge badge-skipped">✕ דולג</span>';
-      html+=`<div class="flex-center justify-between" style="padding:.45rem 0;border-bottom:1px solid var(--border-light)">
-        <div>
-          <div class="text-sm font-bold">${res?res.name:'?'} — ${med?(state.currentUser?.type==='dev'?'••••••':esc(med.name)):'?'}</div>
-          <div class="text-muted" style="font-size:.75rem">${h.time||''} | ${round?round.name:''} | <strong>${h.nurseName||'—'}</strong></div>
-          ${h.note?`<div class="text-muted" style="font-size:.73rem;font-style:italic">* ${esc(h.note)}</div>`:''}
+      const badge=h.status==='given'
+        ?'<span style="font-size:.7rem;font-weight:700;color:var(--given);background:#e8f8f3;padding:.15rem .5rem;border-radius:20px;white-space:nowrap">ניתנה ✓</span>'
+        :'<span style="font-size:.7rem;font-weight:700;color:var(--skip);background:#fef2f2;padding:.15rem .5rem;border-radius:20px;white-space:nowrap">✕ דולג</span>';
+      html+=`<div class="adm-hist-entry">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.82rem;font-weight:700;color:var(--text-primary)">${res?esc(res.name):'?'} — ${med?(state.currentUser?.type==='dev'?'••••••':esc(med.name)):'?'}</div>
+          <div style="font-size:.72rem;color:var(--text-secondary);margin-top:.1rem">${h.time||''} | ${round?esc(round.name):''} | <strong>${esc(h.nurseName||'—')}</strong></div>
+          ${h.note?`<div style="font-size:.7rem;color:var(--text-muted);font-style:italic;margin-top:.1rem">* ${esc(h.note)}</div>`:''}
         </div>${badge}
       </div>`;
     });
-    html+=`</div>`;
+    html+=`</div></div>`;
   });
   return html;
 }
@@ -1840,6 +2720,9 @@ function nurseTab(tab) {
     if (el) el.classList.remove('active');
   });
   const map = { round: 'navRound', history: 'navHistory', reminders: 'navReminders' };
+  // Show notification dot on bell if unseen alerts
+  const dot = document.getElementById('nurseNotifDot');
+  if (dot) dot.style.display = (tab !== 'reminders' && state.hasNewReminders) ? '' : 'none';
   if (map[tab]) {
     const el = document.getElementById(map[tab]);
     if (el) el.classList.add('active');
@@ -1890,108 +2773,111 @@ function renderNurseRound() {
   if (isPast) return renderNurseDateHistory(selDate);
 
   const round = data.activeRoundSession ? data.rounds.find(r=>r.id===data.activeRoundSession.roundId) : getCurrentRound();
-  if (!round) return `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)">${icon('pill',36)}</div><p>אין סבבים מוגדרים</p><p class="text-muted" style="margin-top:.4rem;font-size:.8rem">בקשי מהמנהל להוסיף סבבי חלוקה</p></div>`;
+  if (!round) return `<div class="empty-state" style="margin:1rem"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)">${icon('pill',36)}</div><p>אין סבבים מוגדרים</p><p class="text-muted" style="margin-top:.4rem;font-size:.8rem">בקשי מהמנהל להוסיף סבבי חלוקה</p></div>`;
 
   const session = data.activeRoundSession && data.activeRoundSession.roundId === round.id ? data.activeRoundSession : null;
   const statuses = session ? session.statuses : {};
 
-  // Count per-med statuses
-  let given = 0, skipped = 0, totalMeds = 0;
+  // ── Per-resident stats ──
+  const totalRes = round.entries.length;
+  let handledRes = 0, givenAllRes = 0, skippedAnyRes = 0;
   round.entries.forEach(entry => {
+    const ms = statuses[entry.residentId]?.meds || {};
+    let rGiven = 0, rSkipped = 0;
     entry.medIds.forEach(mid => {
-      totalMeds++;
-      const ms = statuses[entry.residentId]?.meds?.[mid];
-      if (ms?.status === 'given') given++;
-      else if (ms?.status === 'skipped') skipped++;
+      if (ms[mid]?.status === 'given') rGiven++;
+      else if (ms[mid]?.status === 'skipped') rSkipped++;
     });
+    const allDone = (rGiven + rSkipped) === entry.medIds.length && entry.medIds.length > 0;
+    if (allDone) {
+      handledRes++;
+      if (rSkipped > 0) skippedAnyRes++;
+      else givenAllRes++;
+    }
   });
+  const remainingRes = totalRes - handledRes;
+  const pct = totalRes > 0 ? Math.round((handledRes / totalRes) * 100) : 0;
+  const isComplete = totalRes > 0 && handledRes === totalRes;
 
-  const handled = given + skipped;
-  const pct = totalMeds > 0 ? Math.round((handled / totalMeds) * 100) : 0;
-  const isComplete = totalMeds > 0 && handled === totalMeds;
+  // Round icon by time
+  const hhmm = new Date().getHours().toString().padStart(2,'0') + ':' + new Date().getMinutes().toString().padStart(2,'0');
+  const rTime = round.time;
+  const roundIcon = rTime < '11:00' ? 'sun' : rTime < '17:00' ? 'sun' : 'moon';
 
-  // Time context
-  const now = new Date();
-  const hhmm = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-  const diffMins = timeToMinutes(round.time) - timeToMinutes(hhmm);
-  let timeCtxLabel, timeCtxClass;
-  if (diffMins > 60) {
-    timeCtxLabel = `מתחיל בעוד ${formatMinutes(diffMins)}`;
-    timeCtxClass = 'upcoming';
-  } else if (diffMins > 5) {
-    timeCtxLabel = `מתחיל בעוד ${diffMins} דקות`;
-    timeCtxClass = 'upcoming';
-  } else if (diffMins >= -30) {
-    timeCtxLabel = isComplete ? 'הושלם ✓' : 'הסבב פעיל כעת';
-    timeCtxClass = 'current';
-  } else {
-    timeCtxLabel = `הסבב היה לפני ${formatMinutes(-diffMins)}`;
-    timeCtxClass = 'past';
-  }
-
-  // ── Round header ──
-  let html = `<div class="round-card">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem">
-      <div>
-        <h2>${esc(round.name)}</h2>
-        <p>${round.entries.length} דיירים · ${totalMeds} תרופות</p>
-      </div>
-      <div class="time-badge" style="flex-shrink:0">${round.time}</div>
-    </div>
-    <div class="time-ctx ${timeCtxClass}">${timeCtxLabel}</div>
-  </div>`;
-
-  // ── Progress card ──
-  html += `<div style="background:white;border-radius:16px;padding:.9rem 1rem;margin-bottom:.85rem;box-shadow:var(--shadow)">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
-      <div style="font-size:.82rem;font-weight:700;color:var(--text)">התקדמות</div>
-      <div style="font-size:.88rem;font-weight:800;color:${isComplete ? 'var(--success)' : pct > 0 ? 'var(--primary)' : 'var(--text-muted)'}">${pct}%</div>
-    </div>
-    <div class="flow-progress">
-      <div class="flow-progress-fill" style="width:${Math.max(pct, pct > 0 ? 3 : 0)}%"></div>
-    </div>
-    <div style="display:flex;gap:1.2rem;margin-top:.5rem;font-size:.75rem;font-weight:600">
-      <span style="color:var(--success)">✓ ${given} ניתנו</span>
-      <span style="color:var(--skip)">✕ ${skipped} דולגו</span>
-      <span style="color:var(--text-muted)">◦ ${totalMeds - handled} ממתינות</span>
-    </div>
-  </div>`;
-
-  // ── Round chip tabs ──
+  // ── Header card ──
   const sortedRounds = data.rounds.slice().sort((a,b) => a.time.localeCompare(b.time));
-  const doneRoundIds = new Set(data.history.filter(h => h.date?.startsWith(selDate)).map(h => h.roundId));
+  const roundOptions = sortedRounds.map(r =>
+    `<option value="${r.id}" ${r.id===round.id?'selected':''}>${esc(r.name)} (${r.time})</option>`
+  ).join('');
 
-  html += `<div class="round-chips">`;
-  sortedRounds.forEach(r => {
-    const isActive = r.id === round.id;
-    const isDone = doneRoundIds.has(r.id) && !isActive;
-    html += `<button class="round-chip${isActive ? ' active' : ''}${isDone ? ' done' : ''}"
-      onclick="switchRound('${r.id}')">
-      <span class="chip-time">${r.time}</span>
-      <span class="chip-name">${esc(r.name)}</span>
-    </button>`;
-  });
-  html += `</div>`;
+  let html = `<div class="round-header-v2">
+    <div class="round-header-toprow">
+      <div class="round-header-title">${icon('clipboard',17)} חלוקת תרופות</div>
+      <div style="position:relative">
+        <select style="appearance:none;-webkit-appearance:none;background:var(--bg);border:1px solid var(--border-light);border-radius:8px;padding:.38rem 2rem .38rem .7rem;font-size:.82rem;font-weight:600;color:var(--text);font-family:var(--font);cursor:pointer;min-height:36px;direction:rtl"
+          onchange="switchRound(this.value)">${roundOptions}</select>
+        <span style="position:absolute;left:.5rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);display:flex">${icon('chevron-down',14)}</span>
+      </div>
+    </div>
+    <div class="round-stats-grid">
+      <div class="rsg-box">
+        <div class="rsg-round-name">${icon(roundIcon,13)} ${esc(round.name)}</div>
+        <div class="rsg-round-time">${icon('clock',11)} ${round.time}</div>
+        <div class="rsg-label">סבב נוכחי</div>
+      </div>
+      <div class="rsg-box">
+        <div class="rsg-main teal">${handledRes}/${totalRes}</div>
+        <div class="rsg-progress-bar"><div class="rsg-progress-fill" style="width:${pct}%"></div></div>
+        <div class="rsg-label">${pct}%</div>
+      </div>
+      <div class="rsg-box">
+        <div class="rsg-main">${remainingRes}</div>
+        <div class="rsg-label">דיירים<br>נותרו</div>
+      </div>
+    </div>
+  </div>`;
 
-  // ── Completion banner (shows at top of list when done) ──
-  if (isComplete) {
-    html += `<div class="round-complete-banner">
-      <div class="cpl-icon">✓</div>
-      <h3>הסבב הושלם!</h3>
-      <p>${given} תרופות ניתנו${skipped > 0 ? ` · ${skipped} דולגו` : ''} · עכשיו סגרי את הסבב</p>
-    </div>`;
+  // ── "Next action" highlight card ──
+  const nextEntry = !isComplete ? round.entries.find(entry => {
+    const ms = statuses[entry.residentId]?.meds || {};
+    return !entry.medIds.every(mid => ms[mid]?.status);
+  }) : null;
+  if (nextEntry) {
+    const nextRes = data.residents.find(r => r.id === nextEntry.residentId);
+    if (nextRes) {
+      html += `<div class="next-action-card" style="margin:0 .8rem .6rem">
+        <div class="nac-info">
+          <div class="nac-label">הפעולה הבאה</div>
+          <div class="nac-name">חדר ${esc(nextRes.room)} · ${esc(nextRes.name)}</div>
+          <div class="nac-meds">${nextEntry.medIds.length} תרופות</div>
+        </div>
+        <button class="nac-btn" onclick="markAllMeds('${round.id}','${nextEntry.residentId}','given')" title="סמן ניתנה">
+          ${icon('chevron-left',16)}
+        </button>
+      </div>`;
+    }
   }
 
-  // ── Resident search ──
+  // ── Column headers ──
+  html += `<div class="res-col-hdrs">
+    <span>דייר / חדר</span>
+    <span>תרופות במנה זו</span>
+    <span>סטטוס</span>
+  </div>`;
+
+  // ── Resident rows v2 ──
+  const isDev = state.currentUser?.type === 'dev';
+  let isFirstPending = true;
   const resFilterVal = state.residentFilter || '';
   const filterVal = resFilterVal.trim().toLowerCase();
-  html += `<div style="margin-bottom:.65rem">
+
+  // Search bar (compact)
+  html += `<div style="padding:0 .1rem .4rem">
     <input type="text" placeholder="חיפוש דייר..." value="${resFilterVal}"
       oninput="nurseResSearch(this.value)"
-      style="font-size:14px;padding:.45rem .9rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white" id="nurseResSearch">
+      style="font-size:14px;padding:.38rem .85rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white" id="nurseResSearch">
   </div>`;
 
-  // ── Resident list ──
   round.entries.filter(entry => {
     if (!filterVal) return true;
     const r = data.residents.find(x=>x.id===entry.residentId);
@@ -2010,99 +2896,191 @@ function renderNurseRound() {
     const resHandled = resGiven + resSkipped;
     const allDone = resHandled === entry.medIds.length && entry.medIds.length > 0;
     const anySkipped = resSkipped > 0;
-    const rowClass = allDone ? (anySkipped ? 'skipped' : 'given') : '';
+    const allGiven = resGiven === entry.medIds.length;
 
-    let dotClass = 'pending';
-    if (allDone) dotClass = anySkipped ? 'skipped' : 'complete';
-    else if (resHandled > 0) dotClass = 'partial';
+    // Row appearance
+    const rowExtraCls = allDone ? (anySkipped ? 'is-skipped' : 'is-given') : (!allDone && isFirstPending ? 'is-next' : '');
 
-    let medsHtml = entry.medIds.map(mid => {
-      const med = data.meds.find(x=>x.id===mid);
+    // Status button
+    let btnCls, btnLabel, btnIconHtml, btnAction;
+    if (allDone && allGiven) {
+      btnCls = 'given';
+      btnLabel = 'ניתנה';
+      btnIconHtml = icon('check', 13);
+      btnAction = `markAllMeds('${round.id}','${entry.residentId}','undo')`;
+    } else if (allDone && anySkipped) {
+      btnCls = 'skipped';
+      btnLabel = 'דולג';
+      btnIconHtml = icon('x', 13);
+      btnAction = `markAllMeds('${round.id}','${entry.residentId}','undo')`;
+    } else if (isFirstPending) {
+      btnCls = 'next';
+      btnLabel = 'הבא';
+      btnIconHtml = icon('chevron-left', 13);
+      btnAction = `markAllMeds('${round.id}','${entry.residentId}','given')`;
+      isFirstPending = false;
+    } else {
+      btnCls = 'pending';
+      btnLabel = 'ממתין';
+      btnIconHtml = '';
+      btnAction = `markAllMeds('${round.id}','${entry.residentId}','given')`;
+    }
+
+    // Avatar
+    const avatarHtml = res.photo
+      ? `<div class="res-avatar-sm"><img src="${esc(res.photo)}" alt="${esc(res.name)}"></div>`
+      : `<div class="res-avatar-sm">${initials(res.name)}</div>`;
+
+    // Med list items (for expanded view)
+    const medItemsHtml = entry.medIds.map(mid => {
+      const med = data.meds.find(x => x.id === mid);
+      if (!med) return '';
+      const ms = medStatuses[mid];
+      const dotCls = ms?.status === 'given' ? 'given' : ms?.status === 'skipped' ? 'skipped' : 'pending';
+      const medName = isDev ? '••••••' : esc(med.name);
+      const medDose = isDev ? '•••' : esc(med.dose);
+      return `<div class="rme-item"><span class="rme-dot ${dotCls}"></span><span>${medName} ${medDose}</span></div>`;
+    }).join('');
+
+    // Per-med detail rows (full control, shown when expanded)
+    const medDetailHtml = isDev ? '' : entry.medIds.map(mid => {
+      const med = data.meds.find(x => x.id === mid);
       if (!med) return '';
       const ms = medStatuses[mid] || { status: 'pending', note: '' };
       const isGiven   = ms.status === 'given';
       const isSkipped = ms.status === 'skipped';
       const isPending = ms.status === 'pending';
-      const rId  = round.id;
+      const rId = round.id;
       const resId = entry.residentId;
-      const medName = state.currentUser?.type === 'dev' ? '••••••' : esc(med.name);
-      const medDose = state.currentUser?.type === 'dev' ? '•••'    : esc(med.dose);
-      const givenTime = isGiven && ms.time ? ms.time : '';
-
+      const givenTime = isGiven && ms.time ? ' · ' + ms.time : '';
       const borderBg = isGiven
-        ? 'border:2px solid var(--success);background:var(--success-bg)'
-        : isSkipped
-          ? 'border:2px solid var(--skip);background:var(--skip-bg)'
-          : 'border:1.5px solid var(--border-light);background:white';
+        ? 'border:1.5px solid var(--success);background:var(--success-bg)'
+        : isSkipped ? 'border:1.5px solid var(--skip);background:var(--skip-bg)'
+        : 'border:1.5px solid var(--border-light);background:white';
       const nameColor = isGiven ? 'var(--success)' : isSkipped ? 'var(--skip)' : 'var(--text)';
-
-      let actionsHtml;
-      if (state.currentUser?.type === 'dev') {
-        actionsHtml = '<span style="font-size:.75rem;color:var(--text-muted);font-style:italic">צפייה בלבד</span>';
-      } else {
-        actionsHtml = `<div class="med-action-row">
-          <button class="med-btn-given${isGiven ? ' active' : ''}"
-            data-r="${rId}" data-res="${resId}" data-m="${mid}"
+      let notePart = '';
+      if (!isPending) {
+        notePart = `<div style="margin-top:.28rem;display:flex;gap:.3rem;align-items:center">
+          <input type="text" placeholder="הערה (אופציונלי)" value="${esc(ms.note||'')}"
+            class="med-note-input"
+            style="flex:1;border:1px solid var(--border-light);border-radius:7px;background:white;font-family:var(--font);direction:rtl"
+            data-round="${rId}" data-res="${resId}" data-med="${mid}">
+          <button class="note-save-btn" data-round="${rId}" data-res="${resId}" data-med="${mid}" onclick="saveNoteExplicit(this)">שמור</button>
+        </div>`;
+      }
+      return `<div id="medrow_${resId}_${mid}" style="display:flex;flex-direction:column;gap:.25rem;padding:.55rem .6rem;border-radius:10px;${borderBg};margin-bottom:.35rem;transition:all .22s">
+        <div style="display:flex;align-items:baseline;gap:.4rem">
+          <span style="font-weight:700;font-size:.88rem;color:${nameColor};flex:1">${esc(med.name)}</span>
+          <span style="font-size:.73rem;color:var(--text-muted)">${esc(med.dose)}</span>
+        </div>
+        <div class="med-action-row">
+          <button class="med-btn-given${isGiven?' active':''}" data-r="${rId}" data-res="${resId}" data-m="${mid}"
             onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'given')">
-            ${isGiven ? `✓ ניתנה${givenTime ? ' · '+givenTime : ''}` : 'ניתנה ✓'}
+            ${isGiven ? `✓ ניתנה${givenTime}` : 'ניתנה ✓'}
           </button>
-          <button class="med-btn-skip${isSkipped ? ' active' : ''}"
-            data-r="${rId}" data-res="${resId}" data-m="${mid}"
+          <button class="med-btn-skip${isSkipped?' active':''}" data-r="${rId}" data-res="${resId}" data-m="${mid}"
             onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'skipped')">
             ${isSkipped ? '✕' : 'דולג'}
           </button>
-        </div>`;
-      }
-
-      let notePart = '';
-      if (!isPending) {
-        notePart = `<div style="margin-top:.3rem;display:flex;gap:.35rem;align-items:center">
-          <input type="text" placeholder="הערה (אופציונלי)" value="${esc(ms.note||'')}"
-            class="med-note-input"
-            style="flex:1;border:1px solid var(--border-light);border-radius:8px;background:white;font-family:var(--font);direction:rtl"
-            data-round="${rId}" data-res="${resId}" data-med="${mid}">
-          <button class="note-save-btn"
-            data-round="${rId}" data-res="${resId}" data-med="${mid}"
-            onclick="saveNoteExplicit(this)">שמור</button>
-        </div>`;
-      }
-
-      return `<div id="medrow_${resId}_${mid}"
-        style="display:flex;flex-direction:column;gap:.3rem;padding:.65rem .7rem;border-radius:12px;${borderBg};margin-bottom:.4rem;transition:all .25s ease">
-        <div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:.2rem">
-          <span style="font-weight:700;font-size:.92rem;color:${nameColor};flex:1">${medName}</span>
-          <span style="font-size:.75rem;color:var(--text-muted)">${medDose}</span>
         </div>
-        ${actionsHtml}
         ${notePart}
       </div>`;
     }).join('');
 
-    html += `<div class="resident-row ${rowClass}" id="row_${entry.residentId}"
-      style="flex-direction:column;align-items:stretch;padding:.9rem 1rem;margin-bottom:.55rem">
-      <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.65rem">
-        ${residentAvatar(res)}
-        <div style="flex:1">
-          <div class="resident-name">${esc(res.name)}</div>
-          ${state.currentUser?.type !== 'dev' ? `<div class="resident-meds">חדר ${esc(res.room)}</div>` : ''}
-          ${(state.currentUser?.type !== 'dev' && res.notes) ? `<div class="resident-meds" style="color:var(--skip);font-size:.75rem">${icon("alert-circle",12)} ${esc(res.notes)}</div>` : ''}
+    const expandId = 'resexp_' + entry.residentId;
+    const toggleId = 'restgl_' + entry.residentId;
+
+    html += `<div class="res-row-v2 ${rowExtraCls}" id="row_${entry.residentId}">
+      <div class="res-info-col">
+        ${avatarHtml}
+        <div style="min-width:0">
+          <div class="res-room-num">${esc(res.room)}</div>
+          <div class="res-name-v2">${esc(res.name)}</div>
+          ${(anySkipped && allDone) ? `<div class="res-warn-tag">${icon('info',10)} דולג בסבב זה</div>` : ''}
+          ${(res.notes && !isDev) ? `<div class="res-warn-tag">${icon('alert-circle',10)} ${esc(res.notes)}</div>` : ''}
         </div>
-        <div class="status-dot ${dotClass}" title="${dotClass === 'complete' ? 'הושלם' : dotClass === 'partial' ? 'חלקי' : dotClass === 'skipped' ? 'דולג' : 'ממתין'}"></div>
       </div>
-      ${medsHtml}
+      <div class="res-meds-col">
+        <button class="res-meds-toggle-btn" id="${toggleId}" onclick="toggleResMeds('${entry.residentId}')">
+          <span class="mtb-chevron">${icon('chevron-down',13)}</span>
+          <span>${entry.medIds.length} תרופות</span>
+        </button>
+        <div class="res-meds-expanded" id="${expandId}" style="display:none">
+          ${medItemsHtml}
+          ${medDetailHtml ? `<div style="margin-top:.4rem;border-top:1px solid var(--border-light);padding-top:.4rem">${medDetailHtml}</div>` : ''}
+        </div>
+      </div>
+      <div class="res-status-col">
+        ${isDev ? '<span style="font-size:.72rem;color:var(--text-muted)">צפייה</span>' :
+          `<button class="rsb ${btnCls}" onclick="${btnAction}">${btnIconHtml} ${btnLabel}</button>`}
+      </div>
     </div>`;
   });
 
-  // ── Sticky finish button when complete ──
+  // ── Completion banner ──
   if (isComplete) {
-    html += `<div class="sticky-finish">
-      <button class="btn-primary w-full" onclick="finishRound('${round.id}')">
-        סיים וסגור סבב ✓
-      </button>
+    html += `<div class="round-complete-banner" style="margin-bottom:.5rem">
+      <div class="cpl-icon">✓</div>
+      <h3>הסבב הושלם!</h3>
+      <p>${givenAllRes} דיירים קיבלו${skippedAnyRes > 0 ? ` · ${skippedAnyRes} עם דילוג` : ''}</p>
     </div>`;
   }
 
+  // ── Bottom summary bar ──
+  html += `<div class="round-bottom-bar">
+    <div class="rbb-progress">
+      <div class="rbb-label">התקדמות כוללת</div>
+      <div class="rbb-bar"><div class="rbb-fill" style="width:${pct}%"></div></div>
+      <div class="rbb-count">${pct}% · ${handledRes}/${totalRes}</div>
+    </div>
+    <button class="rbb-btn ${isComplete ? 'finish-btn' : ''}"
+      onclick="${isComplete ? `finishRound('${round.id}')` : ''}">
+      ${icon('file-text',14)} סיכום סבב
+    </button>
+  </div>`;
+
   return html;
+}
+
+function toggleResMeds(residentId) {
+  const el = document.getElementById('resexp_' + residentId);
+  const btn = document.getElementById('restgl_' + residentId);
+  if (!el) return;
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (btn) btn.classList.toggle('open', !open);
+}
+
+function markAllMeds(roundId, residentId, action) {
+  if (state.currentUser?.type === 'dev') return;
+  ensureSession(roundId);
+  const round = data.rounds.find(r => r.id === roundId);
+  if (!round) return;
+  const entry = round.entries.find(e => e.residentId === residentId);
+  if (!entry) return;
+  const sid = data.activeRoundSession.startTime;
+
+  if (action === 'undo') {
+    delete data.activeRoundSession.statuses[residentId];
+    data.history = data.history.filter(h => !(h.roundId===roundId && h.residentId===residentId && h.sessionId===sid));
+  } else {
+    if (!data.activeRoundSession.statuses[residentId]) {
+      data.activeRoundSession.statuses[residentId] = { meds: {} };
+    }
+    const nowTime = new Date().toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'});
+    entry.medIds.forEach(medId => {
+      data.activeRoundSession.statuses[residentId].meds[medId] = { status: action, note: '', time: nowTime };
+      data.history = data.history.filter(h => !(h.roundId===roundId && h.residentId===residentId && h.medId===medId && h.sessionId===sid));
+      data.history.push({
+        id: genId(), roundId, residentId, medId, status: action,
+        date: new Date().toISOString(), time: nowTime,
+        nurseName: state.currentUser?.name || '',
+        sessionId: sid, note: ''
+      });
+    });
+  }
+  saveData();
+  renderNurseContent();
 }
 
 function nurseSelectDate(dateStr) {
@@ -2520,14 +3498,8 @@ function applyAdminProfileToChrome() {
   const displayName = state.currentUser?.displayName || creds.displayName || 'מנהל';
   const fullName = state.currentUser?.name || creds.name || displayName;
   if (info) {
-    info.querySelector('strong').textContent = displayName;
-    info.querySelector('span').textContent = 'שלום, ' + displayName;
-  }
-  const title = document.getElementById('adminTitle');
-  if (title && state.currentUser?.type !== 'dev') {
-    const badge = title.querySelector('#syncBadge');
-    title.childNodes[0].nodeValue = 'לוח ניהול ';
-    if (badge && !title.contains(badge)) title.appendChild(badge);
+    const nameEl = info.querySelector('#adminUserName') || info;
+    nameEl.textContent = displayName;
   }
   return { displayName, fullName };
 }
