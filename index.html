@@ -704,12 +704,23 @@
     /* Topbar: remove safe-area padding, add subtle bottom border */
     .topbar { padding: .8rem 2rem; }
 
-    /* Bottom nav: move to sidebar-style or keep as top nav strip — keep top for simplicity */
+    /* Bottom nav: default sticky-top for old screens; nurse screen keeps it at bottom */
     .bottom-nav { position: sticky; top: 0; }
+    #nurseScreen .bottom-nav { position: relative !important; top: auto !important; }
 
     /* Content: more breathing room, bigger max-width */
     .content { padding: 1.6rem 2rem; padding-bottom: 2rem; max-width: 860px; }
     .content-wide { padding: 1.6rem 2rem; }
+
+    /* Nurse screen: keep bottom nav at bottom on desktop */
+    #nurseScreen .bottom-nav {
+      position: relative !important;
+      top: auto !important;
+      border-top: .5px solid var(--border-light);
+      border-bottom: none;
+    }
+    #nurseScreen .content { max-width: 700px; margin: 0 auto; width: 100%; padding: 1.2rem 2rem; }
+    #nurseBottomBar { max-width: 700px; margin: 0 auto; width: 100%; }
 
     /* Admin screen: full-width sidebar layout on desktop */
     #app { max-width: none !important; }
