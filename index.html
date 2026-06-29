@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="תרופות">
-<meta name="theme-color" content="#4B86A8">
+<meta name="theme-color" content="#2D8B74">
 <title>מעקב תרופות – דיור מוגן</title>
 <!-- v16 -->
 <link rel="manifest" href="./manifest.json">
@@ -270,7 +270,7 @@
   }
   .bottom-nav { padding: .3rem 0; }
   .content {
-    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    padding-bottom: 0;
   }
   #loginScreen {
     padding-top: calc(2rem + env(safe-area-inset-top));
@@ -680,6 +680,420 @@
     .resident-row[onclick], .list-item[onclick], .card[onclick] { cursor: pointer; }
   }
 
+  /* ===== NEW INTUITIVE DESIGN v2 ===== */
+
+  /* Updated color palette — warm teal matching mockup */
+  :root {
+    --primary:        #2D8B74;
+    --primary-dark:   #1E6357;
+    --primary-light:  #E8F5F1;
+    --primary-mid:    #7DC4B0;
+    --accent-orange:  #D97706;
+    --accent-orange-bg: #FFF8ED;
+    --accent-orange-border: #F0D080;
+  }
+
+  /* Nurse topbar v2 */
+  .nurse-topbar-v2 {
+    background: white;
+    border-bottom: 1px solid var(--border-light);
+    padding: calc(.8rem + env(safe-area-inset-top)) 1.1rem .8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 .5px 0 rgba(0,0,0,.08);
+  }
+  .nurse-topbar-v2 .ntb-brand {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .nurse-topbar-v2 .ntb-actions {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+  }
+  .ntb-icon-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s;
+  }
+  .ntb-icon-btn:active { background: var(--bg2); }
+  .ntb-notif-dot {
+    position: absolute;
+    top: 5px; left: 5px;
+    width: 8px; height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+
+  /* Nurse screen nav — at bottom via flex order */
+  #nurseScreen .bottom-nav {
+    position: relative !important;
+    top: auto !important;
+    border-top: .5px solid var(--border-light);
+    border-bottom: none;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: rgba(255,255,255,.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  #nurseScreen {
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #nurseScreen .content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Round header card v2 */
+  .round-header-v2 {
+    background: white;
+    padding: .85rem 1rem .7rem;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: .55rem;
+  }
+  .round-header-toprow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .75rem;
+  }
+  .round-header-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .round-selector-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: .4rem .7rem;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    font-family: var(--font);
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s;
+  }
+  .round-selector-btn:active { background: var(--bg2); }
+
+  /* Stats grid */
+  .round-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr 1fr;
+    gap: .4rem;
+  }
+  .rsg-box {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: .55rem .5rem;
+    text-align: center;
+  }
+  .rsg-box .rsg-main {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .rsg-box .rsg-main.teal { color: var(--primary); }
+  .rsg-box .rsg-label {
+    font-size: .65rem;
+    color: var(--text-muted);
+    margin-top: .18rem;
+    font-weight: 600;
+  }
+  .rsg-round-name {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
+  }
+  .rsg-round-time {
+    font-size: .7rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .2rem;
+    margin-top: .12rem;
+  }
+  .rsg-progress-bar {
+    height: 5px;
+    background: var(--border-light);
+    border-radius: 3px;
+    margin: .28rem 0 .1rem;
+    overflow: hidden;
+  }
+  .rsg-progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 3px;
+    transition: width .5s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  /* Next action card */
+  .next-action-card {
+    background: var(--accent-orange-bg);
+    border: 1px solid var(--accent-orange-border);
+    border-radius: 12px;
+    padding: .65rem .9rem;
+    margin: 0 0 .6rem;
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+  }
+  .nac-label {
+    font-size: .68rem;
+    color: #B07820;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: .08rem;
+  }
+  .nac-info { flex: 1; }
+  .nac-name {
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .nac-meds {
+    font-size: .75rem;
+    color: var(--text-muted);
+    margin-top: .06rem;
+  }
+  .nac-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--accent-orange);
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity .15s;
+  }
+  .nac-btn:active { opacity: .8; }
+
+  /* Column headers */
+  .res-col-hdrs {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 84px;
+    gap: .4rem;
+    padding: .2rem .4rem;
+    font-size: .63rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: .2rem;
+  }
+
+  /* Resident rows v2 */
+  .res-row-v2 {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: .75rem .9rem;
+    margin-bottom: .45rem;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 84px;
+    gap: .5rem;
+    align-items: center;
+    transition: box-shadow .2s, border-color .2s;
+  }
+  .res-row-v2:hover { box-shadow: 0 2px 10px rgba(45,139,116,.1); }
+  .res-row-v2.is-skipped { border-color: #FFCDD2; background: #FFF8F8; }
+  .res-row-v2.is-given   { border-color: #C8E6C9; background: #F8FFF8; }
+  .res-row-v2.is-next    { border-right: 3px solid var(--accent-orange); }
+
+  /* Resident info col */
+  .res-info-col {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    min-width: 0;
+  }
+  .res-avatar-sm {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--primary);
+    flex-shrink: 0;
+    border: 1.5px solid var(--primary-mid);
+    overflow: hidden;
+  }
+  .res-avatar-sm img { width:100%;height:100%;object-fit:cover;display:block; }
+  .res-room-num {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .res-name-v2 {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .res-warn-tag {
+    font-size: .67rem;
+    color: var(--skip);
+    display: flex;
+    align-items: center;
+    gap: .18rem;
+    margin-top: .1rem;
+  }
+
+  /* Meds col */
+  .res-meds-col { font-size: .78rem; color: var(--text-secondary); }
+  .res-meds-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .28rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text);
+    font-size: .8rem;
+    background: none;
+    border: none;
+    font-family: var(--font);
+    padding: 0;
+    text-align: right;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mtb-chevron { color: var(--text-muted); transition: transform .2s; display:flex;align-items:center; }
+  .res-meds-toggle-btn.open .mtb-chevron { transform: rotate(180deg); }
+  .res-meds-expanded {
+    margin-top: .35rem;
+    font-size: .75rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    padding-right: .1rem;
+  }
+  .rme-item {
+    display: flex;
+    align-items: center;
+    gap: .38rem;
+  }
+  .rme-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .rme-dot.given   { background: var(--success); }
+  .rme-dot.skipped { background: var(--skip); }
+  .rme-dot.pending { background: var(--border); }
+
+  /* Status button col */
+  .res-status-col { display: flex; align-items: center; justify-content: flex-start; }
+  .rsb {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    padding: .42rem .6rem;
+    border-radius: 9px;
+    font-size: .78rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    min-height: 44px;
+    border: 2px solid transparent;
+    transition: all .14s;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    line-height: 1;
+  }
+  .rsb:active { transform: scale(.93); }
+  .rsb.next    { background: var(--accent-orange); color: white; border-color: var(--accent-orange); }
+  .rsb.pending { background: var(--bg); color: var(--text-muted); border-color: var(--border); }
+  .rsb.given   { background: transparent; color: var(--success); border-color: var(--success); }
+  .rsb.skipped { background: transparent; color: var(--skip); border-color: var(--skip); }
+
+  /* Bottom summary bar */
+  .round-bottom-bar {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    border-top: 1px solid var(--border-light);
+    padding: .6rem 1rem;
+    padding-bottom: calc(.6rem + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    z-index: 40;
+  }
+  .rbb-progress { flex: 1; text-align: left; }
+  .rbb-label {
+    font-size: .68rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: .22rem;
+  }
+  .rbb-bar { height: 5px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+  .rbb-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width .4s ease; }
+  .rbb-count { font-size: .72rem; color: var(--text-muted); margin-top: .18rem; }
+  .rbb-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .5rem .85rem;
+    border-radius: 10px;
+    border: 1.5px solid var(--border-light);
+    background: white;
+    color: var(--text);
+    font-size: .82rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    white-space: nowrap;
+    min-height: 42px;
+    -webkit-tap-highlight-color: transparent;
+    transition: all .15s;
+  }
+  .rbb-btn.finish-btn { background: var(--primary); color: white; border-color: var(--primary); }
+  .rbb-btn:active { transform: scale(.96); }
+
   /* ===== PRINT — BLACK & WHITE ===== */
   @media print {
     .topbar, .bottom-nav, .admin-tabs, .btn, .btn-icon, .topbar-btn { display: none !important; }
@@ -784,30 +1198,43 @@
 
 <!-- ===== NURSE SCREEN ===== -->
 <div id="nurseScreen" class="screen">
-  <div class="topbar">
-    <div style="display:flex;gap:.5rem">
-      <button class="topbar-btn" onclick="doLogout()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> יציאה</button>
-      <button class="topbar-btn accent" onclick="showAdminFromNurse()" id="toAdminBtn" style="display:none">לניהול</button>
+  <!-- New topbar v2 -->
+  <div class="nurse-topbar-v2">
+    <div class="ntb-actions">
+      <button class="ntb-icon-btn" onclick="doLogout()" title="יציאה">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="17" r="1"/></svg>
+      </button>
+      <button class="ntb-icon-btn" onclick="nurseTab('reminders')" id="nurseNotifBtn" title="התראות">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="ntb-notif-dot" id="nurseNotifDot" style="display:none"></span>
+      </button>
     </div>
-    <div class="topbar-title" id="nurseTitle">חלוקת תרופות <span id="syncBadge" style="font-size:.7rem;background:var(--success-bg);color:var(--success);border-radius:10px;padding:.15rem .4rem;opacity:0;transition:opacity .4s">✓</span></div>
-    <div class="topbar-user" id="nurseUserInfo">
-      <strong></strong>
-      <span>שלום</span>
+    <div class="ntb-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+      <span id="nurseTitle">מעקב תרופות</span>
+      <span id="syncBadge" style="font-size:.68rem;background:var(--primary-light);color:var(--primary);border-radius:10px;padding:.12rem .38rem;opacity:0;transition:opacity .4s;font-weight:700">✓</span>
+    </div>
+    <div style="width:80px;display:flex;justify-content:flex-end">
+      <button class="ntb-icon-btn" onclick="showAdminFromNurse()" id="toAdminBtn" style="display:none" title="ניהול">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </button>
+      <div id="nurseUserInfo" style="display:none"><strong></strong><span></span></div>
     </div>
   </div>
-<nav class="bottom-nav">
-    <button class="nav-btn active" id="navRound" onclick="nurseTab('round')">
-      <span class="nav-icon" id="ni-round"></span><span>סבב נוכחי</span>
+
+  <div class="content" id="nurseContent" style="padding-bottom:0"></div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn" id="navReminders" onclick="nurseTab('reminders')">
+      <span class="nav-icon" id="ni-bell"></span><span>התראות</span>
     </button>
     <button class="nav-btn" id="navHistory" onclick="nurseTab('history')">
       <span class="nav-icon" id="ni-hist"></span><span>היסטוריה</span>
     </button>
-    <button class="nav-btn" id="navReminders" onclick="nurseTab('reminders')">
-      <span class="nav-icon" id="ni-bell"></span><span>התראות</span>
+    <button class="nav-btn active" id="navRound" onclick="nurseTab('round')">
+      <span class="nav-icon" id="ni-round"></span><span>סבב</span>
     </button>
   </nav>
-
-  <div class="content" id="nurseContent"></div>
 </div>
 
 <!-- ===== MODAL ===== -->
@@ -1110,8 +1537,18 @@ function icon(name, size=18, cls='') {
     'alert-circle': '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
     'plus':         '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
     'plus-circle':  '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>',
-    'rotate-ccw':   '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>',
-    'settings':     '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+    'rotate-ccw':     '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>',
+    'settings':       '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+    'chevron-down':   '<polyline points="6 9 12 15 18 9"/>',
+    'chevron-right':  '<polyline points="9 18 15 12 9 6"/>',
+    'chevron-left':   '<polyline points="15 18 9 12 15 6"/>',
+    'clipboard':      '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>',
+    'sun':            '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+    'file-text':      '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>',
+    'x':              '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+    'info':           '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+    'moon':           '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+    'sunset':         '<path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="8 6 12 2 16 6"/>',
   };
   const path = icons[name] || '<circle cx="12" cy="12" r="4"/>';
   const clsAttr = cls ? ` class="${cls}"` : '';
@@ -1840,6 +2277,9 @@ function nurseTab(tab) {
     if (el) el.classList.remove('active');
   });
   const map = { round: 'navRound', history: 'navHistory', reminders: 'navReminders' };
+  // Show notification dot on bell if unseen alerts
+  const dot = document.getElementById('nurseNotifDot');
+  if (dot) dot.style.display = (tab !== 'reminders' && state.hasNewReminders) ? '' : 'none';
   if (map[tab]) {
     const el = document.getElementById(map[tab]);
     if (el) el.classList.add('active');
@@ -1890,108 +2330,111 @@ function renderNurseRound() {
   if (isPast) return renderNurseDateHistory(selDate);
 
   const round = data.activeRoundSession ? data.rounds.find(r=>r.id===data.activeRoundSession.roundId) : getCurrentRound();
-  if (!round) return `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)">${icon('pill',36)}</div><p>אין סבבים מוגדרים</p><p class="text-muted" style="margin-top:.4rem;font-size:.8rem">בקשי מהמנהל להוסיף סבבי חלוקה</p></div>`;
+  if (!round) return `<div class="empty-state" style="margin:1rem"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)">${icon('pill',36)}</div><p>אין סבבים מוגדרים</p><p class="text-muted" style="margin-top:.4rem;font-size:.8rem">בקשי מהמנהל להוסיף סבבי חלוקה</p></div>`;
 
   const session = data.activeRoundSession && data.activeRoundSession.roundId === round.id ? data.activeRoundSession : null;
   const statuses = session ? session.statuses : {};
 
-  // Count per-med statuses
-  let given = 0, skipped = 0, totalMeds = 0;
+  // ── Per-resident stats ──
+  const totalRes = round.entries.length;
+  let handledRes = 0, givenAllRes = 0, skippedAnyRes = 0;
   round.entries.forEach(entry => {
+    const ms = statuses[entry.residentId]?.meds || {};
+    let rGiven = 0, rSkipped = 0;
     entry.medIds.forEach(mid => {
-      totalMeds++;
-      const ms = statuses[entry.residentId]?.meds?.[mid];
-      if (ms?.status === 'given') given++;
-      else if (ms?.status === 'skipped') skipped++;
+      if (ms[mid]?.status === 'given') rGiven++;
+      else if (ms[mid]?.status === 'skipped') rSkipped++;
     });
+    const allDone = (rGiven + rSkipped) === entry.medIds.length && entry.medIds.length > 0;
+    if (allDone) {
+      handledRes++;
+      if (rSkipped > 0) skippedAnyRes++;
+      else givenAllRes++;
+    }
   });
+  const remainingRes = totalRes - handledRes;
+  const pct = totalRes > 0 ? Math.round((handledRes / totalRes) * 100) : 0;
+  const isComplete = totalRes > 0 && handledRes === totalRes;
 
-  const handled = given + skipped;
-  const pct = totalMeds > 0 ? Math.round((handled / totalMeds) * 100) : 0;
-  const isComplete = totalMeds > 0 && handled === totalMeds;
+  // Round icon by time
+  const hhmm = new Date().getHours().toString().padStart(2,'0') + ':' + new Date().getMinutes().toString().padStart(2,'0');
+  const rTime = round.time;
+  const roundIcon = rTime < '11:00' ? 'sun' : rTime < '17:00' ? 'sun' : 'moon';
 
-  // Time context
-  const now = new Date();
-  const hhmm = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-  const diffMins = timeToMinutes(round.time) - timeToMinutes(hhmm);
-  let timeCtxLabel, timeCtxClass;
-  if (diffMins > 60) {
-    timeCtxLabel = `מתחיל בעוד ${formatMinutes(diffMins)}`;
-    timeCtxClass = 'upcoming';
-  } else if (diffMins > 5) {
-    timeCtxLabel = `מתחיל בעוד ${diffMins} דקות`;
-    timeCtxClass = 'upcoming';
-  } else if (diffMins >= -30) {
-    timeCtxLabel = isComplete ? 'הושלם ✓' : 'הסבב פעיל כעת';
-    timeCtxClass = 'current';
-  } else {
-    timeCtxLabel = `הסבב היה לפני ${formatMinutes(-diffMins)}`;
-    timeCtxClass = 'past';
-  }
-
-  // ── Round header ──
-  let html = `<div class="round-card">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem">
-      <div>
-        <h2>${esc(round.name)}</h2>
-        <p>${round.entries.length} דיירים · ${totalMeds} תרופות</p>
-      </div>
-      <div class="time-badge" style="flex-shrink:0">${round.time}</div>
-    </div>
-    <div class="time-ctx ${timeCtxClass}">${timeCtxLabel}</div>
-  </div>`;
-
-  // ── Progress card ──
-  html += `<div style="background:white;border-radius:16px;padding:.9rem 1rem;margin-bottom:.85rem;box-shadow:var(--shadow)">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
-      <div style="font-size:.82rem;font-weight:700;color:var(--text)">התקדמות</div>
-      <div style="font-size:.88rem;font-weight:800;color:${isComplete ? 'var(--success)' : pct > 0 ? 'var(--primary)' : 'var(--text-muted)'}">${pct}%</div>
-    </div>
-    <div class="flow-progress">
-      <div class="flow-progress-fill" style="width:${Math.max(pct, pct > 0 ? 3 : 0)}%"></div>
-    </div>
-    <div style="display:flex;gap:1.2rem;margin-top:.5rem;font-size:.75rem;font-weight:600">
-      <span style="color:var(--success)">✓ ${given} ניתנו</span>
-      <span style="color:var(--skip)">✕ ${skipped} דולגו</span>
-      <span style="color:var(--text-muted)">◦ ${totalMeds - handled} ממתינות</span>
-    </div>
-  </div>`;
-
-  // ── Round chip tabs ──
+  // ── Header card ──
   const sortedRounds = data.rounds.slice().sort((a,b) => a.time.localeCompare(b.time));
-  const doneRoundIds = new Set(data.history.filter(h => h.date?.startsWith(selDate)).map(h => h.roundId));
+  const roundOptions = sortedRounds.map(r =>
+    `<option value="${r.id}" ${r.id===round.id?'selected':''}>${esc(r.name)} (${r.time})</option>`
+  ).join('');
 
-  html += `<div class="round-chips">`;
-  sortedRounds.forEach(r => {
-    const isActive = r.id === round.id;
-    const isDone = doneRoundIds.has(r.id) && !isActive;
-    html += `<button class="round-chip${isActive ? ' active' : ''}${isDone ? ' done' : ''}"
-      onclick="switchRound('${r.id}')">
-      <span class="chip-time">${r.time}</span>
-      <span class="chip-name">${esc(r.name)}</span>
-    </button>`;
-  });
-  html += `</div>`;
+  let html = `<div class="round-header-v2">
+    <div class="round-header-toprow">
+      <div class="round-header-title">${icon('clipboard',17)} חלוקת תרופות</div>
+      <div style="position:relative">
+        <select style="appearance:none;-webkit-appearance:none;background:var(--bg);border:1px solid var(--border-light);border-radius:8px;padding:.38rem 2rem .38rem .7rem;font-size:.82rem;font-weight:600;color:var(--text);font-family:var(--font);cursor:pointer;min-height:36px;direction:rtl"
+          onchange="switchRound(this.value)">${roundOptions}</select>
+        <span style="position:absolute;left:.5rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);display:flex">${icon('chevron-down',14)}</span>
+      </div>
+    </div>
+    <div class="round-stats-grid">
+      <div class="rsg-box">
+        <div class="rsg-round-name">${icon(roundIcon,13)} ${esc(round.name)}</div>
+        <div class="rsg-round-time">${icon('clock',11)} ${round.time}</div>
+        <div class="rsg-label">סבב נוכחי</div>
+      </div>
+      <div class="rsg-box">
+        <div class="rsg-main teal">${handledRes}/${totalRes}</div>
+        <div class="rsg-progress-bar"><div class="rsg-progress-fill" style="width:${pct}%"></div></div>
+        <div class="rsg-label">${pct}%</div>
+      </div>
+      <div class="rsg-box">
+        <div class="rsg-main">${remainingRes}</div>
+        <div class="rsg-label">דיירים<br>נותרו</div>
+      </div>
+    </div>
+  </div>`;
 
-  // ── Completion banner (shows at top of list when done) ──
-  if (isComplete) {
-    html += `<div class="round-complete-banner">
-      <div class="cpl-icon">✓</div>
-      <h3>הסבב הושלם!</h3>
-      <p>${given} תרופות ניתנו${skipped > 0 ? ` · ${skipped} דולגו` : ''} · עכשיו סגרי את הסבב</p>
-    </div>`;
+  // ── "Next action" highlight card ──
+  const nextEntry = !isComplete ? round.entries.find(entry => {
+    const ms = statuses[entry.residentId]?.meds || {};
+    return !entry.medIds.every(mid => ms[mid]?.status);
+  }) : null;
+  if (nextEntry) {
+    const nextRes = data.residents.find(r => r.id === nextEntry.residentId);
+    if (nextRes) {
+      html += `<div class="next-action-card" style="margin:0 .8rem .6rem">
+        <div class="nac-info">
+          <div class="nac-label">הפעולה הבאה</div>
+          <div class="nac-name">חדר ${esc(nextRes.room)} · ${esc(nextRes.name)}</div>
+          <div class="nac-meds">${nextEntry.medIds.length} תרופות</div>
+        </div>
+        <button class="nac-btn" onclick="markAllMeds('${round.id}','${nextEntry.residentId}','given')" title="סמן ניתנה">
+          ${icon('chevron-left',16)}
+        </button>
+      </div>`;
+    }
   }
 
-  // ── Resident search ──
+  // ── Column headers ──
+  html += `<div class="res-col-hdrs">
+    <span>דייר / חדר</span>
+    <span>תרופות במנה זו</span>
+    <span>סטטוס</span>
+  </div>`;
+
+  // ── Resident rows v2 ──
+  const isDev = state.currentUser?.type === 'dev';
+  let isFirstPending = true;
   const resFilterVal = state.residentFilter || '';
   const filterVal = resFilterVal.trim().toLowerCase();
-  html += `<div style="margin-bottom:.65rem">
+
+  // Search bar (compact)
+  html += `<div style="padding:0 .1rem .4rem">
     <input type="text" placeholder="חיפוש דייר..." value="${resFilterVal}"
       oninput="nurseResSearch(this.value)"
-      style="font-size:14px;padding:.45rem .9rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white" id="nurseResSearch">
+      style="font-size:14px;padding:.38rem .85rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white" id="nurseResSearch">
   </div>`;
 
-  // ── Resident list ──
   round.entries.filter(entry => {
     if (!filterVal) return true;
     const r = data.residents.find(x=>x.id===entry.residentId);
@@ -2010,99 +2453,191 @@ function renderNurseRound() {
     const resHandled = resGiven + resSkipped;
     const allDone = resHandled === entry.medIds.length && entry.medIds.length > 0;
     const anySkipped = resSkipped > 0;
-    const rowClass = allDone ? (anySkipped ? 'skipped' : 'given') : '';
+    const allGiven = resGiven === entry.medIds.length;
 
-    let dotClass = 'pending';
-    if (allDone) dotClass = anySkipped ? 'skipped' : 'complete';
-    else if (resHandled > 0) dotClass = 'partial';
+    // Row appearance
+    const rowExtraCls = allDone ? (anySkipped ? 'is-skipped' : 'is-given') : (!allDone && isFirstPending ? 'is-next' : '');
 
-    let medsHtml = entry.medIds.map(mid => {
-      const med = data.meds.find(x=>x.id===mid);
+    // Status button
+    let btnCls, btnLabel, btnIconHtml, btnAction;
+    if (allDone && allGiven) {
+      btnCls = 'given';
+      btnLabel = 'ניתנה';
+      btnIconHtml = icon('check', 13);
+      btnAction = `markAllMeds('${round.id}','${entry.residentId}','undo')`;
+    } else if (allDone && anySkipped) {
+      btnCls = 'skipped';
+      btnLabel = 'דולג';
+      btnIconHtml = icon('x', 13);
+      btnAction = `markAllMeds('${round.id}','${entry.residentId}','undo')`;
+    } else if (isFirstPending) {
+      btnCls = 'next';
+      btnLabel = 'הבא';
+      btnIconHtml = icon('chevron-left', 13);
+      btnAction = `markAllMeds('${round.id}','${entry.residentId}','given')`;
+      isFirstPending = false;
+    } else {
+      btnCls = 'pending';
+      btnLabel = 'ממתין';
+      btnIconHtml = '';
+      btnAction = `markAllMeds('${round.id}','${entry.residentId}','given')`;
+    }
+
+    // Avatar
+    const avatarHtml = res.photo
+      ? `<div class="res-avatar-sm"><img src="${esc(res.photo)}" alt="${esc(res.name)}"></div>`
+      : `<div class="res-avatar-sm">${initials(res.name)}</div>`;
+
+    // Med list items (for expanded view)
+    const medItemsHtml = entry.medIds.map(mid => {
+      const med = data.meds.find(x => x.id === mid);
+      if (!med) return '';
+      const ms = medStatuses[mid];
+      const dotCls = ms?.status === 'given' ? 'given' : ms?.status === 'skipped' ? 'skipped' : 'pending';
+      const medName = isDev ? '••••••' : esc(med.name);
+      const medDose = isDev ? '•••' : esc(med.dose);
+      return `<div class="rme-item"><span class="rme-dot ${dotCls}"></span><span>${medName} ${medDose}</span></div>`;
+    }).join('');
+
+    // Per-med detail rows (full control, shown when expanded)
+    const medDetailHtml = isDev ? '' : entry.medIds.map(mid => {
+      const med = data.meds.find(x => x.id === mid);
       if (!med) return '';
       const ms = medStatuses[mid] || { status: 'pending', note: '' };
       const isGiven   = ms.status === 'given';
       const isSkipped = ms.status === 'skipped';
       const isPending = ms.status === 'pending';
-      const rId  = round.id;
+      const rId = round.id;
       const resId = entry.residentId;
-      const medName = state.currentUser?.type === 'dev' ? '••••••' : esc(med.name);
-      const medDose = state.currentUser?.type === 'dev' ? '•••'    : esc(med.dose);
-      const givenTime = isGiven && ms.time ? ms.time : '';
-
+      const givenTime = isGiven && ms.time ? ' · ' + ms.time : '';
       const borderBg = isGiven
-        ? 'border:2px solid var(--success);background:var(--success-bg)'
-        : isSkipped
-          ? 'border:2px solid var(--skip);background:var(--skip-bg)'
-          : 'border:1.5px solid var(--border-light);background:white';
+        ? 'border:1.5px solid var(--success);background:var(--success-bg)'
+        : isSkipped ? 'border:1.5px solid var(--skip);background:var(--skip-bg)'
+        : 'border:1.5px solid var(--border-light);background:white';
       const nameColor = isGiven ? 'var(--success)' : isSkipped ? 'var(--skip)' : 'var(--text)';
-
-      let actionsHtml;
-      if (state.currentUser?.type === 'dev') {
-        actionsHtml = '<span style="font-size:.75rem;color:var(--text-muted);font-style:italic">צפייה בלבד</span>';
-      } else {
-        actionsHtml = `<div class="med-action-row">
-          <button class="med-btn-given${isGiven ? ' active' : ''}"
-            data-r="${rId}" data-res="${resId}" data-m="${mid}"
+      let notePart = '';
+      if (!isPending) {
+        notePart = `<div style="margin-top:.28rem;display:flex;gap:.3rem;align-items:center">
+          <input type="text" placeholder="הערה (אופציונלי)" value="${esc(ms.note||'')}"
+            class="med-note-input"
+            style="flex:1;border:1px solid var(--border-light);border-radius:7px;background:white;font-family:var(--font);direction:rtl"
+            data-round="${rId}" data-res="${resId}" data-med="${mid}">
+          <button class="note-save-btn" data-round="${rId}" data-res="${resId}" data-med="${mid}" onclick="saveNoteExplicit(this)">שמור</button>
+        </div>`;
+      }
+      return `<div id="medrow_${resId}_${mid}" style="display:flex;flex-direction:column;gap:.25rem;padding:.55rem .6rem;border-radius:10px;${borderBg};margin-bottom:.35rem;transition:all .22s">
+        <div style="display:flex;align-items:baseline;gap:.4rem">
+          <span style="font-weight:700;font-size:.88rem;color:${nameColor};flex:1">${esc(med.name)}</span>
+          <span style="font-size:.73rem;color:var(--text-muted)">${esc(med.dose)}</span>
+        </div>
+        <div class="med-action-row">
+          <button class="med-btn-given${isGiven?' active':''}" data-r="${rId}" data-res="${resId}" data-m="${mid}"
             onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'given')">
-            ${isGiven ? `✓ ניתנה${givenTime ? ' · '+givenTime : ''}` : 'ניתנה ✓'}
+            ${isGiven ? `✓ ניתנה${givenTime}` : 'ניתנה ✓'}
           </button>
-          <button class="med-btn-skip${isSkipped ? ' active' : ''}"
-            data-r="${rId}" data-res="${resId}" data-m="${mid}"
+          <button class="med-btn-skip${isSkipped?' active':''}" data-r="${rId}" data-res="${resId}" data-m="${mid}"
             onclick="markMedStatus(this.dataset.r,this.dataset.res,this.dataset.m,'skipped')">
             ${isSkipped ? '✕' : 'דולג'}
           </button>
-        </div>`;
-      }
-
-      let notePart = '';
-      if (!isPending) {
-        notePart = `<div style="margin-top:.3rem;display:flex;gap:.35rem;align-items:center">
-          <input type="text" placeholder="הערה (אופציונלי)" value="${esc(ms.note||'')}"
-            class="med-note-input"
-            style="flex:1;border:1px solid var(--border-light);border-radius:8px;background:white;font-family:var(--font);direction:rtl"
-            data-round="${rId}" data-res="${resId}" data-med="${mid}">
-          <button class="note-save-btn"
-            data-round="${rId}" data-res="${resId}" data-med="${mid}"
-            onclick="saveNoteExplicit(this)">שמור</button>
-        </div>`;
-      }
-
-      return `<div id="medrow_${resId}_${mid}"
-        style="display:flex;flex-direction:column;gap:.3rem;padding:.65rem .7rem;border-radius:12px;${borderBg};margin-bottom:.4rem;transition:all .25s ease">
-        <div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:.2rem">
-          <span style="font-weight:700;font-size:.92rem;color:${nameColor};flex:1">${medName}</span>
-          <span style="font-size:.75rem;color:var(--text-muted)">${medDose}</span>
         </div>
-        ${actionsHtml}
         ${notePart}
       </div>`;
     }).join('');
 
-    html += `<div class="resident-row ${rowClass}" id="row_${entry.residentId}"
-      style="flex-direction:column;align-items:stretch;padding:.9rem 1rem;margin-bottom:.55rem">
-      <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.65rem">
-        ${residentAvatar(res)}
-        <div style="flex:1">
-          <div class="resident-name">${esc(res.name)}</div>
-          ${state.currentUser?.type !== 'dev' ? `<div class="resident-meds">חדר ${esc(res.room)}</div>` : ''}
-          ${(state.currentUser?.type !== 'dev' && res.notes) ? `<div class="resident-meds" style="color:var(--skip);font-size:.75rem">${icon("alert-circle",12)} ${esc(res.notes)}</div>` : ''}
+    const expandId = 'resexp_' + entry.residentId;
+    const toggleId = 'restgl_' + entry.residentId;
+
+    html += `<div class="res-row-v2 ${rowExtraCls}" id="row_${entry.residentId}">
+      <div class="res-info-col">
+        ${avatarHtml}
+        <div style="min-width:0">
+          <div class="res-room-num">${esc(res.room)}</div>
+          <div class="res-name-v2">${esc(res.name)}</div>
+          ${(anySkipped && allDone) ? `<div class="res-warn-tag">${icon('info',10)} דולג בסבב זה</div>` : ''}
+          ${(res.notes && !isDev) ? `<div class="res-warn-tag">${icon('alert-circle',10)} ${esc(res.notes)}</div>` : ''}
         </div>
-        <div class="status-dot ${dotClass}" title="${dotClass === 'complete' ? 'הושלם' : dotClass === 'partial' ? 'חלקי' : dotClass === 'skipped' ? 'דולג' : 'ממתין'}"></div>
       </div>
-      ${medsHtml}
+      <div class="res-meds-col">
+        <button class="res-meds-toggle-btn" id="${toggleId}" onclick="toggleResMeds('${entry.residentId}')">
+          <span class="mtb-chevron">${icon('chevron-down',13)}</span>
+          <span>${entry.medIds.length} תרופות</span>
+        </button>
+        <div class="res-meds-expanded" id="${expandId}" style="display:none">
+          ${medItemsHtml}
+          ${medDetailHtml ? `<div style="margin-top:.4rem;border-top:1px solid var(--border-light);padding-top:.4rem">${medDetailHtml}</div>` : ''}
+        </div>
+      </div>
+      <div class="res-status-col">
+        ${isDev ? '<span style="font-size:.72rem;color:var(--text-muted)">צפייה</span>' :
+          `<button class="rsb ${btnCls}" onclick="${btnAction}">${btnIconHtml} ${btnLabel}</button>`}
+      </div>
     </div>`;
   });
 
-  // ── Sticky finish button when complete ──
+  // ── Completion banner ──
   if (isComplete) {
-    html += `<div class="sticky-finish">
-      <button class="btn-primary w-full" onclick="finishRound('${round.id}')">
-        סיים וסגור סבב ✓
-      </button>
+    html += `<div class="round-complete-banner" style="margin-bottom:.5rem">
+      <div class="cpl-icon">✓</div>
+      <h3>הסבב הושלם!</h3>
+      <p>${givenAllRes} דיירים קיבלו${skippedAnyRes > 0 ? ` · ${skippedAnyRes} עם דילוג` : ''}</p>
     </div>`;
   }
 
+  // ── Bottom summary bar ──
+  html += `<div class="round-bottom-bar">
+    <div class="rbb-progress">
+      <div class="rbb-label">התקדמות כוללת</div>
+      <div class="rbb-bar"><div class="rbb-fill" style="width:${pct}%"></div></div>
+      <div class="rbb-count">${pct}% · ${handledRes}/${totalRes}</div>
+    </div>
+    <button class="rbb-btn ${isComplete ? 'finish-btn' : ''}"
+      onclick="${isComplete ? `finishRound('${round.id}')` : ''}">
+      ${icon('file-text',14)} סיכום סבב
+    </button>
+  </div>`;
+
   return html;
+}
+
+function toggleResMeds(residentId) {
+  const el = document.getElementById('resexp_' + residentId);
+  const btn = document.getElementById('restgl_' + residentId);
+  if (!el) return;
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (btn) btn.classList.toggle('open', !open);
+}
+
+function markAllMeds(roundId, residentId, action) {
+  if (state.currentUser?.type === 'dev') return;
+  ensureSession(roundId);
+  const round = data.rounds.find(r => r.id === roundId);
+  if (!round) return;
+  const entry = round.entries.find(e => e.residentId === residentId);
+  if (!entry) return;
+  const sid = data.activeRoundSession.startTime;
+
+  if (action === 'undo') {
+    delete data.activeRoundSession.statuses[residentId];
+    data.history = data.history.filter(h => !(h.roundId===roundId && h.residentId===residentId && h.sessionId===sid));
+  } else {
+    if (!data.activeRoundSession.statuses[residentId]) {
+      data.activeRoundSession.statuses[residentId] = { meds: {} };
+    }
+    const nowTime = new Date().toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'});
+    entry.medIds.forEach(medId => {
+      data.activeRoundSession.statuses[residentId].meds[medId] = { status: action, note: '', time: nowTime };
+      data.history = data.history.filter(h => !(h.roundId===roundId && h.residentId===residentId && h.medId===medId && h.sessionId===sid));
+      data.history.push({
+        id: genId(), roundId, residentId, medId, status: action,
+        date: new Date().toISOString(), time: nowTime,
+        nurseName: state.currentUser?.name || '',
+        sessionId: sid, note: ''
+      });
+    });
+  }
+  saveData();
+  renderNurseContent();
 }
 
 function nurseSelectDate(dateStr) {
