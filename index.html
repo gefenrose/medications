@@ -1403,13 +1403,15 @@
   .atb-more-menu {
     display: none;
     position: absolute;
-    top: calc(100% + 2px);
-    right: 0;
+    top: calc(100% + 4px);
+    left: 0;
+    right: auto;
     background: white;
     border: 1.5px solid var(--border-light);
     border-radius: 12px;
     box-shadow: 0 6px 24px rgba(0,0,0,.12);
     min-width: 130px;
+    max-width: calc(100vw - 16px);
     z-index: 200;
     overflow: hidden;
     animation: menuFadeIn .15s ease;
