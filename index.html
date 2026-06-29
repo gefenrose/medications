@@ -1357,9 +1357,7 @@
   /* Admin tab bar — slim underline style */
   .admin-tab-bar {
     display: flex;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    overflow: visible;
     background: white;
     border-bottom: 1.5px solid var(--border-light);
     padding: 0 .8rem;
@@ -1368,7 +1366,16 @@
     top: calc(53px + env(safe-area-inset-top));
     z-index: 90;
   }
-  .admin-tab-bar::-webkit-scrollbar { display: none; }
+  /* Scrollable inner container — overflow lives here, not on the parent */
+  .atb-scroll {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .atb-scroll::-webkit-scrollbar { display: none; }
   .atb-tab {
     padding: .7rem .85rem;
     border: none;
@@ -1788,11 +1795,13 @@
     </div>
   </div>
 
-  <!-- Tab bar -->
+  <!-- Tab bar: scrollable tabs + overflow menu as siblings to avoid iOS overflow clipping -->
   <div class="admin-tab-bar" id="adminTabs">
-    <button class="atb-tab active" onclick="adminTab('rounds')" data-tab="rounds">סבבים</button>
-    <button class="atb-tab" onclick="adminTab('residents')" data-tab="residents">דיירים</button>
-    <button class="atb-tab" onclick="adminTab('meds')" data-tab="meds">תרופות</button>
+    <div class="atb-scroll">
+      <button class="atb-tab active" onclick="adminTab('rounds')" data-tab="rounds">סבבים</button>
+      <button class="atb-tab" onclick="adminTab('residents')" data-tab="residents">דיירים</button>
+      <button class="atb-tab" onclick="adminTab('meds')" data-tab="meds">תרופות</button>
+    </div>
     <div class="atb-more-wrap" id="atbMoreWrap">
       <button class="atb-tab atb-more-btn" id="atbMoreBtn" onclick="toggleAdminMoreMenu(event)" aria-label="עוד">
         <span id="atbMoreLabel">עוד</span>
