@@ -4479,6 +4479,14 @@ function initNavIcons() {
     const el = document.getElementById(id);
     if (el) el.style.display = isDev ? 'none' : '';
   });
+  // Show nurse-switch button for admin and dev
+  ['toNurseBtn', 'toNurseBtnSidebar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = '';
+  });
+  // Show back-to-admin button in nurse screen for admin/dev users
+  const toAdmin = document.getElementById('toAdminBtn');
+  if (toAdmin) toAdmin.style.display = '';
   const ni = {'ni-round':'pill','ni-hist':'history'};
   Object.entries(ni).forEach(([id,name]) => {
     const el = document.getElementById(id);
