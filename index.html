@@ -2281,8 +2281,8 @@ function setLoginType(type) {
     type === 'dev'   ? 'dev username' : 'הכניסי שם משתמש';
 }
 function doLogin() {
-  const u = document.getElementById('loginUsername').value.trim();
-  const p = document.getElementById('loginPassword').value.trim();
+  const u = document.getElementById('loginUsername').value.trim().toLowerCase();
+  const p = document.getElementById('loginPassword').value.trim().toLowerCase();
   const err = document.getElementById('loginError');
   err.style.display = 'none';
   if (state.loginType === 'admin' || state.loginType === 'dev') {
@@ -2305,7 +2305,7 @@ function doLogin() {
         }
       });
       startSync();
-    } else if ((()=>{ const cr=getAdminCreds(); return u===cr.username && p===cr.password; })()) {
+    } else if ((()=>{ const cr=getAdminCreds(); return u===cr.username.toLowerCase() && p===cr.password.toLowerCase(); })()) {
       const cr = getAdminCreds();
       state.currentUser = {
         type: 'admin',
@@ -2333,7 +2333,7 @@ function doLogin() {
       startSync();
     } else { err.style.display = 'block'; }
   } else {
-    const nurse = data.nurses.find(n => n.username === u && n.password === p);
+    const nurse = data.nurses.find(n => n.username.toLowerCase() === u && n.password.toLowerCase() === p);
     if (nurse) {
       state.currentUser = { type: 'nurse', name: nurse.name, id: nurse.id };
       state.selectedDate = new Date().toISOString().split('T')[0];
