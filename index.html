@@ -1395,13 +1395,15 @@
   .atb-more-btn.menu-open { color: var(--primary); }
   .atb-more-menu {
     display: none;
-    position: fixed;
+    position: absolute;
+    top: calc(100% + 2px);
+    right: 0;
     background: white;
     border: 1.5px solid var(--border-light);
     border-radius: 12px;
     box-shadow: 0 6px 24px rgba(0,0,0,.12);
     min-width: 130px;
-    z-index: 1000;
+    z-index: 200;
     overflow: hidden;
     animation: menuFadeIn .15s ease;
   }
@@ -1431,7 +1433,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
     min-width: 0;
   }
 
@@ -2375,9 +2377,6 @@ function toggleAdminMoreMenu(e) {
   btn.classList.toggle('menu-open', open);
   document.getElementById('atbMoreChevron').style.transform = open ? 'rotate(180deg)' : '';
   if (open) {
-    const rect = btn.getBoundingClientRect();
-    menu.style.top  = (rect.bottom + 2) + 'px';
-    menu.style.right = (window.innerWidth - rect.right) + 'px';
     setTimeout(() => document.addEventListener('click', _closeAdminMoreOnOutside, { once: true }), 0);
   }
 }
