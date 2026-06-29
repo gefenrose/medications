@@ -1094,9 +1094,284 @@
   .rbb-btn.finish-btn { background: var(--primary); color: white; border-color: var(--primary); }
   .rbb-btn:active { transform: scale(.96); }
 
+  /* ===== ADMIN REDESIGN ===== */
+
+  /* Admin topbar — same visual language as nurse */
+  .admin-topbar-v2 {
+    background: white;
+    border-bottom: 1px solid var(--border-light);
+    padding: calc(.8rem + env(safe-area-inset-top)) 1.1rem .8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 .5px 0 rgba(0,0,0,.08);
+    flex-shrink: 0;
+  }
+  .admin-topbar-v2 .atb-brand {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .admin-topbar-v2 .atb-actions {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+  }
+  .admin-topbar-v2 .atb-user {
+    font-size: .78rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+  }
+
+  /* Admin tab bar — slim underline style */
+  .admin-tab-bar {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    background: white;
+    border-bottom: 1.5px solid var(--border-light);
+    padding: 0 .8rem;
+    flex-shrink: 0;
+    position: sticky;
+    top: calc(53px + env(safe-area-inset-top));
+    z-index: 90;
+  }
+  .admin-tab-bar::-webkit-scrollbar { display: none; }
+  .atb-tab {
+    padding: .7rem .85rem;
+    border: none;
+    border-bottom: 2.5px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: .83rem;
+    white-space: nowrap;
+    color: var(--text-muted);
+    font-family: var(--font);
+    margin-bottom: -1.5px;
+    transition: color .18s, border-color .18s;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    min-height: 44px;
+  }
+  .atb-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .atb-tab:active { opacity: .7; }
+
+  /* Admin content wrapper */
+  .admin-content-wrap {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: .9rem 1rem;
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    background: var(--bg);
+  }
+
+  /* Admin section header */
+  .adm-section-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .8rem;
+  }
+  .adm-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .adm-section-sub {
+    font-size: .75rem;
+    color: var(--text-muted);
+    margin-top: .12rem;
+  }
+  .adm-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .48rem .9rem;
+    border-radius: 10px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-size: .82rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    white-space: nowrap;
+    min-height: 38px;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s;
+  }
+  .adm-add-btn:active { background: var(--primary-dark); }
+
+  /* Admin search input */
+  .adm-search {
+    font-size: 14px !important;
+    padding: .42rem .9rem;
+    border: 1.5px solid var(--border-light);
+    border-radius: 20px;
+    font-family: var(--font);
+    direction: rtl;
+    width: 100%;
+    background: white;
+    margin-bottom: .7rem;
+    display: block;
+    transition: border-color .2s;
+  }
+  .adm-search:focus { outline: none; border-color: var(--primary-mid); }
+
+  /* Admin list item v2 */
+  .adm-list-item {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: .75rem .9rem;
+    margin-bottom: .45rem;
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    transition: box-shadow .18s;
+  }
+  .adm-list-item:hover { box-shadow: 0 2px 10px rgba(45,139,116,.1); }
+  .adm-item-body { flex: 1; min-width: 0; }
+  .adm-item-title {
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .adm-item-sub { font-size: .75rem; color: var(--text-secondary); margin-top: .15rem; line-height: 1.5; }
+  .adm-item-actions { display: flex; gap: .35rem; flex-shrink: 0; }
+  .adm-edit-btn {
+    padding: .38rem .7rem;
+    border-radius: 8px;
+    border: 1.5px solid var(--primary-mid);
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: .78rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    min-height: 36px;
+    transition: all .12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .adm-edit-btn:active { background: var(--primary); color: white; }
+  .adm-del-btn {
+    padding: .38rem .7rem;
+    border-radius: 8px;
+    border: 1.5px solid #e5a0a0;
+    background: #fff4f4;
+    color: var(--skip);
+    font-size: .78rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    min-height: 36px;
+    transition: all .12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .adm-del-btn:active { background: var(--skip); color: white; border-color: var(--skip); }
+
+  /* Round card in admin */
+  .adm-round-card {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    margin-bottom: .5rem;
+    overflow: hidden;
+  }
+  .adm-round-header {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .8rem .9rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .adm-round-time-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--primary-light);
+    flex-shrink: 0;
+  }
+  .adm-round-time-badge .badge-time { font-size: .82rem; font-weight: 800; color: var(--primary); line-height: 1.1; }
+  .adm-round-time-badge .badge-icon { color: var(--primary); margin-bottom: .1rem; }
+  .adm-round-entries { padding: .4rem .9rem .6rem; }
+  .adm-round-entry-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .3rem 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: .82rem;
+  }
+  .adm-round-entry-row:last-child { border-bottom: none; }
+
+  /* History entry v2 */
+  .adm-hist-entry {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .5rem 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .adm-hist-entry:last-child { border-bottom: none; }
+
+  /* Admin stats summary at top */
+  .adm-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .5rem;
+    margin-bottom: 1rem;
+  }
+  .adm-sum-box {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: .7rem .5rem;
+    text-align: center;
+  }
+  .adm-sum-val {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .adm-sum-label {
+    font-size: .67rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: .22rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+
   /* ===== PRINT — BLACK & WHITE ===== */
   @media print {
-    .topbar, .bottom-nav, .admin-tabs, .btn, .btn-icon, .topbar-btn { display: none !important; }
+    .topbar, .bottom-nav, .admin-tabs, .admin-tab-bar, .btn, .btn-icon, .topbar-btn { display: none !important; }
     .content, #adminContent { padding: 0 !important; padding-bottom: 0 !important; }
     .screen { display: flex !important; }
     #adminScreen { display: block !important; }
@@ -1172,28 +1447,42 @@
 </div>
 
 <!-- ===== ADMIN SCREEN ===== -->
-<div id="adminScreen" class="screen">
-  <div class="topbar">
-    <button class="topbar-btn" onclick="doLogout()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> יציאה</button>
-    <div class="topbar-title" id="adminTitle">לוח ניהול <span id="syncBadge" style="font-size:.7rem;background:var(--success-bg);color:var(--success);border-radius:10px;padding:.15rem .4rem;opacity:0;transition:opacity .4s;margin-right:.3rem">✓ מסונכרן</span></div>
-    <div class="topbar-user" id="adminUserInfo">
-      <strong>מנהל</strong>
-      <span>שלום, מנהל</span>
+<div id="adminScreen" class="screen" style="flex-direction:column;overflow:hidden">
+  <!-- Topbar v2 -->
+  <div class="admin-topbar-v2">
+    <div class="atb-actions">
+      <button class="ntb-icon-btn" onclick="doLogout()" title="יציאה">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="17" r="1"/></svg>
+      </button>
+    </div>
+    <div class="atb-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+      <span id="adminTitle">לוח ניהול</span>
+      <span id="adminSyncBadge" style="font-size:.68rem;background:var(--primary-light);color:var(--primary);border-radius:10px;padding:.12rem .38rem;opacity:0;transition:opacity .4s;font-weight:700">✓</span>
+    </div>
+    <div style="width:80px;display:flex;justify-content:flex-end;align-items:center;gap:.35rem">
+      <button class="ntb-icon-btn" onclick="showNurseViewFromAdmin()" id="toNurseBtn" title="תצוגת מדריכה" style="display:none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+      <div class="atb-user" id="adminUserInfo">
+        <span id="adminUserName">מנהל</span>
+      </div>
     </div>
   </div>
-  <div style="flex:1;padding:1rem;padding-bottom:calc(1rem + env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch">
-    <div class="admin-tabs" id="adminTabs">
-      <button class="admin-tab active" onclick="adminTab('rounds')"><span class="tab-icon" data-icon="rotate-ccw"></span><span>סבבים</span></button>
-      <button class="admin-tab" onclick="adminTab('residents')"><span class="tab-icon" data-icon="users"></span><span>דיירים</span></button>
-      <button class="admin-tab" onclick="adminTab('meds')"><span class="tab-icon" data-icon="pill"></span><span>תרופות</span></button>
-      <button class="admin-tab" onclick="adminTab('nurses')"><span class="tab-icon" data-icon="user"></span><span>מדריכות</span></button>
-      <button class="admin-tab" onclick="adminTab('history')"><span class="tab-icon" data-icon="history"></span><span>היסטוריה</span></button>
-      <button class="admin-tab" onclick="adminTab('export')"><span class="tab-icon" data-icon="download"></span><span>ייצוא</span></button>
-      <button class="admin-tab" onclick="adminTab('profile')"><span class="tab-icon" data-icon="settings"></span><span>פרופיל</span></button>
-    </div>
-    <div id="adminContent"></div>
-    <div class="page-hint" style="padding-bottom:env(safe-area-inset-bottom)"><a href="#" onclick="showNurseViewFromAdmin()" style="color:var(--text-muted);text-decoration:none;font-size:.8rem">← מעבר לתצוגת מדריכה</a></div>
+
+  <!-- Tab bar -->
+  <div class="admin-tab-bar" id="adminTabs">
+    <button class="atb-tab active" onclick="adminTab('rounds')" data-tab="rounds">סבבים</button>
+    <button class="atb-tab" onclick="adminTab('residents')" data-tab="residents">דיירים</button>
+    <button class="atb-tab" onclick="adminTab('meds')" data-tab="meds">תרופות</button>
+    <button class="atb-tab" onclick="adminTab('nurses')" data-tab="nurses">מדריכות</button>
+    <button class="atb-tab" onclick="adminTab('history')" data-tab="history">היסטוריה</button>
+    <button class="atb-tab" onclick="adminTab('export')" data-tab="export">ייצוא</button>
+    <button class="atb-tab" onclick="adminTab('profile')" data-tab="profile" id="adminProfileTab">פרופיל</button>
   </div>
+
+  <!-- Scrollable content -->
+  <div class="admin-content-wrap" id="adminContent"></div>
 </div>
 
 <!-- ===== NURSE SCREEN ===== -->
@@ -1464,13 +1753,16 @@ function stopSync() {
 }
 
 function showSyncBadge(msg, warn) {
-  const el = document.getElementById('syncBadge');
-  if (!el) return;
-  el.textContent = msg || '✓ מסונכרן';
-  el.style.background = warn ? '#fff3cd' : 'var(--success-bg)';
-  el.style.color = warn ? '#856404' : 'var(--success)';
-  el.style.opacity = '1';
-  setTimeout(() => { el.style.opacity = '0'; }, 2000);
+  // Update both possible sync badge elements
+  ['syncBadge','adminSyncBadge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = (msg || '✓') + (id === 'adminSyncBadge' ? ' מסונכרן' : '');
+    el.style.background = warn ? '#fff3cd' : 'var(--primary-light)';
+    el.style.color = warn ? '#856404' : 'var(--primary)';
+    el.style.opacity = '1';
+    setTimeout(() => { el.style.opacity = '0'; }, 2500);
+  });
 }
 
 function rerenderCurrent() {
@@ -1751,29 +2043,26 @@ function showScreen(id) {
 // ==================== ADMIN ====================
 function adminTab(tab) {
   state.adminTab = tab;
-  state.adminSearch = { residents: '', meds: '', nurses: '' }; // reset search on tab change
+  state.adminSearch = { residents: '', meds: '', nurses: '' };
+  // Update new tab bar
+  document.querySelectorAll('.atb-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  // Also support legacy .admin-tab if present
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-  const tabs = ['rounds','residents','meds','nurses','history','export','profile'];
-  const idx = tabs.indexOf(tab);
-  if (idx >= 0) document.querySelectorAll('.admin-tab')[idx].classList.add('active');
   const adminEl = document.getElementById('adminContent');
   if (adminEl) {
     adminEl.style.opacity = '0';
     adminEl.style.transition = 'opacity .1s';
+    // Scroll tab into view
+    const activeTab = document.querySelector(`.atb-tab[data-tab="${tab}"]`);
+    if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     setTimeout(() => {
       renderAdminContent();
       adminEl.style.opacity = '1';
+      adminEl.scrollTop = 0;
     }, 80);
   } else {
     renderAdminContent();
   }
-  // Inject tab icons
-  setTimeout(() => {
-    document.querySelectorAll('.tab-icon[data-icon]').forEach(el => {
-      el.innerHTML = icon(el.dataset.icon, 20);
-      el.style.cssText = 'display:inline-flex;align-items:center;opacity:.8';
-    });
-  }, 90);
 }
 
 function renderAdminContent() {
@@ -1791,31 +2080,56 @@ function renderAdminContent() {
 
 function renderAdminRounds() {
   const isDev = state.currentUser?.type === 'dev';
-  let html = `<div class="section-header"><div><div class="section-title">סבבי חלוקה</div><div class="section-desc">מתי מחלקים תרופות ולמי</div></div></div>`;
-  if (!isDev) html += `<button class="admin-add-btn" onclick="openRoundModal()">${icon('plus-circle',18)} הוסף סבב חדש</button>`;
+  // Summary stats
+  const totalMeds = data.meds.length;
+  const totalRes  = data.residents.length;
+  const totalRounds = data.rounds.length;
+  let html = `<div class="adm-summary-grid">
+    <div class="adm-sum-box"><div class="adm-sum-val">${totalRounds}</div><div class="adm-sum-label">סבבים</div></div>
+    <div class="adm-sum-box"><div class="adm-sum-val">${totalRes}</div><div class="adm-sum-label">דיירים</div></div>
+    <div class="adm-sum-box"><div class="adm-sum-val">${totalMeds}</div><div class="adm-sum-label">תרופות</div></div>
+  </div>`;
+
+  html += `<div class="adm-section-hdr">
+    <div><div class="adm-section-title">${icon('rotate-ccw',16)} סבבי חלוקה</div><div class="adm-section-sub">מתי מחלקים תרופות ולמי</div></div>
+    ${!isDev ? `<button class="adm-add-btn" onclick="openRoundModal()">${icon('plus',14)} הוסף</button>` : ''}
+  </div>`;
+
   if (!data.rounds.length) {
-    html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין סבבים עדיין</p></div>`;
+    html += `<div class="empty-state"><p>אין סבבים עדיין</p></div>`;
+    return html;
   }
+
   data.rounds.sort((a,b) => a.time.localeCompare(b.time)).forEach(round => {
-    const entryCount = round.entries.length;
-    html += `<div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">${esc(round.name)}</div>
-          <div class="card-subtitle">${round.time} | ${entryCount} דיירים</div>
+    const roundIconName = round.time < '11:00' ? 'sun' : round.time < '17:00' ? 'sun' : 'moon';
+    const medCount = round.entries.reduce((s,e) => s + e.medIds.length, 0);
+    html += `<div class="adm-round-card">
+      <div class="adm-round-header">
+        <div class="adm-round-time-badge">
+          <span class="badge-icon">${icon(roundIconName,14)}</span>
+          <span class="badge-time">${round.time}</span>
         </div>
-        ${!isDev ? `<div class="flex gap-sm">
-          <button class="admin-edit-btn" onclick="openRoundModal('${round.id}')">ערוך</button>
-          <button class="admin-delete-btn" onclick="deleteRound('${round.id}')">מחק</button>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:.92rem;color:var(--text)">${esc(round.name)}</div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-top:.1rem">${round.entries.length} דיירים · ${medCount} תרופות</div>
+        </div>
+        ${!isDev ? `<div style="display:flex;gap:.35rem">
+          <button class="adm-edit-btn" onclick="openRoundModal('${round.id}')">ערוך</button>
+          <button class="adm-del-btn" onclick="deleteRound('${round.id}')">מחק</button>
         </div>` : ''}
       </div>
-      ${round.entries.map(e => {
-        const res = data.residents.find(r => r.id === e.residentId);
-        const medNames = e.medIds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name : '?'; }).join(', ');
-        const isDevR = state.currentUser?.type === 'dev';
-      const medDisp = isDevR ? `<span style="filter:blur(4px);user-select:none">${medNames}</span>` : medNames;
-      return res ? `<div class="flex-center gap-sm" style="padding:.3rem 0;border-bottom:1px solid var(--border-light);font-size:.83rem;color:var(--text)"><span>${esc(res.name)}</span><span class="text-muted" style="margin-right:.3rem">— ${medDisp}</span></div>` : '';
-      }).join('')}
+      <div class="adm-round-entries">
+        ${round.entries.map(e => {
+          const res = data.residents.find(r => r.id === e.residentId);
+          const medNames = e.medIds.map(mid => { const m = data.meds.find(x=>x.id===mid); return m ? m.name+' '+m.dose : '?'; }).join(', ');
+          const medDisp = isDev ? `<span style="filter:blur(4px);user-select:none">${medNames}</span>` : medNames;
+          return res ? `<div class="adm-round-entry-row">
+            <span style="font-weight:700;color:var(--primary);min-width:2.5rem">${esc(res.room)}</span>
+            <span style="flex:1;font-weight:600">${esc(res.name)}</span>
+            <span style="color:var(--text-muted);font-size:.78rem">${medDisp}</span>
+          </div>` : '';
+        }).join('')}
+      </div>
     </div>`;
   });
   return html;
@@ -1840,16 +2154,13 @@ function adminSearchUpdate(field, val, renderFn) {
 
 function renderAdminResidents() {
   const isDev = state.currentUser?.type === 'dev';
-  let html = `<div>
-    <div class="section-header" style="margin-bottom:.5rem">
-      <div><div class="section-title">דיירים</div><div class="section-desc">פרטי הדיירים ותרופותיהם</div></div>
-    </div>
-    ${!isDev ? '<button class="admin-add-btn" onclick="openResidentModal()">' + icon('plus-circle',18) + ' הוסף דייר חדש</button>' : ''}
-    <input type="text" id="resSearchInput" placeholder="חיפוש לפי שם דייר..." value="${state.adminSearch.residents||''}"
-      oninput="adminSearchUpdate('residents',this.value,renderAdminResidents)"
-      style="font-size:14px;padding:.42rem .9rem;border:1.5px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.7rem">
-  </div>`;
-  if (!data.residents.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין דיירים</p></div>`;
+  let html = `<div class="adm-section-hdr">
+    <div><div class="adm-section-title">דיירים</div><div class="adm-section-sub">פרטי הדיירים ותרופותיהם</div></div>
+    ${!isDev ? `<button class="adm-add-btn" onclick="openResidentModal()">${icon('plus-circle',15)} הוסף</button>` : ''}
+  </div>
+  <input type="text" id="resSearchInput" class="adm-search" placeholder="חיפוש לפי שם דייר..." value="${state.adminSearch.residents||''}"
+    oninput="adminSearchUpdate('residents',this.value,renderAdminResidents)">`;
+  if (!data.residents.length) html += `<div class="empty-state"><p>אין דיירים</p></div>`;
   const resQ = state.adminSearch.residents||'';
   const resFiltered = resQ ? data.residents.filter(r=>fuzzy(r.name,resQ)) : data.residents;
   resFiltered.forEach(res => {
@@ -1857,16 +2168,19 @@ function renderAdminResidents() {
     const medDisplay = isDev
       ? '<span style="filter:blur(4px);user-select:none;pointer-events:none">' + (medNames || 'ללא תרופות') + '</span>'
       : (medNames || 'ללא תרופות');
-    html += `<div class="list-item">
-      ${residentAvatar(res)}
-      <div class="list-item-content">
-        <div class="list-item-title">${esc(res.name)}${isDev ? '' : ` — חדר ${esc(res.room)}`}</div>
-        <div class="list-item-sub">${medDisplay}</div>
-        ${(!isDev && res.notes) ? `<div class="list-item-sub" style="color:var(--skip)">${icon('alert-circle',13)} ${esc(res.notes)}</div>` : ''}
+    html += `<div class="adm-list-item">
+      <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">
+        ${!isDev ? `<div class="res-room-num">${esc(res.room)}</div>` : ''}
+        <div class="resident-avatar" style="width:34px;height:34px;font-size:.75rem">${initials(res.name)}</div>
       </div>
-      ${isDev ? '' : `<div class="list-item-actions">
-        <button class="admin-edit-btn" onclick="openResidentModal('${res.id}')">ערוך</button>
-        <button class="admin-delete-btn" onclick="deleteResident('${res.id}')">מחק</button>
+      <div class="adm-item-body">
+        <div class="adm-item-title">${esc(res.name)}</div>
+        <div class="adm-item-sub">${medDisplay}</div>
+        ${(!isDev && res.notes) ? `<div class="adm-item-sub" style="color:var(--skip)">${icon('alert-circle',12)} ${esc(res.notes)}</div>` : ''}
+      </div>
+      ${isDev ? '' : `<div class="adm-item-actions">
+        <button class="adm-edit-btn" onclick="openResidentModal('${res.id}')">ערוך</button>
+        <button class="adm-del-btn" onclick="deleteResident('${res.id}')">מחק</button>
       </div>`}
     </div>`;
   });
@@ -1875,63 +2189,56 @@ function renderAdminResidents() {
 
 function renderAdminMeds() {
   const isDev = state.currentUser?.type === 'dev';
-  let html = `<div>
-    <div class="section-header" style="margin-bottom:.5rem">
-      <div><div class="section-title">תרופות</div><div class="section-desc">כל התרופות הקיימות במערכת</div></div>
-    </div>
-    ${!isDev ? '<button class="admin-add-btn" onclick="openMedModal()">' + icon('plus-circle',18) + ' הוסף תרופה חדשה</button>' : ''}
-    <input type="text" id="medSearchInput" placeholder="חיפוש לפי שם / מינון..." value="${state.adminSearch.meds||''}"
-      oninput="adminSearchUpdate('meds',this.value,renderAdminMeds)"
-      style="font-size:14px;padding:.42rem .9rem;border:1.5px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.7rem">
-  </div>`;
-
-  if (!data.meds.length) html += `<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין תרופות</p></div>`;
+  let html = `<div class="adm-section-hdr">
+    <div><div class="adm-section-title">תרופות</div><div class="adm-section-sub">כל התרופות הקיימות במערכת</div></div>
+    ${!isDev ? `<button class="adm-add-btn" onclick="openMedModal()">${icon('plus-circle',15)} הוסף</button>` : ''}
+  </div>
+  <input type="text" id="medSearchInput" class="adm-search" placeholder="חיפוש לפי שם / מינון..." value="${state.adminSearch.meds||''}"
+    oninput="adminSearchUpdate('meds',this.value,renderAdminMeds)">`;
+  if (!data.meds.length) html += `<div class="empty-state"><p>אין תרופות</p></div>`;
   const medQ = state.adminSearch.meds||'';
   const medsFiltered = medQ ? data.meds.filter(m=>fuzzy(m.name+' '+m.dose,medQ)) : data.meds;
-  medsFiltered.forEach((med, idx2) => {
+  medsFiltered.forEach(med => {
     const name  = esc(med.name);
     const dose  = esc(med.dose);
     const type  = esc(med.type);
-    const notes = med.notes ? ' | ' + esc(med.notes) : '';
-    const avatar = 'Rx';
-    html += `<div class="list-item">
-      <div style="width:38px;height:38px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--primary);flex-shrink:0">${avatar}</div>
-      <div class="list-item-content">
-        <div class="list-item-title">${name}</div>
-        <div class="list-item-sub">${type} | מינון: ${dose}${notes}</div>
-      </div>`;
-    if (!isDev) html += `<div class="list-item-actions">
-        <button class="admin-edit-btn" onclick="openMedModal('${med.id}')">ערוך</button>
-        <button class="admin-delete-btn" onclick="deleteMed('${med.id}')">מחק</button>
-      </div>`;
-    html += `</div>`;
+    const notes = med.notes ? ` | ${esc(med.notes)}` : '';
+    html += `<div class="adm-list-item">
+      <div style="width:38px;height:38px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:var(--primary);flex-shrink:0">Rx</div>
+      <div class="adm-item-body">
+        <div class="adm-item-title">${isDev ? '<span style="filter:blur(4px);user-select:none;pointer-events:none">'+name+'</span>' : name}</div>
+        <div class="adm-item-sub">${type} | מינון: ${dose}${notes}</div>
+      </div>
+      ${isDev ? '' : `<div class="adm-item-actions">
+        <button class="adm-edit-btn" onclick="openMedModal('${med.id}')">ערוך</button>
+        <button class="adm-del-btn" onclick="deleteMed('${med.id}')">מחק</button>
+      </div>`}
+    </div>`;
   });
   return html;
 }
 
 function renderAdminNurses() {
   const isDev = state.currentUser?.type === 'dev';
-  let html = `<div>
-    <div class="section-header" style="margin-bottom:.5rem">
-      <div><div class="section-title">מדריכות</div><div class="section-desc">פרטי ההתחברות של כל מדריכה</div></div>
-    </div>
-    ${!isDev ? '<button class="admin-add-btn" onclick="openNurseModal()">' + icon('plus-circle',18) + ' הוסף מדריכה חדשה</button>' : ''}
-    <input type="text" id="nurseSearchInput" placeholder="חיפוש לפי שם מדריכה..." value="${state.adminSearch.nurses||''}"
-      oninput="adminSearchUpdate('nurses',this.value,renderAdminNurses)"
-      style="font-size:14px;padding:.42rem .9rem;border:1.5px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white;margin-bottom:.7rem">
-  </div>`;
+  let html = `<div class="adm-section-hdr">
+    <div><div class="adm-section-title">מדריכות</div><div class="adm-section-sub">פרטי ההתחברות של כל מדריכה</div></div>
+    ${!isDev ? `<button class="adm-add-btn" onclick="openNurseModal()">${icon('plus-circle',15)} הוסף</button>` : ''}
+  </div>
+  <input type="text" id="nurseSearchInput" class="adm-search" placeholder="חיפוש לפי שם מדריכה..." value="${state.adminSearch.nurses||''}"
+    oninput="adminSearchUpdate('nurses',this.value,renderAdminNurses)">`;
+  if (!data.nurses.length) html += `<div class="empty-state"><p>אין מדריכות</p></div>`;
   const nurseQ = state.adminSearch.nurses||'';
   const nursesFiltered = nurseQ ? data.nurses.filter(n=>fuzzy(n.name,nurseQ)) : data.nurses;
   nursesFiltered.forEach(nurse => {
-    html += `<div class="list-item">
-      <div class="resident-avatar">${initials(nurse.name)}</div>
-      <div class="list-item-content">
-        <div class="list-item-title">${esc(nurse.name)}</div>
-        <div class="list-item-sub">שם משתמש: ${esc(nurse.username)}</div>
+    html += `<div class="adm-list-item">
+      <div class="resident-avatar" style="width:36px;height:36px;font-size:.78rem">${initials(nurse.name)}</div>
+      <div class="adm-item-body">
+        <div class="adm-item-title">${esc(nurse.name)}</div>
+        <div class="adm-item-sub">שם משתמש: ${esc(nurse.username)}</div>
       </div>
-      ${!isDev ? `<div class="list-item-actions">
-        <button class="admin-edit-btn" onclick="openNurseModal('${nurse.id}')">ערוך</button>
-        <button class="admin-delete-btn" onclick="deleteNurse('${nurse.id}')">מחק</button>
+      ${!isDev ? `<div class="adm-item-actions">
+        <button class="adm-edit-btn" onclick="openNurseModal('${nurse.id}')">ערוך</button>
+        <button class="adm-del-btn" onclick="deleteNurse('${nurse.id}')">מחק</button>
       </div>` : ''}
     </div>`;
   });
@@ -1943,23 +2250,20 @@ function renderAdminHistory() {
   if(!state.histFilters)state.histFilters={date:'',nurse:'',resident:''};
   const{date:fDate,nurse:fNurse,resident:fRes}=state.histFilters;
   const nurseOpts=data.nurses.map(n=>`<option value="${esc(n.name)}" ${fNurse===n.name?'selected':''}>${esc(n.name)}</option>`).join('');
-  let html=`<div class="card" style="margin-bottom:.8rem;padding:.8rem 1rem">
-    <div style="font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:.6rem">סינון</div>
-    <div style="display:flex;flex-direction:column;gap:.5rem">
-      <div style="position:relative">
-        <input type="date" value="${fDate}" max="${today}" onchange="state.histFilters.date=this.value;renderAdminContent()"
-          placeholder="תאריך"
-          style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:ltr;width:100%">
-        ${!fDate ? `<span style="position:absolute;right:.7rem;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-muted);pointer-events:none">תאריך</span>` : ''}
-      </div>
-      <select onchange="state.histFilters.nurse=this.value;renderAdminContent()"
-        style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);background:white;direction:rtl">
-        <option value="" ${!fNurse?'selected':''}>כל המדריכות</option>${nurseOpts}
-      </select>
-      <input type="text" placeholder="חיפוש דייר..." value="${fRes}" oninput="state.histFilters.resident=this.value;renderAdminContent()"
-        style="font-size:14px;padding:.4rem .7rem;border:1px solid var(--border-light);border-radius:10px;font-family:var(--font);direction:rtl;background:white">
-    </div>
-    ${(fDate||fNurse||fRes)?`<button class="btn btn-outline btn-sm mt-sm" onclick="state.histFilters={date:'',nurse:'',resident:''};renderAdminContent()">נקה סינון</button>`:''}
+  const hasFilter = fDate||fNurse||fRes;
+  let html=`<div class="adm-section-hdr" style="margin-bottom:.6rem">
+    <div><div class="adm-section-title">היסטוריה</div><div class="adm-section-sub">רשומות חלוקת תרופות</div></div>
+    ${hasFilter ? `<button class="adm-add-btn" style="background:var(--skip);border-color:var(--skip)" onclick="state.histFilters={date:'',nurse:'',resident:''};renderAdminContent()">נקה</button>` : ''}
+  </div>
+  <div style="display:flex;flex-direction:column;gap:.45rem;margin-bottom:.9rem">
+    <input type="date" value="${fDate}" max="${today}" onchange="state.histFilters.date=this.value;renderAdminContent()"
+      class="adm-search" style="direction:ltr">
+    <select onchange="state.histFilters.nurse=this.value;renderAdminContent()"
+      class="adm-search" style="appearance:auto">
+      <option value="" ${!fNurse?'selected':''}>כל המדריכות</option>${nurseOpts}
+    </select>
+    <input type="text" placeholder="חיפוש דייר..." value="${fRes}" oninput="state.histFilters.resident=this.value;renderAdminContent()"
+      class="adm-search">
   </div>`;
   const filtered=data.history.filter(h=>{
     if(fDate&&!(h.date||'').startsWith(fDate))return false;
@@ -1967,25 +2271,29 @@ function renderAdminHistory() {
     if(fRes){const r=data.residents.find(x=>x.id===h.residentId);if(!r||!fuzzy(r.name,fRes))return false;}
     return true;
   });
-  if(!filtered.length){html+=`<div class="empty-state"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)"></div><p>אין רשומות</p></div>`;return html;}
+  if(!filtered.length){html+=`<div class="empty-state"><p>אין רשומות</p></div>`;return html;}
   const byDate={};
   filtered.forEach(h=>{const d=(h.date||'').split('T')[0];if(!byDate[d])byDate[d]=[];byDate[d].push(h);});
   Object.keys(byDate).sort().reverse().forEach(date=>{
-    html+=`<div class="card"><div class="card-title" style="margin-bottom:.6rem">${icon("calendar",14)} ${formatDate(date)}</div>`;
+    html+=`<div class="adm-round-card" style="margin-bottom:.7rem">
+      <div class="adm-round-header">${icon('calendar',14,'',)} <span style="font-size:.82rem;font-weight:700;color:var(--text-primary)">${formatDate(date)}</span></div>
+      <div class="adm-round-entries">`;
     byDate[date].forEach(h=>{
       const res=data.residents.find(r=>r.id===h.residentId);
       const med=data.meds.find(m=>m.id===h.medId);
       const round=data.rounds.find(r=>r.id===h.roundId);
-      const badge=h.status==='given'?'<span class="badge badge-given">ניתנה ✓</span>':'<span class="badge badge-skipped">✕ דולג</span>';
-      html+=`<div class="flex-center justify-between" style="padding:.45rem 0;border-bottom:1px solid var(--border-light)">
-        <div>
-          <div class="text-sm font-bold">${res?res.name:'?'} — ${med?(state.currentUser?.type==='dev'?'••••••':esc(med.name)):'?'}</div>
-          <div class="text-muted" style="font-size:.75rem">${h.time||''} | ${round?round.name:''} | <strong>${h.nurseName||'—'}</strong></div>
-          ${h.note?`<div class="text-muted" style="font-size:.73rem;font-style:italic">* ${esc(h.note)}</div>`:''}
+      const badge=h.status==='given'
+        ?'<span style="font-size:.7rem;font-weight:700;color:var(--given);background:#e8f8f3;padding:.15rem .5rem;border-radius:20px;white-space:nowrap">ניתנה ✓</span>'
+        :'<span style="font-size:.7rem;font-weight:700;color:var(--skip);background:#fef2f2;padding:.15rem .5rem;border-radius:20px;white-space:nowrap">✕ דולג</span>';
+      html+=`<div class="adm-hist-entry">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.82rem;font-weight:700;color:var(--text-primary)">${res?esc(res.name):'?'} — ${med?(state.currentUser?.type==='dev'?'••••••':esc(med.name)):'?'}</div>
+          <div style="font-size:.72rem;color:var(--text-secondary);margin-top:.1rem">${h.time||''} | ${round?esc(round.name):''} | <strong>${esc(h.nurseName||'—')}</strong></div>
+          ${h.note?`<div style="font-size:.7rem;color:var(--text-muted);font-style:italic;margin-top:.1rem">* ${esc(h.note)}</div>`:''}
         </div>${badge}
       </div>`;
     });
-    html+=`</div>`;
+    html+=`</div></div>`;
   });
   return html;
 }
@@ -3055,14 +3363,8 @@ function applyAdminProfileToChrome() {
   const displayName = state.currentUser?.displayName || creds.displayName || 'מנהל';
   const fullName = state.currentUser?.name || creds.name || displayName;
   if (info) {
-    info.querySelector('strong').textContent = displayName;
-    info.querySelector('span').textContent = 'שלום, ' + displayName;
-  }
-  const title = document.getElementById('adminTitle');
-  if (title && state.currentUser?.type !== 'dev') {
-    const badge = title.querySelector('#syncBadge');
-    title.childNodes[0].nodeValue = 'לוח ניהול ';
-    if (badge && !title.contains(badge)) title.appendChild(badge);
+    const nameEl = info.querySelector('#adminUserName') || info;
+    nameEl.textContent = displayName;
   }
   return { displayName, fullName };
 }
