@@ -10,13 +10,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="תרופות">
-<meta name="theme-color" content="#2D8B74">
+<meta name="theme-color" content="#006C70">
 <title>מעקב תרופות – דיור מוגן</title>
 <link rel="icon" href="icons/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<!-- v16 -->
+<!-- v18 -->
 <link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icons/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
@@ -697,6 +696,264 @@
   .login-help summary::-webkit-details-marker { display: none; }
   .login-help-content { margin-top: .6rem; display: grid; gap: .35rem; text-align: center; line-height: 1.45; }
   #devTabBtn { background: none; border: none; color: var(--text-muted); opacity: .45; cursor: pointer; font-family: var(--font); font-size: .68rem; padding: .15rem .4rem; }
+
+  /* ===== REFERENCE CLINICAL DASHBOARD LANGUAGE ===== */
+  :root {
+    --primary:       #006C70;
+    --primary-dark:  #004F52;
+    --primary-light: #EEF9F8;
+    --primary-mid:   #8BBFC1;
+    --bg:            #FFFFFF;
+    --bg2:           #F7FAFA;
+    --card:          #FFFFFF;
+    --surface1:      #FBFCFC;
+    --surface2:      #F4F8F8;
+    --border:        #D8E1E2;
+    --border-light:  #E7ECEC;
+    --text:          #242933;
+    --text-secondary:#59616C;
+    --text-muted:    #707985;
+    --success:       #006C70;
+    --success-bg:    #F5FBFA;
+    --skip:          #F01822;
+    --skip-bg:       #FFF7F7;
+    --accent-orange: #D09300;
+    --accent-orange-bg: #FFF8E7;
+    --accent-orange-border: #F0D187;
+    --shadow:        0 1px 2px rgba(27, 35, 45, .04);
+    --shadow-md:     0 10px 34px rgba(27, 35, 45, .09);
+    --radius:        10px;
+    --radius-sm:     7px;
+  }
+
+  html, body { background: #FFFFFF; }
+  body { color: var(--text); }
+
+  #loginScreen { background: #FFFFFF; }
+  .login-box {
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    background: #FFFFFF;
+  }
+  .login-logo .icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 10px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-light);
+    box-shadow: none;
+  }
+  .login-logo .icon img {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+    display: block;
+  }
+  .login-logo h1,
+  .topbar-title {
+    color: var(--primary-dark);
+    font-weight: 800;
+  }
+  .login-roles {
+    border-radius: 6px;
+    border-color: var(--primary);
+    background: #FFFFFF;
+  }
+  .login-role-card.active {
+    background: var(--primary-light);
+    box-shadow: none;
+  }
+
+  .topbar,
+  .admin-topbar-v2 {
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border);
+    box-shadow: none;
+  }
+  .topbar-btn,
+  .atb-tab,
+  .admin-tab,
+  .pill-tab,
+  .round-chip,
+  .admin-edit-btn,
+  .btn-outline,
+  .note-save-btn {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #FFFFFF;
+    box-shadow: none;
+    color: var(--primary);
+  }
+  .topbar-btn:hover,
+  .atb-tab:hover,
+  .round-chip:hover,
+  .btn-outline:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+  }
+
+  .bottom-nav {
+    top: auto;
+    bottom: 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 0;
+    background: rgba(255,255,255,.96);
+  }
+  .nav-btn {
+    font-size: .78rem;
+    color: var(--text-secondary);
+    min-height: 64px;
+  }
+  .nav-btn .nav-icon svg {
+    width: 25px;
+    height: 25px;
+    stroke-width: 2;
+  }
+  .nav-btn.active {
+    color: var(--primary);
+    border-top: 4px solid var(--primary);
+    border-bottom: 0;
+  }
+
+  .card,
+  .resident-row,
+  .list-item,
+  .reminder-card,
+  .empty-state,
+  .stat-card,
+  .round-header-v2,
+  .res-row-v2,
+  .summary-strip,
+  .adm-round-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #FFFFFF;
+    box-shadow: none;
+  }
+
+  .round-header-v2 {
+    padding: 1rem;
+  }
+  .round-header-title {
+    color: var(--text);
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+  .round-stats-grid {
+    grid-template-columns: 1.35fr 1fr 1fr;
+    gap: .7rem;
+  }
+  .rsg-box {
+    background: #FFFFFF;
+    border-radius: 0;
+    min-height: 104px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .rsg-box + .rsg-box {
+    border-right: 1px solid var(--border-light);
+  }
+  .rsg-box .rsg-main {
+    color: var(--primary);
+    font-size: 1.45rem;
+  }
+  .rsg-round-name {
+    color: var(--text);
+    font-size: 1.55rem;
+    font-weight: 800;
+  }
+  .rsg-round-time {
+    color: var(--text);
+    font-size: 1.1rem;
+  }
+  .rsg-progress-bar {
+    height: 7px;
+    background: #C9DADD;
+    max-width: 132px;
+    margin: .35rem auto .12rem;
+  }
+  .rsg-progress-fill { background: var(--primary); }
+
+  .next-action-card {
+    min-height: 70px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #FFF8E7 0%, #FFFDF7 100%);
+    border-color: var(--accent-orange-border);
+    justify-content: space-between;
+    padding: .8rem 1rem;
+  }
+  .nac-label {
+    color: var(--accent-orange);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .nac-name {
+    font-size: 1rem;
+    font-weight: 800;
+  }
+  .nac-btn {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(145deg, #DCA000 0%, #C98D00 100%);
+  }
+
+  .res-col-hdrs {
+    color: var(--text-secondary);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .res-row-v2 {
+    border-radius: 4px;
+    border-color: #DED5C8;
+  }
+  .resident-avatar {
+    background: transparent;
+    color: var(--primary);
+    box-shadow: none;
+    border: 0;
+  }
+  .resident-name,
+  .res-name {
+    font-size: 1.08rem;
+    font-weight: 800;
+  }
+  .med-btn-given,
+  .med-btn-skip,
+  .btn-primary,
+  .btn-orange,
+  .admin-add-btn {
+    background: #FFFFFF;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    border-radius: 4px;
+    box-shadow: none;
+    font-weight: 800;
+  }
+  .med-btn-given.active {
+    background: #FFFFFF;
+    color: var(--primary);
+    box-shadow: none;
+  }
+  .med-btn-skip {
+    border-color: var(--skip);
+    color: var(--skip);
+  }
+  .med-btn-skip.active,
+  .admin-delete-btn {
+    background: #FFFFFF;
+    color: var(--skip);
+    border-color: var(--skip);
+  }
+
+  @media (max-width: 430px) {
+    .round-stats-grid { gap: .4rem; }
+    .rsg-round-name { font-size: 1.35rem; }
+    .rsg-round-time { font-size: 1rem; }
+    .rsg-box { min-height: 92px; }
+    .next-action-card { padding: .75rem; }
+  }
 
   /* ===== DESKTOP (≥769px) ===== */
   @media (min-width: 769px) {
@@ -1676,7 +1933,7 @@
 <div id="loginScreen" class="screen active">
   <div class="login-box">
     <div class="login-logo" style="animation:fadeSlideDown .4s ease">
-      <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+      <div class="icon"><img src="./icons/icon-192.png" alt="" aria-hidden="true"></div>
       <h1>מעקב תרופות</h1>
       <p>מערכת ניהול תרופות לדיור מוגן</p>
     </div>
@@ -1842,9 +2099,6 @@
       <span id="syncBadge" style="font-size:.68rem;background:var(--primary-light);color:var(--primary);border-radius:10px;padding:.12rem .38rem;opacity:0;transition:opacity .4s;font-weight:700">✓</span>
     </div>
     <div style="width:80px;display:flex;justify-content:flex-end">
-      <button class="ntb-icon-btn" onclick="showAdminFromNurse()" id="toAdminBtn" style="display:none" title="ניהול">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      </button>
       <div id="nurseUserInfo" style="display:none"><strong></strong><span></span></div>
     </div>
   </div>
@@ -1956,18 +2210,13 @@ const defaultData = {
 };
 
 // ── GitHub Sync ─────────────────────────────────────────────────
-const GH_TOKEN = "ghp_q0rgqERADyZyE1Dd" + "5e2C89cB8gTKif24QSi1";
 const GH_REPO  = "gefenrose/medications";
 const GH_FILE  = "data.json";
-const GH_API   = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
 const GH_RAW   = `https://raw.githubusercontent.com/${GH_REPO}/main/${GH_FILE}`;
 
-let _fileSha      = null;  // SHA needed for PUT (updated after each write)
 let _lastTs       = 0;     // last seen _ts from remote
 let _pollInterval = null;
-let _writeQueue   = null;  // debounce timer
 let _syncEnabled  = false;
-let _writing      = false;
 
 // Reads via CDN raw URL — no auth, no API rate-limit, simpler decoding
 async function ghRead() {
@@ -1978,72 +2227,8 @@ async function ghRead() {
   } catch(e) { return null; }
 }
 
-// Fetches current SHA from API — only called when we need to write
-async function ghGetSha() {
-  try {
-    const r = await fetch(GH_API, {
-      headers: { Authorization: 'token ' + GH_TOKEN, Accept: 'application/vnd.github.v3+json' }
-    });
-    if (!r.ok) return null;
-    const j = await r.json();
-    return j.sha || null;
-  } catch(e) { return null; }
-}
-
-// Safe UTF-8 → base64 for any size payload
-function toBase64(str) {
-  const bytes = new TextEncoder().encode(str);
-  let bin = '';
-  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-  return btoa(bin);
-}
-
-async function ghWrite(payload, retrying) {
-  if (_writing && !retrying) return;
-  _writing = true;
-  try {
-    // Always fetch a fresh SHA before writing to avoid stale-SHA conflicts
-    const sha = await ghGetSha();
-    if (!sha) { showSyncBadge('✕ שגיאת חיבור', true); return; }
-    _fileSha = sha;
-
-    payload._ts = Date.now();
-    const r = await fetch(GH_API, {
-      method: 'PUT',
-      headers: { Authorization: 'token ' + GH_TOKEN, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
-      body: JSON.stringify({
-        message: 'sync ' + new Date().toLocaleTimeString('he-IL'),
-        content: toBase64(JSON.stringify(payload)),
-        sha: _fileSha
-      })
-    });
-    if (r.ok) {
-      const j = await r.json();
-      _fileSha = j.content?.sha || _fileSha;
-      _lastTs  = payload._ts;
-      showSyncBadge('✓ מסונכרן');
-    } else if (r.status === 409 && !retrying) {
-      // Conflict: another device wrote between our ghGetSha() and PUT — merge and retry once
-      const fresh = await ghRead();
-      if (fresh) mergeRemote(fresh);
-      await ghWrite(payload, true);
-    } else {
-      showSyncBadge('✕ שגיאת שמירה', true);
-    }
-  } catch(e) { console.warn('ghWrite', e); showSyncBadge('✕ שגיאת חיבור', true); }
-  finally { _writing = false; }
-}
-
 function saveDataRemote() {
-  if (_writeQueue) clearTimeout(_writeQueue);
-  _writeQueue = setTimeout(() => {
-    const payload = {
-      nurses: data.nurses, residents: data.residents, meds: data.meds,
-      rounds: data.rounds, history: data.history,
-      activeRoundSession: data.activeRoundSession || null
-    };
-    ghWrite(payload);
-  }, 600);
+  showSyncBadge('✓ נשמר מקומית');
 }
 
 function mergeRemote(remote) {
@@ -2074,7 +2259,7 @@ function startSync() {
   if (_pollInterval) return;
   _syncEnabled = true;
   _pollInterval = setInterval(async () => {
-    if (!_syncEnabled || _writing) return;
+    if (!_syncEnabled) return;
     const remote = await ghRead();
     if (!remote) { showSyncBadge('✕ אין חיבור', true); return; }
     if ((remote._ts || 0) > _lastTs) {
@@ -2362,7 +2547,6 @@ function doLogin() {
     } else { err.style.display = 'block'; }
   }
 }
-document.getElementById('loginPassword').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 function doLogout() {
   stopSync();
   stopAdminIdleTimer();
@@ -3124,14 +3308,14 @@ function renderNurseRound() {
     const nextRes = data.residents.find(r => r.id === nextEntry.residentId);
     if (nextRes) {
       html += `<div class="next-action-card" style="margin:0 .8rem .6rem">
+        <button class="nac-btn" onclick="markAllMeds('${round.id}','${nextEntry.residentId}','given')" title="סמן ניתנה">
+          ${icon('chevron-left',16)}
+        </button>
         <div class="nac-info">
           <div class="nac-label">הפעולה הבאה</div>
           <div class="nac-name">חדר ${esc(nextRes.room)} · ${esc(nextRes.name)}</div>
           <div class="nac-meds">${nextEntry.medIds.length} תרופות</div>
         </div>
-        <button class="nac-btn" onclick="markAllMeds('${round.id}','${nextEntry.residentId}','given')" title="סמן ניתנה">
-          ${icon('chevron-left',16)}
-        </button>
       </div>`;
     }
   }
@@ -4343,11 +4527,6 @@ function showNurseViewFromAdmin() {
   showScreen('nurseScreen');
   nurseTab('round');
 }
-function showAdminFromNurse() {
-  showScreen('adminScreen');
-  applyAdminProfileToChrome();
-  adminTab('rounds');
-}
 
 // ==================== PUSH NOTIFICATIONS ====================
 
@@ -4517,9 +4696,6 @@ function initNavIcons() {
     const el = document.getElementById(id);
     if (el) el.style.display = '';
   });
-  // Show back-to-admin button in nurse screen for admin/dev users
-  const toAdmin = document.getElementById('toAdminBtn');
-  if (toAdmin) toAdmin.style.display = '';
   const ni = {'ni-round':'pill','ni-hist':'history'};
   Object.entries(ni).forEach(([id,name]) => {
     const el = document.getElementById(id);
@@ -4593,7 +4769,11 @@ const origOpenModal = openModal;
 </script>
 
 <script>
-if ('serviceWorker' in navigator) {
+const canUseServiceWorker =
+  'serviceWorker' in navigator &&
+  (location.protocol === 'http:' || location.protocol === 'https:');
+
+if (canUseServiceWorker) {
   window.addEventListener('load', async () => {
     try {
       // updateViaCache:'none' = browser never caches sw.js itself
