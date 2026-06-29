@@ -2544,7 +2544,7 @@ function renderAdminResidents() {
     html += `<div class="adm-list-item">
       <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">
         ${!isDev ? `<div class="res-room-num">${esc(res.room)}</div>` : ''}
-        <div class="resident-avatar" style="width:34px;height:34px;font-size:.75rem">${initials(res.name)}</div>
+        <div class="resident-avatar${res.photo ? ' photo' : ''}" style="width:34px;height:34px;font-size:.75rem">${res.photo ? `<img src="${esc(res.photo)}" alt="${esc(res.name)}">` : initials(res.name)}</div>
       </div>
       <div class="adm-item-body">
         <div class="adm-item-title">${esc(res.name)}</div>
@@ -2604,7 +2604,7 @@ function renderAdminNurses() {
   const nursesFiltered = nurseQ ? data.nurses.filter(n=>fuzzy(n.name,nurseQ)) : data.nurses;
   nursesFiltered.forEach(nurse => {
     html += `<div class="adm-list-item">
-      <div class="resident-avatar" style="width:36px;height:36px;font-size:.78rem">${initials(nurse.name)}</div>
+      <div class="resident-avatar${nurse.photo ? ' photo' : ''}" style="width:36px;height:36px;font-size:.78rem">${nurse.photo ? `<img src="${esc(nurse.photo)}" alt="${esc(nurse.name)}">` : initials(nurse.name)}</div>
       <div class="adm-item-body">
         <div class="adm-item-title">${esc(nurse.name)}</div>
         <div class="adm-item-sub">שם משתמש: ${esc(nurse.username)}</div>
@@ -2925,20 +2925,53 @@ function openNurseModal(id) {  if (state.currentUser?.type === 'dev') return;
     <div class="form-group"><label>שם מלא</label><input id="nurse_name" value="${nurse ? esc(nurse.name) : ''}"></div>
     <div class="form-group"><label>שם משתמש</label><input id="nurse_username" value="${nurse ? esc(nurse.username) : ''}"></div>
     <div class="form-group"><label>סיסמה</label><input id="nurse_password" type="password" placeholder="${nurse ? 'השאר ריק לשמירת הסיסמה הקיימת' : ''}"></div>
+    <div class="form-group">
+      <label>תמונה</label>
+      <div class="photo-picker">
+        <div id="nurse_photo_preview">${photoPreviewHtml(nurse?.name || '', nurse?.photo || '')}</div>
+        <div style="flex:1">
+          <input type="hidden" id="nurse_photo_data" value="${nurse?.photo ? esc(nurse.photo) : ''}">
+          <input class="photo-file" id="nurse_photo_file" type="file" accept="image/*" onchange="handleNursePhoto(this)">
+          <div class="photo-picker-actions">
+            <label for="nurse_photo_file" class="btn btn-outline btn-sm">בחר תמונה</label>
+            <button type="button" class="btn btn-outline btn-sm" onclick="removeNursePhoto()">הסר</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <button class="btn btn-orange w-full mt-md" onclick="saveNurse()">שמור</button>
   `);
+}
+async function handleNursePhoto(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { alert('נא לבחור קובץ תמונה'); input.value = ''; return; }
+  try {
+    const dataUrl = await resizeResidentPhoto(file);
+    document.getElementById('nurse_photo_data').value = dataUrl;
+    const name = document.getElementById('nurse_name')?.value || '';
+    document.getElementById('nurse_photo_preview').innerHTML = photoPreviewHtml(name, dataUrl);
+  } catch(e) {
+    alert(e.message || 'לא ניתן לטעון את התמונה');
+  } finally { input.value = ''; }
+}
+function removeNursePhoto() {
+  document.getElementById('nurse_photo_data').value = '';
+  const name = document.getElementById('nurse_name')?.value || '';
+  document.getElementById('nurse_photo_preview').innerHTML = photoPreviewHtml(name, '');
 }
 function saveNurse() {
   const name = document.getElementById('nurse_name').value.trim();
   const username = document.getElementById('nurse_username').value.trim();
   const password = document.getElementById('nurse_password').value.trim();
+  const photo = document.getElementById('nurse_photo_data')?.value || '';
   if (!name || !username) return alert('נא למלא שם ושם משתמש');
   if (state.editId) {
     const n = data.nurses.find(n=>n.id===state.editId);
-    if (n) { n.name = name; n.username = username; if (password) n.password = password; }
+    if (n) { n.name = name; n.username = username; n.photo = photo; if (password) n.password = password; }
   } else {
     if (!password) return alert('נא להכניס סיסמה');
-    data.nurses.push({ id: genId(), name, username, password });
+    data.nurses.push({ id: genId(), name, username, password, photo });
   }
   saveData(); closeModal(); renderAdminContent();
 }
