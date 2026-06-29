@@ -828,8 +828,8 @@
 
   /* Nurse screen nav — at bottom via flex order */
   #nurseScreen .bottom-nav {
-    position: sticky !important;
-    bottom: 0 !important;
+    position: relative !important;
+    bottom: auto !important;
     top: auto !important;
     border-top: .5px solid var(--border-light);
     border-bottom: none;
@@ -3705,10 +3705,6 @@ function applyAdminProfileToChrome() {
   if (sidebarName) sidebarName.textContent = displayName;
   const sidebarAvatar = document.getElementById('adminUserAvatarSidebar');
   if (sidebarAvatar) sidebarAvatar.textContent = displayName.charAt(0);
-  // Sync toNurseBtn visibility to sidebar
-  const toNurseSidebar = document.getElementById('toNurseBtnSidebar');
-  const toNurseTopbar  = document.getElementById('toNurseBtn');
-  if (toNurseSidebar && toNurseTopbar) toNurseSidebar.style.display = toNurseTopbar.style.display;
   return { displayName, fullName };
 }
 
@@ -4424,13 +4420,11 @@ function toggleRoundNotif(roundId, mute) {
 
 // ==================== INIT ====================
 function initNavIcons() {
-  // Hide profile tab for dev
-  document.querySelectorAll('.admin-tab').forEach(btn => {
-    if (btn.textContent.includes('פרופיל') && state.currentUser?.type === 'dev') {
-      btn.style.display = 'none';
-    } else {
-      btn.style.display = '';
-    }
+  // Hide profile tab for dev (mobile tab bar + overflow menu + sidebar)
+  const isDev = state.currentUser?.type === 'dev';
+  ['adminProfileTab', 'adminProfileTabSidebar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isDev ? 'none' : '';
   });
   const ni = {'ni-round':'pill','ni-hist':'history','ni-bell':'bell'};
   Object.entries(ni).forEach(([id,name]) => {
