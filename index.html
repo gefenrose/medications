@@ -58,7 +58,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: var(--font); background: var(--bg); color: var(--text); direction: rtl; min-height: 100vh; font-size: 15px; }
 
-  .screen { display: none; height: 100%; min-height: 100vh; flex-direction: column; overflow: hidden; }
+  .screen { display: none; height: 100vh; height: 100dvh; max-height: 100dvh; flex-direction: column; overflow: hidden; }
   .screen.active { display: flex; }
 
   /* LOGIN */
@@ -283,7 +283,7 @@
   }
 
   /* Prevent overscroll bounce showing white bg on iOS */
-  html, body { overscroll-behavior: none; background: var(--bg); }
+  html, body { overscroll-behavior: none; background: var(--bg); height: 100%; }
   body { -webkit-font-smoothing: antialiased; }
 
   /* Med row buttons — wrap on very small screens */
