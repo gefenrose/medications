@@ -704,12 +704,23 @@
     /* Topbar: remove safe-area padding, add subtle bottom border */
     .topbar { padding: .8rem 2rem; }
 
-    /* Bottom nav: move to sidebar-style or keep as top nav strip — keep top for simplicity */
+    /* Bottom nav: default sticky-top for old screens; nurse screen keeps it at bottom */
     .bottom-nav { position: sticky; top: 0; }
+    #nurseScreen .bottom-nav { position: relative !important; top: auto !important; }
 
     /* Content: more breathing room, bigger max-width */
     .content { padding: 1.6rem 2rem; padding-bottom: 2rem; max-width: 860px; }
     .content-wide { padding: 1.6rem 2rem; }
+
+    /* Nurse screen: keep bottom nav at bottom on desktop */
+    #nurseScreen .bottom-nav {
+      position: relative !important;
+      top: auto !important;
+      border-top: .5px solid var(--border-light);
+      border-bottom: none;
+    }
+    #nurseScreen .content { max-width: 700px; margin: 0 auto; width: 100%; padding: 1.2rem 2rem; }
+    #nurseBottomBar { max-width: 700px; margin: 0 auto; width: 100%; }
 
     /* Admin screen: full-width sidebar layout on desktop */
     #app { max-width: none !important; }
@@ -717,6 +728,13 @@
       flex-direction: row !important;
       overflow: hidden;
       height: 100vh;
+    }
+    .admin-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
     }
     .admin-topbar-v2 {
       display: none !important;
@@ -834,6 +852,7 @@
     position: relative !important;
     bottom: auto !important;
     top: auto !important;
+    flex-shrink: 0 !important;
     border-top: .5px solid var(--border-light);
     border-bottom: none;
     padding-bottom: env(safe-area-inset-bottom);
@@ -850,7 +869,9 @@
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    min-height: 0;
   }
+  #nurseBottomBar { flex-shrink: 0; }
 
   /* Round header card v2 */
   .round-header-v2 {
@@ -1405,6 +1426,15 @@
   .atb-menu-item:active { background: var(--primary-light); }
   .atb-menu-item.active { color: var(--primary); background: var(--primary-light); }
 
+  /* Admin main column (mobile = stacked, desktop = fills beside sidebar) */
+  .admin-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+
   /* Admin content wrapper */
   .admin-content-wrap {
     flex: 1;
@@ -1732,6 +1762,8 @@
       </button>
     </div>
   </aside>
+  <!-- Mobile: topbar + tabs + content stacked in column -->
+  <div class="admin-main">
   <!-- Topbar v2 -->
   <div class="admin-topbar-v2">
     <div class="atb-actions">
@@ -1775,6 +1807,7 @@
 
   <!-- Scrollable content -->
   <div class="admin-content-wrap" id="adminContent"></div>
+  </div><!-- /.admin-main -->
 </div>
 
 <!-- ===== NURSE SCREEN ===== -->
