@@ -809,7 +809,8 @@
 
   /* Nurse screen nav — at bottom via flex order */
   #nurseScreen .bottom-nav {
-    position: relative !important;
+    position: sticky !important;
+    bottom: 0 !important;
     top: auto !important;
     border-top: .5px solid var(--border-light);
     border-bottom: none;
@@ -817,6 +818,7 @@
     background: rgba(255,255,255,.97);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    z-index: 98;
   }
   #nurseScreen {
     flex-direction: column;
@@ -992,7 +994,7 @@
     padding: .75rem .9rem;
     margin-bottom: .45rem;
     display: grid;
-    grid-template-columns: 1fr 1.4fr 84px;
+    grid-template-columns: 1fr 1.2fr 72px;
     gap: .5rem;
     align-items: center;
     transition: box-shadow .2s, border-color .2s;
@@ -1088,26 +1090,40 @@
   .rme-dot.skipped { background: var(--skip); }
   .rme-dot.pending { background: var(--border); }
 
-  /* Status button col */
-  .res-status-col { display: flex; align-items: center; justify-content: flex-start; }
+  /* Status buttons col */
+  .res-status-col {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .28rem;
+    min-width: 0;
+  }
+  .rsb-pair { display: flex; flex-direction: column; gap: .28rem; width: 100%; }
   .rsb {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: .25rem;
-    padding: .42rem .6rem;
+    justify-content: center;
+    gap: .22rem;
+    padding: .38rem .3rem;
     border-radius: 9px;
-    font-size: .78rem;
+    font-size: .76rem;
     font-weight: 700;
     font-family: var(--font);
     cursor: pointer;
-    min-height: 44px;
+    min-height: 36px;
     border: 2px solid transparent;
     transition: all .14s;
     white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
     line-height: 1;
+    width: 100%;
   }
-  .rsb:active { transform: scale(.93); }
+  .rsb:active { transform: scale(.94); }
+  .rsb.given-btn         { background: var(--success-bg); color: var(--success); border-color: var(--success); }
+  .rsb.given-btn.active  { background: var(--success); color: white; }
+  .rsb.skip-btn          { background: var(--skip-bg); color: var(--skip); border-color: var(--skip); }
+  .rsb.skip-btn.active   { background: var(--skip); color: white; }
+  /* legacy single-button states kept for undo button */
   .rsb.next    { background: var(--accent-orange); color: white; border-color: var(--accent-orange); }
   .rsb.pending { background: var(--bg); color: var(--text-muted); border-color: var(--border); }
   .rsb.given   { background: transparent; color: var(--success); border-color: var(--success); }
@@ -1615,14 +1631,14 @@
   <div class="content" id="nurseContent" style="padding-bottom:0"></div>
 
   <nav class="bottom-nav">
-    <button class="nav-btn" id="navReminders" onclick="nurseTab('reminders')">
-      <span class="nav-icon" id="ni-bell"></span><span>התראות</span>
+    <button class="nav-btn active" id="navRound" onclick="nurseTab('round')">
+      <span class="nav-icon" id="ni-round"></span><span>סבב</span>
     </button>
     <button class="nav-btn" id="navHistory" onclick="nurseTab('history')">
       <span class="nav-icon" id="ni-hist"></span><span>היסטוריה</span>
     </button>
-    <button class="nav-btn active" id="navRound" onclick="nurseTab('round')">
-      <span class="nav-icon" id="ni-round"></span><span>סבב</span>
+    <button class="nav-btn" id="navReminders" onclick="nurseTab('reminders')">
+      <span class="nav-icon" id="ni-bell"></span><span>התראות</span>
     </button>
   </nav>
 </div>
@@ -3011,8 +3027,17 @@ function renderNurseRound() {
         </div>
       </div>
       <div class="res-status-col">
-        ${isDev ? '<span style="font-size:.72rem;color:var(--text-muted)">צפייה</span>' :
-          `<button class="rsb ${btnCls}" onclick="${btnAction}">${btnIconHtml} ${btnLabel}</button>`}
+        ${isDev ? '<span style="font-size:.72rem;color:var(--text-muted)">צפייה</span>' : `
+        <div class="rsb-pair">
+          <button class="rsb given-btn${allGiven && allDone ? ' active' : ''}"
+            onclick="markAllMeds('${round.id}','${entry.residentId}',${allGiven && allDone ? "'undo'" : "'given'"})">
+            ✓ ניתנה
+          </button>
+          <button class="rsb skip-btn${anySkipped && allDone ? ' active' : ''}"
+            onclick="markAllMeds('${round.id}','${entry.residentId}',${anySkipped && allDone ? "'undo'" : "'skipped'"})">
+            ✕ דולג
+          </button>
+        </div>`}
       </div>
     </div>`;
   });
