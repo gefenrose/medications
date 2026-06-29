@@ -10,9 +10,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="תרופות">
-<meta name="theme-color" content="#4A7C6F">
+<meta name="theme-color" content="#4B86A8">
 <title>מעקב תרופות – דיור מוגן</title>
-<!-- v13 -->
+<!-- v16 -->
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -22,10 +22,10 @@
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
   :root {
     /* Primary — muted teal/sage, not screaming blue */
-    --primary:       #4A7C6F;
-    --primary-dark:  #2F5F54;
-    --primary-light: #EBF4F1;
-    --primary-mid:   #7AADA2;
+    --primary:       #4B86A8;
+    --primary-dark:  #2F617C;
+    --primary-light: #EAF4FA;
+    --primary-mid:   #9FC7DD;
 
     /* Surfaces — Material You tonal */
     --bg:            #F4F6F4;
@@ -150,6 +150,8 @@
   .resident-row.given { background: var(--success-bg); border: none; }
   .resident-row.skipped { background: var(--skip-bg); border: none; }
   .resident-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: .9rem; font-weight: 700; color: var(--primary); flex-shrink: 0; border: none; }
+  .resident-avatar.photo { background-size: cover; background-position: center; color: transparent; overflow: hidden; }
+  .resident-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .resident-info { flex: 1; }
   .resident-name { font-weight: 700; font-size: .92rem; color: var(--text); }
   .resident-meds { font-size: .75rem; color: var(--text-secondary); margin-top: .18rem; }
@@ -172,7 +174,7 @@
   .list-item-actions { display: flex; gap: .3rem; }
 
   /* ROUND HEADER CARD */
-  .round-card { background: linear-gradient(160deg, #3D6B5E 0%, #5A9A8A 100%); border: none; border-radius: var(--radius); padding: 1.1rem 1.3rem; margin-bottom: 1rem; }
+  .round-card { background: linear-gradient(160deg, #3F789A 0%, #6EA6C3 100%); border: none; border-radius: var(--radius); padding: 1.1rem 1.3rem; margin-bottom: 1rem; }
   .round-card h2 { font-size: 1.2rem; font-weight: 700; color: white; }
   .round-card p { font-size: .82rem; color: rgba(255,255,255,.75); margin-top: .2rem; }
   .round-card .time-badge { background: rgba(255,255,255,.25); color: white; border-radius: 6px; padding: .25rem .65rem; font-size: .82rem; font-weight: 700; display: inline-block; margin-top: .5rem; }
@@ -212,6 +214,10 @@
   .med-pill { display: inline-flex; align-items: center; gap: .35rem; padding: .45rem .85rem; border-radius: 20px; border: 1.5px solid var(--border-light); background: white; cursor: pointer; font-size: .85rem; font-weight: 500; color: var(--text-secondary); transition: all .18s; user-select: none; -webkit-tap-highlight-color: transparent; min-height: 38px; }
   .med-pill.selected { background: var(--surface2); border-color: var(--primary-mid); color: var(--primary); font-weight: 700; }
   .med-pill.selected::before { content: "✓ "; font-size: .8rem; }
+  .photo-picker { display: flex; align-items: center; gap: .75rem; padding: .75rem; border: 1px solid var(--border-light); border-radius: var(--radius-sm); background: var(--surface1); }
+  .photo-picker .resident-avatar { width: 58px; height: 58px; font-size: 1rem; }
+  .photo-picker-actions { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .photo-file { position: absolute; inline-size: 1px; block-size: 1px; opacity: 0; pointer-events: none; }
   .divider { height: 1px; background: var(--border-light); margin: .8rem 0; }
   .text-muted { color: var(--text-secondary); font-size: .83rem; }
   .mt-sm { margin-top: .5rem; }
@@ -394,7 +400,7 @@
 
   /* Nurse round-card: richer gradient */
   .round-card {
-    background: linear-gradient(145deg, #3D6B5E 0%, #4A8075 50%, #5A9A8A 100%);
+    background: linear-gradient(145deg, #3F789A 0%, #4B86A8 50%, #78AEC8 100%);
     box-shadow: 0 4px 20px rgba(61,107,94,.3);
   }
 
@@ -602,6 +608,30 @@
   .note-save-btn:active { transform:scale(.96); }
   .note-save-btn.saved { border-color:var(--success);background:var(--success-bg);color:var(--success); }
 
+  /* Compact login polish */
+  #loginScreen { background: var(--bg); padding: 1rem; }
+  .login-box { max-width: 360px; padding: 1.4rem; border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 12px 34px rgba(15, 40, 36, .08); }
+  .login-logo { display: grid; grid-template-columns: 1fr 42px; gap: .75rem; align-items: center; text-align: right; margin-bottom: 1.1rem; }
+  .login-logo .icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; grid-column: 2; grid-row: 1 / span 2; }
+  .login-logo .icon svg { width: 42px; height: 42px; }
+  .login-logo h1 { font-size: 1.2rem; margin: 0; line-height: 1.2; grid-column: 1; letter-spacing: 0; }
+  .login-logo p { font-size: .78rem; margin-top: .18rem; line-height: 1.35; grid-column: 1; max-width: 16rem; }
+  .login-roles { display: grid; grid-template-columns: repeat(2, 1fr); gap: .35rem; margin-bottom: 1rem; padding: .25rem; border: 1px solid var(--border-light); border-radius: 8px; background: var(--surface1); }
+  .login-role-card { border-radius: 7px; min-height: 42px; padding: .55rem .4rem; border: 0; background: transparent; box-shadow: none; }
+  .login-role-card .role-icon { display: none; }
+  .login-role-card .role-label { font-size: .88rem; color: var(--text-secondary); }
+  .login-role-card.active { background: white; border-color: transparent; box-shadow: 0 1px 2px rgba(15, 40, 36, .08); }
+  .login-role-card.active .role-label { color: var(--primary); }
+  .login-box .form-group { margin-bottom: .85rem; }
+  .login-box .form-group label { font-size: .74rem; margin-bottom: .3rem; text-transform: none; font-weight: 700; }
+  .login-box .form-group input { min-height: 46px; border: 1px solid var(--border-light); background: white; }
+  .login-box .btn-primary { margin-top: .35rem; min-height: 46px; }
+  .login-help { margin-top: .8rem; border-top: 1px solid var(--border-light); padding-top: .65rem; color: var(--text-muted); font-size: .74rem; }
+  .login-help summary { cursor: pointer; list-style: none; text-align: center; font-weight: 700; }
+  .login-help summary::-webkit-details-marker { display: none; }
+  .login-help-content { margin-top: .6rem; display: grid; gap: .35rem; text-align: center; line-height: 1.45; }
+  #devTabBtn { background: none; border: none; color: var(--text-muted); opacity: .45; cursor: pointer; font-family: var(--font); font-size: .68rem; padding: .15rem .4rem; }
+
   /* ===== DESKTOP (≥769px) ===== */
   @media (min-width: 769px) {
     /* Layout: center everything in a max-width container */
@@ -680,10 +710,14 @@
 <div id="loginScreen" class="screen active">
   <div class="login-box">
     <div class="login-logo" style="animation:fadeSlideDown .4s ease">
-      <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
-  <rect x="4" y="22" width="56" height="20" rx="10" fill="#4A7C6F" transform="rotate(-35 32 32)"/>
-  <rect x="4" y="22" width="28" height="20" rx="10" fill="white" opacity="0.55" transform="rotate(-35 32 32)"/>
-  <line x1="32" y1="10" x2="32" y2="54" stroke="white" stroke-width="1.5" opacity="0.4" transform="rotate(-35 32 32)"/>
+      <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none" aria-hidden="true">
+  <g transform="rotate(-34 32 32)">
+    <rect x="7" y="22" width="50" height="20" rx="10" fill="#FFFFFF" stroke="#4B86A8" stroke-width="2.5"/>
+    <path d="M32 22h15a10 10 0 0 1 0 20H32V22Z" fill="#4B86A8"/>
+    <path d="M17 30h10" stroke="#B7D8E8" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M32 23.5v17" stroke="#4B86A8" stroke-width="2" stroke-linecap="round" opacity=".35"/>
+  </g>
+  <circle cx="47" cy="18" r="3" fill="#9FC7DD"/>
 </svg></div>
       <h1>מעקב תרופות</h1>
       <p>מערכת ניהול תרופות לדיור מוגן</p>
@@ -712,14 +746,14 @@
     </div>
     <div class="error-msg" id="loginError">שם משתמש או סיסמה שגויים</div>
     <button class="btn-primary mt-md" onclick="doLogin()">כניסה</button>
-    <p style="text-align:center;margin-top:1.2rem;font-size:.78rem;color:var(--text-muted)">מנהל: admin / 1234 &nbsp;|&nbsp; מדריכה: sarah / 1234</p>
-    <p style="text-align:center;margin-top:.8rem">
-      <button onclick="setLoginType('dev')" id="devTabBtn"
-        style="background:none;border:none;font-size:.65rem;color:var(--text-muted);opacity:.25;cursor:pointer;font-family:var(--font);padding:.2rem .5rem;letter-spacing:.04em">
-        developer
-      </button>
-    </p>
-    <p style="text-align:center;margin-top:2rem;font-size:.7rem;color:var(--text-muted);opacity:.55;letter-spacing:.02em">נוצר על ידי גפן רוזנבליט גולני</p>
+    <details class="login-help">
+      <summary>פרטי כניסה לדמו</summary>
+      <div class="login-help-content">
+        <div>מדריכה: sarah / 1234</div>
+        <div>מנהל: admin / 1234</div>
+        <button onclick="setLoginType('dev')" id="devTabBtn">developer</button>
+      </div>
+    </details>
   </div>
 </div>
 
@@ -728,7 +762,7 @@
   <div class="topbar">
     <button class="topbar-btn" onclick="doLogout()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> יציאה</button>
     <div class="topbar-title" id="adminTitle">לוח ניהול <span id="syncBadge" style="font-size:.7rem;background:var(--success-bg);color:var(--success);border-radius:10px;padding:.15rem .4rem;opacity:0;transition:opacity .4s;margin-right:.3rem">✓ מסונכרן</span></div>
-    <div class="topbar-user">
+    <div class="topbar-user" id="adminUserInfo">
       <strong>מנהל</strong>
       <span>שלום, מנהל</span>
     </div>
@@ -1205,10 +1239,16 @@ function doLogin() {
       });
       startSync();
     } else if ((()=>{ const cr=getAdminCreds(); return u===cr.username && p===cr.password; })()) {
-      state.currentUser = { type: 'admin', name: 'מנהל' };
+      const cr = getAdminCreds();
+      state.currentUser = {
+        type: 'admin',
+        name: cr.name || 'מנהל',
+        displayName: cr.displayName || cr.name || 'מנהל'
+      };
       saveSession(state.currentUser);
       resetAdminIdleTimer();
       showScreen('adminScreen');
+      applyAdminProfileToChrome();
       adminTab('rounds');
       // Load latest from Firebase first
       ghRead().then(remote => {
@@ -1381,7 +1421,7 @@ function renderAdminResidents() {
       ? '<span style="filter:blur(4px);user-select:none;pointer-events:none">' + (medNames || 'ללא תרופות') + '</span>'
       : (medNames || 'ללא תרופות');
     html += `<div class="list-item">
-      <div class="resident-avatar">${initials(res.name)}</div>
+      ${residentAvatar(res)}
       <div class="list-item-content">
         <div class="list-item-title">${esc(res.name)}${isDev ? '' : ` — חדר ${esc(res.room)}`}</div>
         <div class="list-item-sub">${medDisplay}</div>
@@ -1611,6 +1651,60 @@ function deleteRound(id) {  if (state.currentUser?.type === 'dev') return;
   saveData(); renderAdminContent();
 }
 
+function photoPreviewHtml(name, photo) {
+  if (photo) return `<div class="resident-avatar photo"><img src="${esc(photo)}" alt="${esc(name || 'דייר')}"></div>`;
+  return `<div class="resident-avatar">${initials(name || '?')}</div>`;
+}
+
+function resizeResidentPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('לא ניתן לקרוא את התמונה'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('קובץ התמונה לא תקין'));
+      img.onload = () => {
+        const max = 360;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.78));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleResidentPhoto(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    alert('נא לבחור קובץ תמונה');
+    input.value = '';
+    return;
+  }
+  try {
+    const dataUrl = await resizeResidentPhoto(file);
+    document.getElementById('res_photo_data').value = dataUrl;
+    const name = document.getElementById('res_name')?.value || '';
+    document.getElementById('res_photo_preview').innerHTML = photoPreviewHtml(name, dataUrl);
+  } catch(e) {
+    alert(e.message || 'לא ניתן לטעון את התמונה');
+  } finally {
+    input.value = '';
+  }
+}
+
+function removeResidentPhoto() {
+  document.getElementById('res_photo_data').value = '';
+  const name = document.getElementById('res_name')?.value || '';
+  document.getElementById('res_photo_preview').innerHTML = photoPreviewHtml(name, '');
+}
+
 function openResidentModal(id) {  if (state.currentUser?.type === 'dev') return;
 
   state.editId = id || null;
@@ -1620,6 +1714,21 @@ function openResidentModal(id) {  if (state.currentUser?.type === 'dev') return;
   openModal(id ? 'עריכת דייר' : 'דייר חדש', `
     <div class="form-group"><label>שם מלא</label><input id="res_name" value="${res ? esc(res.name) : ''}"></div>
     <div class="form-group"><label>מספר חדר</label><input id="res_room" value="${res ? esc(res.room) : ''}"></div>
+    <div class="form-group">
+      <label>תמונה</label>
+      <div class="photo-picker">
+        <div id="res_photo_preview">${photoPreviewHtml(res?.name || '', res?.photo || '')}</div>
+        <div style="flex:1">
+          <input type="hidden" id="res_photo_data" value="${res?.photo ? esc(res.photo) : ''}">
+          <input class="photo-file" id="res_photo_file" type="file" accept="image/*" onchange="handleResidentPhoto(this)">
+          <div class="photo-picker-actions">
+            <label for="res_photo_file" class="btn btn-outline btn-sm">בחר תמונה</label>
+            <button type="button" class="btn btn-outline btn-sm" onclick="removeResidentPhoto()">הסר</button>
+          </div>
+          <div class="text-muted" style="font-size:.74rem;margin-top:.35rem">התמונה תישמר בפרופיל הדייר ותוצג בסבבים</div>
+        </div>
+      </div>
+    </div>
     <div class="form-group"><label>הערות רפואיות / אלרגיות</label><textarea id="res_notes" rows="2">${res ? esc(res.notes) : ''}</textarea></div>
     <div class="form-group">
       <label>תרופות רשומות</label>
@@ -1637,13 +1746,14 @@ function saveResident() {
   const name = document.getElementById('res_name').value.trim();
   const room = document.getElementById('res_room').value.trim();
   const notes = document.getElementById('res_notes').value.trim();
+  const photo = document.getElementById('res_photo_data')?.value || '';
   const meds = [...document.querySelectorAll('#res_med_pills .med-pill.selected')].map(p => p.dataset.medid);
   if (!name) return alert('נא להכניס שם');
   if (state.editId) {
     const r = data.residents.find(r=>r.id===state.editId);
-    if (r) { r.name = name; r.room = room; r.notes = notes; r.meds = meds; }
+    if (r) { r.name = name; r.room = room; r.notes = notes; r.meds = meds; r.photo = photo; }
   } else {
-    data.residents.push({ id: genId(), name, room, notes, meds });
+    data.residents.push({ id: genId(), name, room, notes, meds, photo });
   }
   saveData(); closeModal(); renderAdminContent();
 }
@@ -1971,7 +2081,7 @@ function renderNurseRound() {
     html += `<div class="resident-row ${rowClass}" id="row_${entry.residentId}"
       style="flex-direction:column;align-items:stretch;padding:.9rem 1rem;margin-bottom:.55rem">
       <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.65rem">
-        <div class="resident-avatar">${initials(res.name)}</div>
+        ${residentAvatar(res)}
         <div style="flex:1">
           <div class="resident-name">${esc(res.name)}</div>
           ${state.currentUser?.type !== 'dev' ? `<div class="resident-meds">חדר ${esc(res.room)}</div>` : ''}
@@ -2136,7 +2246,7 @@ function renderNurseDateHistory(dateStr) {
     Object.entries(byRes).forEach(([resId, hlist]) => {
       const res = data.residents.find(r=>r.id===resId);
       html += `<div style="display:flex;align-items:flex-start;gap:.7rem;padding:.5rem 0;border-bottom:1px solid var(--border-light)">
-        <div class="resident-avatar">${initials(res?.name||'?')}</div>
+        ${residentAvatar(res)}
         <div style="flex:1">
           <div class="resident-name">${res ? esc(res.name) : '?'}</div>
           ${hlist.map(h => {
@@ -2355,11 +2465,20 @@ function checkSyncStatus() {
 }
 function renderAdminProfile() {
   if (state.currentUser?.type === 'dev') return '<div class="empty-state"><p>גישה לא מורשית</p></div>';
+  const creds = getAdminCreds();
   return `<div class="card">
     <div class="card-title" style="margin-bottom:.8rem">פרופיל מנהל</div>
     <div class="form-group">
-      <label>שם משתמש חדש</label>
-      <input id="prof_user" placeholder="admin" value="admin">
+      <label>שם מלא</label>
+      <input id="prof_name" placeholder="שם מלא" value="${esc(creds.name || '')}">
+    </div>
+    <div class="form-group">
+      <label>שם לתצוגה</label>
+      <input id="prof_display" placeholder="שם שיופיע במערכת" value="${esc(creds.displayName || creds.name || '')}">
+    </div>
+    <div class="form-group">
+      <label>שם משתמש</label>
+      <input id="prof_user" placeholder="admin" value="${esc(creds.username || 'admin')}">
     </div>
     <div class="form-group">
       <label>סיסמה נוכחית</label>
@@ -2382,15 +2501,41 @@ function renderAdminProfile() {
 function getAdminCreds() {
   try {
     const raw = localStorage.getItem('medtrack_admin_creds');
-    return raw ? JSON.parse(raw) : { username: 'admin', password: '1234' };
-  } catch(e) { return { username: 'admin', password: '1234' }; }
+    const parsed = raw ? JSON.parse(raw) : {};
+    return {
+      username: parsed.username || 'admin',
+      password: parsed.password || '1234',
+      name: parsed.name || 'מנהל',
+      displayName: parsed.displayName || parsed.name || 'מנהל'
+    };
+  } catch(e) { return { username: 'admin', password: '1234', name: 'מנהל', displayName: 'מנהל' }; }
 }
-function setAdminCreds(u, p) {
-  localStorage.setItem('medtrack_admin_creds', JSON.stringify({ username: u, password: p }));
+function setAdminCreds(profile) {
+  localStorage.setItem('medtrack_admin_creds', JSON.stringify(profile));
+}
+
+function applyAdminProfileToChrome() {
+  const info = document.getElementById('adminUserInfo');
+  const creds = getAdminCreds();
+  const displayName = state.currentUser?.displayName || creds.displayName || 'מנהל';
+  const fullName = state.currentUser?.name || creds.name || displayName;
+  if (info) {
+    info.querySelector('strong').textContent = displayName;
+    info.querySelector('span').textContent = 'שלום, ' + displayName;
+  }
+  const title = document.getElementById('adminTitle');
+  if (title && state.currentUser?.type !== 'dev') {
+    const badge = title.querySelector('#syncBadge');
+    title.childNodes[0].nodeValue = 'לוח ניהול ';
+    if (badge && !title.contains(badge)) title.appendChild(badge);
+  }
+  return { displayName, fullName };
 }
 
 function saveAdminProfile() {
   if (state.currentUser?.type === 'dev') return;
+  const name       = document.getElementById('prof_name').value.trim();
+  const display    = document.getElementById('prof_display').value.trim();
   const newUser    = document.getElementById('prof_user').value.trim();
   const curPass    = document.getElementById('prof_cur_pass').value;
   const newPass    = document.getElementById('prof_new_pass').value;
@@ -2405,11 +2550,22 @@ function saveAdminProfile() {
 
   const creds = getAdminCreds();
   if (curPass !== creds.password) { show('סיסמה נוכחית שגויה', false); return; }
+  if (!name) { show('שם מלא לא יכול להיות ריק', false); return; }
+  if (!display) { show('שם לתצוגה לא יכול להיות ריק', false); return; }
   if (!newUser) { show('שם משתמש לא יכול להיות ריק', false); return; }
   if (newPass && newPass !== confirmPass) { show('הסיסמאות החדשות אינן תואמות', false); return; }
   if (newPass && newPass.length < 4) { show('הסיסמה חייבת להכיל לפחות 4 תווים', false); return; }
 
-  setAdminCreds(newUser, newPass || creds.password);
+  const nextProfile = {
+    username: newUser,
+    password: newPass || creds.password,
+    name,
+    displayName: display
+  };
+  setAdminCreds(nextProfile);
+  state.currentUser = { ...state.currentUser, name, displayName: display };
+  saveSession(state.currentUser);
+  applyAdminProfileToChrome();
   show('✓ השינויים נשמרו בהצלחה', true);
   document.getElementById('prof_cur_pass').value = '';
   document.getElementById('prof_new_pass').value = '';
@@ -2909,6 +3065,12 @@ function toggleEntryMedPill(el) {
 }
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function initials(name) { return (name||'?').split(' ').map(w=>w[0]).slice(0,2).join(''); }
+function residentAvatar(res) {
+  if (res?.photo) {
+    return `<div class="resident-avatar photo"><img src="${esc(res.photo)}" alt="${esc(res.name || 'דייר')}"></div>`;
+  }
+  return `<div class="resident-avatar">${initials(res?.name || '?')}</div>`;
+}
 function formatDate(d) {
   const date = new Date(d);
   return date.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -2921,6 +3083,7 @@ function showNurseViewFromAdmin() {
 }
 function showAdminFromNurse() {
   showScreen('adminScreen');
+  applyAdminProfileToChrome();
   adminTab('rounds');
 }
 
@@ -3106,6 +3269,7 @@ document.getElementById('loginPassword').addEventListener('keydown', e => { if (
 
   if (saved.type === 'admin' || saved.type === 'dev') {
     showScreen('adminScreen');
+    if (saved.type === 'admin') applyAdminProfileToChrome();
     adminTab('rounds');
     resetAdminIdleTimer();
     // Load fresh data from GitHub

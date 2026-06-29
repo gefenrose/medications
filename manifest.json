@@ -1,12 +1,12 @@
 {
   "name": "מעקב תרופות – דיור מוגן",
   "short_name": "תרופות",
-  "description": "מערכת ניהול וחלוקת תרופות לדיור מוגן",
+  "description": "מעקב סבבי חלוקת תרופות לדיור מוגן",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f5f0ea",
-  "theme_color": "#b85c38",
+  "background_color": "#F4F6F4",
+  "theme_color": "#4B86A8",
   "lang": "he",
   "dir": "rtl",
   "icons": [
