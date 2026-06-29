@@ -1141,10 +1141,12 @@
     width: 100%;
   }
   .rsb:active { transform: scale(.94); }
-  .rsb.given-btn         { background: var(--success-bg); color: var(--success); border-color: var(--success); }
-  .rsb.given-btn.active  { background: var(--success); color: white; }
-  .rsb.skip-btn          { background: var(--skip-bg); color: var(--skip); border-color: var(--skip); }
-  .rsb.skip-btn.active   { background: var(--skip); color: white; }
+  /* Unpressed: neutral grey, no colour hint */
+  .rsb.given-btn         { background: var(--bg); color: var(--text-muted); border-color: var(--border-light); }
+  .rsb.skip-btn          { background: var(--bg); color: var(--text-muted); border-color: var(--border-light); }
+  /* Pressed: filled colour */
+  .rsb.given-btn.active  { background: var(--success); color: white; border-color: var(--success); }
+  .rsb.skip-btn.active   { background: var(--skip);    color: white; border-color: var(--skip); }
   /* legacy single-button states kept for undo button */
   .rsb.next    { background: var(--accent-orange); color: white; border-color: var(--accent-orange); }
   .rsb.pending { background: var(--bg); color: var(--text-muted); border-color: var(--border); }
@@ -1811,9 +1813,6 @@
     </button>
     <button class="nav-btn" id="navHistory" onclick="nurseTab('history')">
       <span class="nav-icon" id="ni-hist"></span><span>היסטוריה</span>
-    </button>
-    <button class="nav-btn" id="navReminders" onclick="nurseTab('reminders')">
-      <span class="nav-icon" id="ni-bell"></span><span>התראות</span>
     </button>
   </nav>
 </div>
@@ -2908,11 +2907,11 @@ function deleteNurse(id) {  if (state.currentUser?.type === 'dev') return;
 // ==================== NURSE ====================
 function nurseTab(tab) {
   state.nurseTab = tab;
-  ['navRound','navHistory','navReminders'].forEach(id => {
+  ['navRound','navHistory'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
-  const map = { round: 'navRound', history: 'navHistory', reminders: 'navReminders' };
+  const map = { round: 'navRound', history: 'navHistory' };
   // Show notification dot on bell if unseen alerts
   const dot = document.getElementById('nurseNotifDot');
   if (dot) dot.style.display = (tab !== 'reminders' && state.hasNewReminders) ? '' : 'none';
@@ -4434,7 +4433,7 @@ function initNavIcons() {
     const el = document.getElementById(id);
     if (el) el.style.display = isDev ? 'none' : '';
   });
-  const ni = {'ni-round':'pill','ni-hist':'history','ni-bell':'bell'};
+  const ni = {'ni-round':'pill','ni-hist':'history'};
   Object.entries(ni).forEach(([id,name]) => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = icon(name, 22);
