@@ -14,7 +14,7 @@
 <title>מעקב תרופות – דיור מוגן</title>
 <link rel="icon" href="icons/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<!-- v18 -->
+<!-- v19 -->
 <link rel="manifest" href="./manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1474,6 +1474,106 @@
   }
   .rbb-btn.finish-btn { background: var(--primary); color: white; border-color: var(--primary); }
   .rbb-btn:active { transform: scale(.96); }
+
+  @media (min-width: 900px) {
+    #nurseScreen.active {
+      display: flex;
+      min-height: 100vh;
+      height: 100vh;
+      background: #F7FAFA;
+    }
+    #nurseScreen .nurse-topbar-v2 {
+      position: sticky;
+      top: 0;
+      padding: 1rem 2rem;
+    }
+    #nurseScreen .content {
+      width: min(1180px, calc(100vw - 64px));
+      max-width: none;
+      margin: 0 auto;
+      padding: 1.4rem 0 1rem !important;
+      overflow-y: auto;
+    }
+    #nurseScreen .bottom-nav {
+      order: 2;
+      width: min(1180px, calc(100vw - 64px));
+      max-width: none;
+      margin: 0 auto;
+      border: 1px solid var(--border-light);
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 -8px 22px rgba(20, 83, 88, .06);
+      padding: .15rem 0;
+    }
+    #nurseBottomBar {
+      order: 3;
+      width: min(1180px, calc(100vw - 64px));
+      max-width: none;
+      margin: 0 auto;
+    }
+    #nurseBottomBar:empty { display: none; }
+    #nurseScreen .round-bottom-bar {
+      border: 1px solid var(--border-light);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      padding: .8rem 1.2rem;
+    }
+    .nurse-round-desktop-grid {
+      display: grid;
+      grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+      gap: 1rem;
+      align-items: start;
+      direction: ltr;
+    }
+    .nurse-round-summary,
+    .nurse-round-list {
+      direction: rtl;
+      min-width: 0;
+    }
+    .nurse-round-summary {
+      position: sticky;
+      top: 88px;
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+    }
+    .nurse-round-summary .round-header-v2,
+    .nurse-round-summary .next-action-card,
+    .nurse-round-list {
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 12px 30px rgba(20, 83, 88, .06);
+    }
+    .nurse-round-summary .round-header-v2 {
+      margin: 0;
+      padding: 1rem;
+    }
+    .nurse-round-summary .next-action-card {
+      margin: 0 !important;
+      padding: .9rem 1rem;
+    }
+    .nurse-round-list {
+      padding: 1rem;
+    }
+    .nurse-round-list .res-col-hdrs {
+      padding: .2rem .6rem .45rem;
+      margin: 0;
+    }
+    .nurse-round-list .res-row-v2 {
+      grid-template-columns: minmax(210px, 1fr) minmax(260px, 1.25fr) 150px;
+      padding: .9rem 1rem;
+      margin-bottom: .65rem;
+    }
+    .nurse-round-list .rsb-pair {
+      flex-direction: row;
+    }
+    .nurse-round-list .rsb {
+      min-height: 40px;
+    }
+    .nurse-round-list [style*="padding:0 .1rem .4rem"] {
+      padding: 0 0 .7rem !important;
+    }
+  }
 
   /* ===== ADMIN REDESIGN ===== */
 
@@ -3272,7 +3372,7 @@ function renderNurseRound() {
     `<option value="${r.id}" ${r.id===round.id?'selected':''}>${esc(r.name)} (${r.time})</option>`
   ).join('');
 
-  let html = `<div class="round-header-v2">
+  let html = `<div class="nurse-round-desktop-grid"><section class="nurse-round-summary"><div class="round-header-v2">
     <div class="round-header-toprow">
       <div class="round-header-title">${icon('clipboard',17)} חלוקת תרופות</div>
       <div style="position:relative">
@@ -3321,7 +3421,7 @@ function renderNurseRound() {
   }
 
   // ── Column headers ──
-  html += `<div class="res-col-hdrs">
+  html += `</section><section class="nurse-round-list"><div class="res-col-hdrs">
     <span>דייר / חדר</span>
     <span>תרופות במנה זו</span>
     <span>סטטוס</span>
@@ -3496,6 +3596,8 @@ function renderNurseRound() {
       <p>${givenAllRes} דיירים קיבלו${skippedAnyRes > 0 ? ` · ${skippedAnyRes} עם דילוג` : ''}</p>
     </div>`;
   }
+
+  html += `</section></div>`;
 
   const bar = `<div class="round-bottom-bar">
     <div class="rbb-progress">
