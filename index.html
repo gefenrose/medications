@@ -12,6 +12,8 @@
 <meta name="apple-mobile-web-app-title" content="תרופות">
 <meta name="theme-color" content="#2D8B74">
 <title>מעקב תרופות – דיור מוגן</title>
+<link rel="icon" href="icons/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <!-- v16 -->
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
@@ -1393,15 +1395,13 @@
   .atb-more-btn.menu-open { color: var(--primary); }
   .atb-more-menu {
     display: none;
-    position: absolute;
-    top: calc(100% + 2px);
-    right: 0;
+    position: fixed;
     background: white;
     border: 1.5px solid var(--border-light);
     border-radius: 12px;
     box-shadow: 0 6px 24px rgba(0,0,0,.12);
     min-width: 130px;
-    z-index: 200;
+    z-index: 1000;
     overflow: hidden;
     animation: menuFadeIn .15s ease;
   }
@@ -2375,6 +2375,9 @@ function toggleAdminMoreMenu(e) {
   btn.classList.toggle('menu-open', open);
   document.getElementById('atbMoreChevron').style.transform = open ? 'rotate(180deg)' : '';
   if (open) {
+    const rect = btn.getBoundingClientRect();
+    menu.style.top  = (rect.bottom + 2) + 'px';
+    menu.style.right = (window.innerWidth - rect.right) + 'px';
     setTimeout(() => document.addEventListener('click', _closeAdminMoreOnOutside, { once: true }), 0);
   }
 }
