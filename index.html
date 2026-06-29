@@ -711,8 +711,27 @@
     .content { padding: 1.6rem 2rem; padding-bottom: 2rem; max-width: 860px; }
     .content-wide { padding: 1.6rem 2rem; }
 
-    /* Admin screen centering */
-    #adminScreen > div { max-width: 920px; margin: 0 auto; padding: 1.6rem 2rem !important; }
+    /* Admin screen: sidebar layout on desktop */
+    #adminScreen {
+      flex-direction: row !important;
+      overflow: hidden;
+    }
+    .admin-topbar-v2 {
+      display: none; /* replaced by sidebar header */
+    }
+    .admin-sidebar {
+      display: flex !important;
+    }
+    .admin-tab-bar {
+      display: none !important;
+    }
+    .atb-more-wrap { display: none !important; }
+    .admin-content-wrap {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem 2.5rem;
+      min-width: 0;
+    }
 
     /* Modal: center on screen, not bottom sheet */
     .modal-overlay { align-items: center; }
@@ -810,6 +829,7 @@
   /* Nurse screen nav — at bottom via flex order */
   #nurseScreen .bottom-nav {
     position: relative !important;
+    bottom: auto !important;
     top: auto !important;
     border-top: .5px solid var(--border-light);
     border-bottom: none;
@@ -817,6 +837,7 @@
     background: rgba(255,255,255,.97);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    z-index: 98;
   }
   #nurseScreen {
     flex-direction: column;
@@ -992,7 +1013,7 @@
     padding: .75rem .9rem;
     margin-bottom: .45rem;
     display: grid;
-    grid-template-columns: 1fr 1.4fr 84px;
+    grid-template-columns: 1fr 1.2fr 72px;
     gap: .5rem;
     align-items: center;
     transition: box-shadow .2s, border-color .2s;
@@ -1088,26 +1109,40 @@
   .rme-dot.skipped { background: var(--skip); }
   .rme-dot.pending { background: var(--border); }
 
-  /* Status button col */
-  .res-status-col { display: flex; align-items: center; justify-content: flex-start; }
+  /* Status buttons col */
+  .res-status-col {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .28rem;
+    min-width: 0;
+  }
+  .rsb-pair { display: flex; flex-direction: column; gap: .28rem; width: 100%; }
   .rsb {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: .25rem;
-    padding: .42rem .6rem;
+    justify-content: center;
+    gap: .22rem;
+    padding: .38rem .3rem;
     border-radius: 9px;
-    font-size: .78rem;
+    font-size: .76rem;
     font-weight: 700;
     font-family: var(--font);
     cursor: pointer;
-    min-height: 44px;
+    min-height: 36px;
     border: 2px solid transparent;
     transition: all .14s;
     white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
     line-height: 1;
+    width: 100%;
   }
-  .rsb:active { transform: scale(.93); }
+  .rsb:active { transform: scale(.94); }
+  .rsb.given-btn         { background: var(--success-bg); color: var(--success); border-color: var(--success); }
+  .rsb.given-btn.active  { background: var(--success); color: white; }
+  .rsb.skip-btn          { background: var(--skip-bg); color: var(--skip); border-color: var(--skip); }
+  .rsb.skip-btn.active   { background: var(--skip); color: white; }
+  /* legacy single-button states kept for undo button */
   .rsb.next    { background: var(--accent-orange); color: white; border-color: var(--accent-orange); }
   .rsb.pending { background: var(--bg); color: var(--text-muted); border-color: var(--border); }
   .rsb.given   { background: transparent; color: var(--success); border-color: var(--success); }
@@ -1161,6 +1196,104 @@
   /* ===== ADMIN REDESIGN ===== */
 
   /* Admin topbar — same visual language as nurse */
+  /* Admin sidebar (desktop only — hidden by default) */
+  .admin-sidebar {
+    display: none;
+    flex-direction: column;
+    width: 220px;
+    min-width: 220px;
+    background: white;
+    border-left: 1.5px solid var(--border-light);
+    height: 100%;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .asb-header {
+    padding: 1.4rem 1.2rem .9rem;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+  }
+  .asb-brand {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--primary);
+  }
+  .asb-sync {
+    font-size: .68rem;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 8px;
+    padding: .1rem .35rem;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity .4s;
+    align-self: flex-start;
+  }
+  .asb-nav {
+    flex: 1;
+    padding: .6rem .7rem;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+  }
+  .asb-nav-item {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .65rem .8rem;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    font-family: var(--font);
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-align: right;
+    width: 100%;
+    transition: background .14s, color .14s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .asb-nav-item:hover { background: var(--primary-light); color: var(--primary); }
+  .asb-nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
+  .asb-nav-item svg { flex-shrink: 0; opacity: .7; }
+  .asb-nav-item.active svg { opacity: 1; }
+  .asb-footer {
+    padding: .8rem .7rem calc(.8rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+  .asb-user {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .4rem .5rem;
+  }
+  .asb-avatar {
+    width: 34px; height: 34px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; font-weight: 800; color: var(--primary);
+    flex-shrink: 0;
+  }
+  .asb-user-name { font-size: .82rem; font-weight: 700; color: var(--text-primary); }
+  .asb-logout {
+    display: flex; align-items: center; gap: .3rem;
+    font-size: .72rem; color: var(--text-muted); font-family: var(--font);
+    background: none; border: none; cursor: pointer; padding: 0; margin-top: .15rem;
+    font-weight: 600;
+  }
+  .asb-logout:hover { color: var(--skip); }
+  .asb-nurse-switch { margin-top: .2rem; font-size: .82rem; }
+
   .admin-topbar-v2 {
     background: white;
     border-bottom: 1px solid var(--border-light);
@@ -1541,11 +1674,67 @@
 
 <!-- ===== ADMIN SCREEN ===== -->
 <div id="adminScreen" class="screen" style="flex-direction:column;overflow:hidden">
+  <!-- Desktop sidebar (hidden on mobile via CSS) -->
+  <aside class="admin-sidebar">
+    <div class="asb-header">
+      <div class="asb-brand">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        <span>לוח ניהול</span>
+      </div>
+      <span id="adminSyncBadgeSidebar" class="asb-sync">✓</span>
+    </div>
+    <nav class="asb-nav">
+      <button class="asb-nav-item active" onclick="adminTab('rounds')" data-tab="rounds">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        סבבים
+      </button>
+      <button class="asb-nav-item" onclick="adminTab('residents')" data-tab="residents">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        דיירים
+      </button>
+      <button class="asb-nav-item" onclick="adminTab('meds')" data-tab="meds">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+        תרופות
+      </button>
+      <button class="asb-nav-item" onclick="adminTab('nurses')" data-tab="nurses">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        מדריכות
+      </button>
+      <button class="asb-nav-item" onclick="adminTab('history')" data-tab="history">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        היסטוריה
+      </button>
+      <button class="asb-nav-item" onclick="adminTab('export')" data-tab="export">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        ייצוא
+      </button>
+      <button class="asb-nav-item" onclick="adminTab('profile')" data-tab="profile" id="adminProfileTabSidebar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        פרופיל
+      </button>
+    </nav>
+    <div class="asb-footer">
+      <div class="asb-user" id="adminUserInfoSidebar">
+        <div class="asb-avatar" id="adminUserAvatarSidebar">מ</div>
+        <div>
+          <div class="asb-user-name" id="adminUserNameSidebar">מנהל</div>
+          <button class="asb-logout" onclick="doLogout()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            יציאה
+          </button>
+        </div>
+      </div>
+      <button class="asb-nav-item asb-nurse-switch" onclick="showNurseViewFromAdmin()" id="toNurseBtnSidebar" style="display:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        תצוגת מדריכה
+      </button>
+    </div>
+  </aside>
   <!-- Topbar v2 -->
   <div class="admin-topbar-v2">
     <div class="atb-actions">
       <button class="ntb-icon-btn" onclick="doLogout()" title="יציאה">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="17" r="1"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
     </div>
     <div class="atb-brand">
@@ -1592,7 +1781,7 @@
   <div class="nurse-topbar-v2">
     <div class="ntb-actions">
       <button class="ntb-icon-btn" onclick="doLogout()" title="יציאה">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="17" r="1"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
       <button class="ntb-icon-btn" onclick="nurseTab('reminders')" id="nurseNotifBtn" title="התראות">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
@@ -1615,8 +1804,8 @@
   <div class="content" id="nurseContent" style="padding-bottom:0"></div>
 
   <nav class="bottom-nav">
-    <button class="nav-btn" id="navReminders" onclick="nurseTab('reminders')">
-      <span class="nav-icon" id="ni-bell"></span><span>התראות</span>
+    <button class="nav-btn active" id="navRound" onclick="nurseTab('round')">
+      <span class="nav-icon" id="ni-round"></span><span>סבב</span>
     </button>
     <button class="nav-btn" id="navHistory" onclick="nurseTab('history')">
       <span class="nav-icon" id="ni-hist"></span><span>היסטוריה</span>
@@ -1855,10 +2044,11 @@ function stopSync() {
 
 function showSyncBadge(msg, warn) {
   // Update both possible sync badge elements
-  ['syncBadge','adminSyncBadge'].forEach(id => {
+  ['syncBadge','adminSyncBadge','adminSyncBadgeSidebar'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.textContent = (msg || '✓') + (id === 'adminSyncBadge' ? ' מסונכרן' : '');
+    const isNurse = id === 'syncBadge';
+    el.textContent = (msg || '✓') + (isNurse ? '' : ' מסונכרן');
     el.style.background = warn ? '#fff3cd' : 'var(--primary-light)';
     el.style.color = warn ? '#856404' : 'var(--primary)';
     el.style.opacity = '1';
@@ -2169,10 +2359,11 @@ function adminTab(tab) {
   state.adminTab = tab;
   state.adminSearch = { residents: '', meds: '', nurses: '' };
   closeAdminMoreMenu();
-  // Primary tabs
+  // Mobile tab bar
   document.querySelectorAll('.atb-tab[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  // Overflow menu items
   document.querySelectorAll('.atb-menu-item[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  // Desktop sidebar
+  document.querySelectorAll('.asb-nav-item[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   // Show "עוד" button as active when an overflow tab is selected
   const moreBtn = document.getElementById('atbMoreBtn');
   if (moreBtn) moreBtn.classList.toggle('active', ADMIN_OVERFLOW_TABS.has(tab));
@@ -3011,8 +3202,17 @@ function renderNurseRound() {
         </div>
       </div>
       <div class="res-status-col">
-        ${isDev ? '<span style="font-size:.72rem;color:var(--text-muted)">צפייה</span>' :
-          `<button class="rsb ${btnCls}" onclick="${btnAction}">${btnIconHtml} ${btnLabel}</button>`}
+        ${isDev ? '<span style="font-size:.72rem;color:var(--text-muted)">צפייה</span>' : `
+        <div class="rsb-pair">
+          <button class="rsb given-btn${allGiven && allDone ? ' active' : ''}"
+            onclick="markAllMeds('${round.id}','${entry.residentId}',${allGiven && allDone ? "'undo'" : "'given'"})">
+            ✓ ניתנה
+          </button>
+          <button class="rsb skip-btn${anySkipped && allDone ? ' active' : ''}"
+            onclick="markAllMeds('${round.id}','${entry.residentId}',${anySkipped && allDone ? "'undo'" : "'skipped'"})">
+            ✕ דולג
+          </button>
+        </div>`}
       </div>
     </div>`;
   });
@@ -3501,6 +3701,10 @@ function applyAdminProfileToChrome() {
     const nameEl = info.querySelector('#adminUserName') || info;
     nameEl.textContent = displayName;
   }
+  const sidebarName = document.getElementById('adminUserNameSidebar');
+  if (sidebarName) sidebarName.textContent = displayName;
+  const sidebarAvatar = document.getElementById('adminUserAvatarSidebar');
+  if (sidebarAvatar) sidebarAvatar.textContent = displayName.charAt(0);
   return { displayName, fullName };
 }
 
@@ -4216,13 +4420,11 @@ function toggleRoundNotif(roundId, mute) {
 
 // ==================== INIT ====================
 function initNavIcons() {
-  // Hide profile tab for dev
-  document.querySelectorAll('.admin-tab').forEach(btn => {
-    if (btn.textContent.includes('פרופיל') && state.currentUser?.type === 'dev') {
-      btn.style.display = 'none';
-    } else {
-      btn.style.display = '';
-    }
+  // Hide profile tab for dev (mobile tab bar + overflow menu + sidebar)
+  const isDev = state.currentUser?.type === 'dev';
+  ['adminProfileTab', 'adminProfileTabSidebar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isDev ? 'none' : '';
   });
   const ni = {'ni-round':'pill','ni-hist':'history','ni-bell':'bell'};
   Object.entries(ni).forEach(([id,name]) => {
