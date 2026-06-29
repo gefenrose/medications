@@ -845,6 +845,7 @@
     position: relative !important;
     bottom: auto !important;
     top: auto !important;
+    flex-shrink: 0 !important;
     border-top: .5px solid var(--border-light);
     border-bottom: none;
     padding-bottom: env(safe-area-inset-bottom);
@@ -861,7 +862,9 @@
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    min-height: 0;
   }
+  #nurseBottomBar { flex-shrink: 0; }
 
   /* Round header card v2 */
   .round-header-v2 {
