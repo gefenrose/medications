@@ -1168,6 +1168,43 @@
   }
   .atb-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
   .atb-tab:active { opacity: .7; }
+  .atb-more-wrap { position: relative; margin-right: auto; }
+  .atb-more-btn { gap: .25rem; }
+  .atb-more-btn.menu-open { color: var(--primary); }
+  .atb-more-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 2px);
+    right: 0;
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.12);
+    min-width: 130px;
+    z-index: 200;
+    overflow: hidden;
+    animation: menuFadeIn .15s ease;
+  }
+  .atb-more-menu.open { display: block; }
+  @keyframes menuFadeIn { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
+  .atb-menu-item {
+    display: block;
+    width: 100%;
+    padding: .75rem 1.1rem;
+    border: none;
+    background: transparent;
+    font-family: var(--font);
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: right;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-light);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .atb-menu-item:last-child { border-bottom: none; }
+  .atb-menu-item:active { background: var(--primary-light); }
+  .atb-menu-item.active { color: var(--primary); background: var(--primary-light); }
 
   /* Admin content wrapper */
   .admin-content-wrap {
@@ -1475,10 +1512,18 @@
     <button class="atb-tab active" onclick="adminTab('rounds')" data-tab="rounds">סבבים</button>
     <button class="atb-tab" onclick="adminTab('residents')" data-tab="residents">דיירים</button>
     <button class="atb-tab" onclick="adminTab('meds')" data-tab="meds">תרופות</button>
-    <button class="atb-tab" onclick="adminTab('nurses')" data-tab="nurses">מדריכות</button>
-    <button class="atb-tab" onclick="adminTab('history')" data-tab="history">היסטוריה</button>
-    <button class="atb-tab" onclick="adminTab('export')" data-tab="export">ייצוא</button>
-    <button class="atb-tab" onclick="adminTab('profile')" data-tab="profile" id="adminProfileTab">פרופיל</button>
+    <div class="atb-more-wrap" id="atbMoreWrap">
+      <button class="atb-tab atb-more-btn" id="atbMoreBtn" onclick="toggleAdminMoreMenu(event)" aria-label="עוד">
+        <span id="atbMoreLabel">עוד</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="atbMoreChevron"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="atb-more-menu" id="atbMoreMenu">
+        <button class="atb-menu-item" onclick="adminTab('nurses');closeAdminMoreMenu()" data-tab="nurses">מדריכות</button>
+        <button class="atb-menu-item" onclick="adminTab('history');closeAdminMoreMenu()" data-tab="history">היסטוריה</button>
+        <button class="atb-menu-item" onclick="adminTab('export');closeAdminMoreMenu()" data-tab="export">ייצוא</button>
+        <button class="atb-menu-item" onclick="adminTab('profile');closeAdminMoreMenu()" data-tab="profile" id="adminProfileTab">פרופיל</button>
+      </div>
+    </div>
   </div>
 
   <!-- Scrollable content -->
@@ -2041,20 +2086,54 @@ function showScreen(id) {
 }
 
 // ==================== ADMIN ====================
+const ADMIN_OVERFLOW_TABS = new Set(['nurses','history','export','profile']);
+function toggleAdminMoreMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('atbMoreMenu');
+  const btn  = document.getElementById('atbMoreBtn');
+  const open = menu.classList.toggle('open');
+  btn.classList.toggle('menu-open', open);
+  document.getElementById('atbMoreChevron').style.transform = open ? 'rotate(180deg)' : '';
+  if (open) {
+    setTimeout(() => document.addEventListener('click', _closeAdminMoreOnOutside, { once: true }), 0);
+  }
+}
+function _closeAdminMoreOnOutside() { closeAdminMoreMenu(); }
+function closeAdminMoreMenu() {
+  const menu = document.getElementById('atbMoreMenu');
+  const btn  = document.getElementById('atbMoreBtn');
+  if (!menu) return;
+  menu.classList.remove('open');
+  btn && btn.classList.remove('menu-open');
+  const chev = document.getElementById('atbMoreChevron');
+  if (chev) chev.style.transform = '';
+}
+
 function adminTab(tab) {
   state.adminTab = tab;
   state.adminSearch = { residents: '', meds: '', nurses: '' };
-  // Update new tab bar
-  document.querySelectorAll('.atb-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  // Also support legacy .admin-tab if present
-  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  closeAdminMoreMenu();
+  // Primary tabs
+  document.querySelectorAll('.atb-tab[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  // Overflow menu items
+  document.querySelectorAll('.atb-menu-item[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  // Show "עוד" button as active when an overflow tab is selected
+  const moreBtn = document.getElementById('atbMoreBtn');
+  if (moreBtn) moreBtn.classList.toggle('active', ADMIN_OVERFLOW_TABS.has(tab));
+  // Update "עוד" label to show selected overflow tab name, or reset
+  const moreLabel = document.getElementById('atbMoreLabel');
+  if (moreLabel) {
+    if (ADMIN_OVERFLOW_TABS.has(tab)) {
+      const item = document.querySelector(`.atb-menu-item[data-tab="${tab}"]`);
+      moreLabel.textContent = item ? item.textContent.trim() : 'עוד';
+    } else {
+      moreLabel.textContent = 'עוד';
+    }
+  }
   const adminEl = document.getElementById('adminContent');
   if (adminEl) {
     adminEl.style.opacity = '0';
     adminEl.style.transition = 'opacity .1s';
-    // Scroll tab into view
-    const activeTab = document.querySelector(`.atb-tab[data-tab="${tab}"]`);
-    if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     setTimeout(() => {
       renderAdminContent();
       adminEl.style.opacity = '1';
