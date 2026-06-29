@@ -608,26 +608,90 @@
   .note-save-btn:active { transform:scale(.96); }
   .note-save-btn.saved { border-color:var(--success);background:var(--success-bg);color:var(--success); }
 
-  /* Compact login polish */
-  #loginScreen { background: var(--bg); padding: 1rem; }
-  .login-box { max-width: 360px; padding: 1.4rem; border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 12px 34px rgba(15, 40, 36, .08); }
-  .login-logo { display: grid; grid-template-columns: 1fr 42px; gap: .75rem; align-items: center; text-align: right; margin-bottom: 1.1rem; }
-  .login-logo .icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; grid-column: 2; grid-row: 1 / span 2; }
-  .login-logo .icon svg { width: 42px; height: 42px; }
-  .login-logo h1 { font-size: 1.2rem; margin: 0; line-height: 1.2; grid-column: 1; letter-spacing: 0; }
-  .login-logo p { font-size: .78rem; margin-top: .18rem; line-height: 1.35; grid-column: 1; max-width: 16rem; }
-  .login-roles { display: grid; grid-template-columns: repeat(2, 1fr); gap: .35rem; margin-bottom: 1rem; padding: .25rem; border: 1px solid var(--border-light); border-radius: 8px; background: var(--surface1); }
-  .login-role-card { border-radius: 7px; min-height: 42px; padding: .55rem .4rem; border: 0; background: transparent; box-shadow: none; }
+  /* Login redesign */
+  #loginScreen {
+    background: linear-gradient(160deg, var(--primary-light) 0%, #f0f8f5 55%, white 100%);
+    padding: 1.5rem 1rem;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-box {
+    max-width: 360px;
+    width: 100%;
+    padding: 2rem 1.5rem 1.5rem;
+    border: 1.5px solid rgba(45,139,116,.15);
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 8px 40px rgba(45,139,116,.12);
+  }
+  .login-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 1.6rem;
+    gap: 0;
+  }
+  .login-logo .icon {
+    width: 64px; height: 64px;
+    background: var(--primary-light);
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: .85rem;
+    border: 1.5px solid rgba(45,139,116,.2);
+  }
+  .login-logo .icon svg { width: 36px; height: 36px; }
+  .login-logo h1 {
+    font-size: 1.25rem; font-weight: 800;
+    color: var(--text-primary); margin: 0;
+    letter-spacing: -.02em; line-height: 1.2;
+  }
+  .login-logo p {
+    font-size: .78rem; margin-top: .3rem;
+    color: var(--text-secondary); line-height: 1.4;
+  }
+  .login-roles {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: .4rem; margin-bottom: 1.1rem;
+    padding: .3rem; border: 1.5px solid var(--border-light);
+    border-radius: 12px; background: var(--primary-light);
+  }
+  .login-role-card {
+    border-radius: 9px; min-height: 40px; padding: .5rem .4rem;
+    border: 0; background: transparent; box-shadow: none;
+    cursor: pointer; font-family: var(--font);
+    -webkit-tap-highlight-color: transparent; transition: all .15s;
+  }
   .login-role-card .role-icon { display: none; }
-  .login-role-card .role-label { font-size: .88rem; color: var(--text-secondary); }
-  .login-role-card.active { background: white; border-color: transparent; box-shadow: 0 1px 2px rgba(15, 40, 36, .08); }
-  .login-role-card.active .role-label { color: var(--primary); }
-  .login-box .form-group { margin-bottom: .85rem; }
-  .login-box .form-group label { font-size: .74rem; margin-bottom: .3rem; text-transform: none; font-weight: 700; }
-  .login-box .form-group input { min-height: 46px; border: 1px solid var(--border-light); background: white; }
-  .login-box .btn-primary { margin-top: .35rem; min-height: 46px; }
-  .login-help { margin-top: .8rem; border-top: 1px solid var(--border-light); padding-top: .65rem; color: var(--text-muted); font-size: .74rem; }
-  .login-help summary { cursor: pointer; list-style: none; text-align: center; font-weight: 700; }
+  .login-role-card .role-label { font-size: .86rem; font-weight: 600; color: var(--text-secondary); }
+  .login-role-card.active {
+    background: white;
+    box-shadow: 0 1px 6px rgba(45,139,116,.15);
+  }
+  .login-role-card.active .role-label { color: var(--primary); font-weight: 700; }
+  .login-role-card:active { transform: scale(.97); }
+  .login-box .form-group { margin-bottom: .9rem; }
+  .login-box .form-group label {
+    font-size: .73rem; margin-bottom: .3rem;
+    font-weight: 700; color: var(--text-secondary);
+    text-transform: none; letter-spacing: 0;
+  }
+  .login-box .form-group input {
+    min-height: 46px; border: 1.5px solid var(--border-light);
+    background: var(--primary-light); border-radius: 10px;
+    font-size: .95rem; transition: border-color .18s, background .18s;
+  }
+  .login-box .form-group input:focus {
+    border-color: var(--primary-mid); background: white;
+  }
+  .login-box .btn-primary {
+    margin-top: .4rem; min-height: 48px;
+    border-radius: 12px; font-size: .95rem; letter-spacing: .01em;
+    background: var(--primary); transition: background .15s;
+  }
+  .login-box .btn-primary:active { background: var(--primary-dark); }
+  .login-help { margin-top: .9rem; border-top: 1px solid var(--border-light); padding-top: .65rem; color: var(--text-muted); font-size: .74rem; }
+  .login-help summary { cursor: pointer; list-style: none; text-align: center; font-weight: 700; color: var(--text-secondary); }
   .login-help summary::-webkit-details-marker { display: none; }
   .login-help-content { margin-top: .6rem; display: grid; gap: .35rem; text-align: center; line-height: 1.45; }
   #devTabBtn { background: none; border: none; color: var(--text-muted); opacity: .45; cursor: pointer; font-family: var(--font); font-size: .68rem; padding: .15rem .4rem; }
@@ -1436,15 +1500,7 @@
 <div id="loginScreen" class="screen active">
   <div class="login-box">
     <div class="login-logo" style="animation:fadeSlideDown .4s ease">
-      <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none" aria-hidden="true">
-  <g transform="rotate(-34 32 32)">
-    <rect x="7" y="22" width="50" height="20" rx="10" fill="#FFFFFF" stroke="#4B86A8" stroke-width="2.5"/>
-    <path d="M32 22h15a10 10 0 0 1 0 20H32V22Z" fill="#4B86A8"/>
-    <path d="M17 30h10" stroke="#B7D8E8" stroke-width="2.5" stroke-linecap="round"/>
-    <path d="M32 23.5v17" stroke="#4B86A8" stroke-width="2" stroke-linecap="round" opacity=".35"/>
-  </g>
-  <circle cx="47" cy="18" r="3" fill="#9FC7DD"/>
-</svg></div>
+      <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
       <h1>מעקב תרופות</h1>
       <p>מערכת ניהול תרופות לדיור מוגן</p>
     </div>
