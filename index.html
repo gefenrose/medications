@@ -1801,8 +1801,8 @@
   <div class="admin-tab-bar" id="adminTabs">
     <div class="atb-scroll">
       <button class="atb-tab active" onclick="adminTab('rounds')" data-tab="rounds">סבבים</button>
-      <button class="atb-tab" onclick="adminTab('residents')" data-tab="residents">דיירים</button>
       <button class="atb-tab" onclick="adminTab('meds')" data-tab="meds">תרופות</button>
+      <button class="atb-tab" onclick="adminTab('export')" data-tab="export">ייצוא</button>
     </div>
     <div class="atb-more-wrap" id="atbMoreWrap">
       <button class="atb-tab atb-more-btn" id="atbMoreBtn" onclick="toggleAdminMoreMenu(event)" aria-label="עוד">
@@ -1810,9 +1810,9 @@
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="atbMoreChevron"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="atb-more-menu" id="atbMoreMenu">
+        <button class="atb-menu-item" onclick="adminTab('residents');closeAdminMoreMenu()" data-tab="residents">דיירים</button>
         <button class="atb-menu-item" onclick="adminTab('nurses');closeAdminMoreMenu()" data-tab="nurses">מדריכות</button>
         <button class="atb-menu-item" onclick="adminTab('history');closeAdminMoreMenu()" data-tab="history">היסטוריה</button>
-        <button class="atb-menu-item" onclick="adminTab('export');closeAdminMoreMenu()" data-tab="export">ייצוא</button>
         <button class="atb-menu-item" onclick="adminTab('profile');closeAdminMoreMenu()" data-tab="profile" id="adminProfileTab">פרופיל</button>
       </div>
     </div>
@@ -2379,7 +2379,7 @@ function showScreen(id) {
 }
 
 // ==================== ADMIN ====================
-const ADMIN_OVERFLOW_TABS = new Set(['nurses','history','export','profile']);
+const ADMIN_OVERFLOW_TABS = new Set(['residents','nurses','history','profile']);
 function toggleAdminMoreMenu(e) {
   e.stopPropagation();
   const menu = document.getElementById('atbMoreMenu');
