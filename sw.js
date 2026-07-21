@@ -1,5 +1,5 @@
 // sw.js — network-first, always fresh
-const CACHE = 'medtrack-v19';
+const CACHE = 'medtrack-v20';
 const CDN   = ['cdnjs.cloudflare.com','fonts.gstatic.com','fonts.googleapis.com','cdn.jsdelivr.net'];
 
 self.addEventListener('install', () => self.skipWaiting());
