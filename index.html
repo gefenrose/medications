@@ -2777,8 +2777,8 @@ function renderAdminContent() {
     case 'export': el.innerHTML = renderAdminExport(); break;
     case 'profile': if (false) { adminTab('rounds'); return; } el.innerHTML = renderAdminProfile(); break;
   }
-  applyAddressLanguage(el);
   applyInterfaceLanguage(el);
+  applyAddressLanguage(el);
   // Admin rendering must not depend on the nurse bottom-bar element.
   // Keeping this function self-contained also prevents a render error from
   // leaving #adminContent hidden after adminTab() starts its fade transition.
@@ -3361,8 +3361,8 @@ function renderNurseContent() {
       default: el.innerHTML = '';
     }
   }
-  applyAddressLanguage(el);
   applyInterfaceLanguage(el);
+  applyAddressLanguage(el);
 }
 
 function getCurrentRound() {
@@ -5196,8 +5196,8 @@ function openModal(title, body) {
   document.getElementById('modalTitle').textContent = title;
   document.getElementById('modalBody').innerHTML = body;
   document.getElementById('modalOverlay').classList.add('open');
-  applyAddressLanguage(document.getElementById('modalOverlay'));
   applyInterfaceLanguage(document.getElementById('modalOverlay'));
+  applyAddressLanguage(document.getElementById('modalOverlay'));
   // Set resident selects after DOM is rendered
   setTimeout(() => {
     const round = state.editId ? data.rounds.find(r=>r.id===state.editId) : null;
@@ -5484,8 +5484,8 @@ document.getElementById('loginPassword').addEventListener('keydown', e => { if (
     state.loginType = state.currentUser.type === 'nurse' ? 'nurse' : 'admin';
     saveSession(state.currentUser);
     try { localStorage.setItem('medtrack_language', state.currentUser.language === 'en' ? 'en' : 'he'); } catch(e) {}
-    applyAddressLanguage();
     applyInterfaceLanguage();
+    applyAddressLanguage();
 
     await medtrackCloud.loadDataInto(data);
     medtrackCloud.subscribeRealtime(async () => {
@@ -5532,8 +5532,8 @@ document.addEventListener('DOMContentLoaded', () => {
       el.style.cssText = 'display:inline-flex;align-items:center;margin-left:3px;opacity:.7';
     });
     initNavIcons();
-    applyAddressLanguage();
     applyInterfaceLanguage();
+    applyAddressLanguage();
   }, 50);
 });
 // Patch round form options after modal opens
