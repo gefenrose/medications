@@ -2564,8 +2564,9 @@ function setLoginType(type) {
   const devBtn = document.getElementById('devTabBtn');
   if (devBtn) devBtn.style.opacity = type === 'dev' ? '0.8' : '0.25';
   document.getElementById('loginUsername').placeholder =
-    type === 'admin' ? 'הכניסי שם משתמש מנהלת' :
-    type === 'dev'   ? 'dev username' : 'הכניסי שם משתמש';
+    getInterfaceLanguage() === 'en'
+      ? (type === 'dev' ? 'dev username' : 'Enter username')
+      : (type === 'admin' ? 'הכניסי שם משתמש מנהלת' : 'הכניסי שם משתמש');
 }
 function doLogin() {
   const u = document.getElementById('loginUsername').value.trim().toLowerCase();
@@ -2598,7 +2599,8 @@ function doLogin() {
         type: 'admin',
         name: cr.name || 'מנהל',
         displayName: cr.displayName || cr.name || 'מנהל',
-        addressGender: cr.addressGender || 'female'
+        addressGender: cr.addressGender || 'female',
+        language: cr.language || 'he'
       };
       saveSession(state.currentUser);
       resetAdminIdleTimer();
@@ -2737,6 +2739,7 @@ function renderAdminContent() {
     case 'profile': if (state.currentUser?.type === 'dev') { adminTab('rounds'); return; } el.innerHTML = renderAdminProfile(); break;
   }
   applyAddressLanguage(el);
+  applyInterfaceLanguage(el);
 }
 
 function renderAdminRounds() {
@@ -3317,6 +3320,7 @@ function renderNurseContent() {
     }
   }
   applyAddressLanguage(el);
+  applyInterfaceLanguage(el);
 }
 
 function getCurrentRound() {
@@ -4029,7 +4033,73 @@ function getAddressGender() {
   } catch(e) { return 'female'; }
 }
 
+const UI_TRANSLATIONS = {
+  'מעקב תרופות':'Medication Tracker','מערכת ניהול תרופות לדיור מוגן':'Medication management for assisted living',
+  'מדריכה':'Caregiver','מדריכות':'Caregivers','מנהל':'Manager','מנהלת':'Manager','לוח ניהול':'Admin Dashboard',
+  'סבבים':'Rounds','סבב':'Round','דיירים':'Residents','דייר':'Resident','תרופות':'Medications','תרופה':'Medication',
+  'היסטוריה':'History','ייצוא':'Export','פרופיל':'Profile','יציאה':'Log out','תצוגת מדריכה':'Caregiver View',
+  'עוד':'More','התראות':'Notifications','כניסה':'Log in','שם משתמש':'Username','סיסמה':'Password',
+  'סיסמה נוכחית':'Current password','סיסמה جديدة':'New password','סיסמה חדשה':'New password',
+  'אמת סיסמה חדשה':'Confirm new password','שם מלא':'Full name','שם לתצוגה':'Display name','שמור שינויים':'Save changes',
+  'לשון פנייה':'Addressing','שפת ממשק':'Interface language','עברית':'Hebrew',
+  'נקבה — פנייה לנשים':'Female — address women','זכר — פנייה לגברים':'Male — address men',
+  'השפה נשמרת במכשיר הזה ומשמשת לכל הממשק.':'The language is saved on this device and used throughout the interface.',
+  'הבחירה קובעת את לשון הפנייה למנהלת ולמדריכות ברחבי המערכת.':'This setting controls how the manager and caregivers are addressed throughout the interface.',
+  'שמור':'Save','הוסף':'Add','הוסיפי':'Add','ערוך':'Edit','ערכי':'Edit','מחק':'Delete','מחקי':'Delete',
+  'בחר':'Select','בחרי':'Select','הכנס':'Enter','הכניסי':'Enter',
+  'חיפוש לפי שם דייר...':'Search by resident name...','חיפוש לפי שם / מינון...':'Search by name / dose...',
+  'חיפוש לפי שם מדריכה...':'Search by caregiver name...','חיפוש דייר...':'Search resident...',
+  'עריכת סבב':'Edit round','סבב חדש':'New round','עריכת דייר':'Edit resident','דייר חדש':'New resident',
+  'עריכת תרופה':'Edit medication','תרופה חדשה':'New medication','עריכת מדריכה':'Edit caregiver','מדריכה חדשה':'New caregiver',
+  'ניתנה':'Given','דולג':'Skipped','ממתין':'Pending','הבא':'Next','צפייה':'View','נקה סינון':'Clear filters',
+  'אין סבבים עדיין':'No rounds yet','אין סבבים מוגדרים':'No rounds configured','סבבי חלוקה':'Medication rounds',
+  'מתי מחלקים תרופות ולמי':'When medications are given and to whom','חלוקת תרופות':'Medication administration',
+  'הערה (אופציונלי)':'Note (optional)','נא למלא שם ושעה':'Please enter a name and time','נא להכניס שם':'Please enter a name',
+  'נא להכניס שם תרופה':'Please enter a medication name','נא למלא שם ושם משתמש':'Please enter a name and username',
+  'נא להכניס סיסמה':'Please enter a password','שם משתמש או סיסמה שגויים':'Incorrect username or password',
+  'פרטי כניסה לדמו':'Demo login details','מדריכה: sarah / 1234':'Caregiver: sarah / 1234','מנהל: admin / 1234':'Manager: admin / 1234',
+  '✓ השינויים נשמרו בהצלחה':'✓ Changes saved successfully','סיסמה נוכחית שגויה':'Current password is incorrect',
+  'שם מלא לא יכול להיות ריק':'Full name cannot be empty','שם לתצוגה לא יכול להיות ריק':'Display name cannot be empty',
+  'שם משתמש לא יכול להיות ריק':'Username cannot be empty','הסיסמאות החדשות אינן תואמות':'The new passwords do not match',
+  'הסיסמה חייבת להכיל לפחות 4 תווים':'Password must contain at least 4 characters','שלום, ':'Hello, ',
+  'אין תרופות':'No medications','לא ניתן לקרוא את התמונה':'Unable to read image','קובץ התמונה לא תקין':'Invalid image file',
+  'נא לבחור קובץ תמונה':'Please choose an image file','לא ניתן לטעון את התמונה':'Unable to load image'
+};
+const UI_TRANSLATIONS_REVERSE = Object.fromEntries(Object.entries(UI_TRANSLATIONS).map(([he,en]) => [en,he]));
+function getInterfaceLanguage() { return getAdminCreds().language === 'en' ? 'en' : 'he'; }
+function t(text) {
+  if (!text) return text;
+  const map = getInterfaceLanguage() === 'en' ? UI_TRANSLATIONS : UI_TRANSLATIONS_REVERSE;
+  let out = text;
+  Object.entries(map).sort((a,b)=>b[0].length-a[0].length).forEach(([from,to]) => { out = out.split(from).join(to); });
+  return out;
+}
+function applyInterfaceLanguage(root = document) {
+  const lang = getInterfaceLanguage();
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
+  document.body.dir = lang === 'en' ? 'ltr' : 'rtl';
+  document.body.style.direction = lang === 'en' ? 'ltr' : 'rtl';
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = []; let node;
+  while ((node = walker.nextNode())) {
+    if (node.parentElement && !['SCRIPT','STYLE','NOSCRIPT'].includes(node.parentElement.tagName)) nodes.push(node);
+  }
+  nodes.forEach(n => { n.nodeValue = t(n.nodeValue); });
+  root.querySelectorAll?.('input[placeholder], textarea[placeholder]').forEach(el => { el.placeholder = t(el.placeholder); });
+  root.querySelectorAll?.('[title]').forEach(el => { el.title = t(el.title); });
+}
+function setInterfaceLanguage(language) {
+  const lang = language === 'en' ? 'en' : 'he';
+  const creds = getAdminCreds();
+  setAdminCreds({ ...creds, language: lang });
+  if (state.currentUser) { state.currentUser.language = lang; saveSession(state.currentUser); }
+  applyInterfaceLanguage();
+  if (state.currentUser?.type === 'admin' || state.currentUser?.type === 'dev') renderAdminContent();
+  else if (state.currentUser?.type === 'nurse') renderNurseContent();
+}
 function applyAddressLanguage(root = document) {
+  if (getInterfaceLanguage() === 'en') return;
   const female = getAddressGender() === 'female';
   const replaceWord = (value, from, to) =>
     value.replace(new RegExp('(?<![א-ת])' + from + '(?![א-ת])', 'g'), to);
@@ -4066,6 +4136,14 @@ function renderAdminProfile() {
   const creds = getAdminCreds();
   return `<div class="card">
     <div class="card-title" style="margin-bottom:.8rem">פרופיל מנהל</div>
+    <div class="form-group">
+      <label>שפת ממשק</label>
+      <select id="prof_language" class="full-select" onchange="setInterfaceLanguage(this.value)">
+        <option value="he" ${creds.language === 'en' ? '' : 'selected'}>עברית</option>
+        <option value="en" ${creds.language === 'en' ? 'selected' : ''}>English</option>
+      </select>
+      <div class="section-desc">השפה נשמרת במכשיר הזה ומשמשת לכל הממשק.</div>
+    </div>
     <div class="form-group">
       <label>לשון פנייה</label>
       <select id="prof_gender" class="full-select">
@@ -4113,9 +4191,10 @@ function getAdminCreds() {
       password: parsed.password || '1234',
       name: parsed.name || 'מנהל',
       displayName: parsed.displayName || parsed.name || 'מנהל',
-      addressGender: parsed.addressGender === 'male' ? 'male' : 'female'
+      addressGender: parsed.addressGender === 'male' ? 'male' : 'female',
+      language: parsed.language === 'en' ? 'en' : 'he'
     };
-  } catch(e) { return { username: 'admin', password: '1234', name: 'מנהל', displayName: 'מנהל', addressGender: 'female' }; }
+  } catch(e) { return { username: 'admin', password: '1234', name: 'מנהל', displayName: 'מנהל', addressGender: 'female', language: 'he' }; }
 }
 function setAdminCreds(profile) {
   localStorage.setItem('medtrack_admin_creds', JSON.stringify(profile));
@@ -4146,6 +4225,7 @@ function saveAdminProfile() {
   const newPass    = document.getElementById('prof_new_pass').value;
   const confirmPass= document.getElementById('prof_confirm_pass').value;
   const addressGender = document.getElementById('prof_gender')?.value === 'male' ? 'male' : 'female';
+  const language = document.getElementById('prof_language')?.value === 'en' ? 'en' : 'he';
   const msg        = document.getElementById('prof_msg');
 
   const show = (text, ok) => {
@@ -4167,14 +4247,16 @@ function saveAdminProfile() {
     password: newPass || creds.password,
     name,
     displayName: display,
-    addressGender
+    addressGender,
+    language
   };
   setAdminCreds(nextProfile);
   state.currentUser = { ...state.currentUser, name, displayName: display };
   saveSession(state.currentUser);
   applyAdminProfileToChrome();
   applyAddressLanguage();
-  show('✓ השינויים נשמרו בהצלחה', true);
+  setInterfaceLanguage(language);
+  show(t('✓ השינויים נשמרו בהצלחה'), true);
   document.getElementById('prof_cur_pass').value = '';
   document.getElementById('prof_new_pass').value = '';
   document.getElementById('prof_confirm_pass').value = '';
@@ -4624,6 +4706,7 @@ function openModal(title, body) {
   document.getElementById('modalBody').innerHTML = body;
   document.getElementById('modalOverlay').classList.add('open');
   applyAddressLanguage(document.getElementById('modalOverlay'));
+  applyInterfaceLanguage(document.getElementById('modalOverlay'));
   // Set resident selects after DOM is rendered
   setTimeout(() => {
     const round = state.editId ? data.rounds.find(r=>r.id===state.editId) : null;
@@ -4874,6 +4957,7 @@ document.getElementById('loginPassword').addEventListener('keydown', e => { if (
 
   state.currentUser = saved;
   applyAddressLanguage();
+  applyInterfaceLanguage();
 
   if (saved.type === 'admin' || saved.type === 'dev') {
     showScreen('adminScreen');
@@ -4927,6 +5011,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     initNavIcons();
     applyAddressLanguage();
+    applyInterfaceLanguage();
   }, 50);
 });
 // Patch round form options after modal opens
