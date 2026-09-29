@@ -394,10 +394,15 @@
   #loginScreen {
     background: linear-gradient(160deg, #e8f5f0 0%, #f4f6f4 40%, #f0ece8 100%);
     justify-content: flex-start;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    /* The base .screen is a fixed-height app shell with overflow:hidden.
+       Override that for login so the whole login page can grow and scroll. */
+    height: auto;
+    max-height: none;
     min-height: 100vh;
     min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
   #loginScreen .login-box {
     flex-shrink: 0;
