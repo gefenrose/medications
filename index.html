@@ -4219,52 +4219,78 @@ function applyAddressLanguage(root = document) {
 
 function renderAdminProfile() {
   if (state.currentUser?.type === 'dev') return '<div class="empty-state"><p>גישה לא מורשית</p></div>';
-  const creds = getAdminCreds();
+  const p = medtrackCloud?.profile || {};
+  const language = p.language === 'en' ? 'en' : 'he';
+  const gender = p.address_gender === 'male' ? 'male' : 'female';
   return `<div class="card">
     <div class="card-title" style="margin-bottom:.8rem">פרופיל מנהל</div>
     <div class="form-group">
       <label>שפת ממשק</label>
-      <select id="prof_language" class="full-select" onchange="setInterfaceLanguage(this.value)">
-        <option value="he" ${creds.language === 'en' ? '' : 'selected'}>עברית</option>
-        <option value="en" ${creds.language === 'en' ? 'selected' : ''}>English</option>
+      <select id="prof_language" class="full-select">
+        <option value="he" ${language === 'en' ? '' : 'selected'}>עברית</option>
+        <option value="en" ${language === 'en' ? 'selected' : ''}>English</option>
       </select>
-      <div class="section-desc">השפה נשמרת במכשיר הזה ומשמשת לכל הממשק.</div>
     </div>
     <div class="form-group">
       <label>לשון פנייה</label>
       <select id="prof_gender" class="full-select">
-        <option value="female" ${getAdminCreds().addressGender === 'male' ? '' : 'selected'}>נקבה — פנייה לנשים</option>
-        <option value="male" ${getAdminCreds().addressGender === 'male' ? 'selected' : ''}>זכר — פנייה לגברים</option>
+        <option value="female" ${gender === 'male' ? '' : 'selected'}>נקבה — פנייה לנשים</option>
+        <option value="male" ${gender === 'male' ? 'selected' : ''}>זכר — פנייה לגברים</option>
       </select>
-      <div class="section-desc">הבחירה קובעת את לשון הפנייה למנהלת ולמדריכות ברחבי המערכת.</div>
     </div>
     <div class="form-group">
       <label>שם מלא</label>
-      <input id="prof_name" placeholder="שם מלא" value="${esc(creds.name || '')}">
-    </div>
-    <div class="form-group">
-      <label>שם לתצוגה</label>
-      <input id="prof_display" placeholder="שם שיופיע במערכת" value="${esc(creds.displayName || creds.name || '')}">
+      <input id="prof_name" placeholder="שם מלא" value="${esc(p.display_name || '')}">
     </div>
     <div class="form-group">
       <label>שם משתמש</label>
-      <input id="prof_user" placeholder="admin" value="${esc(creds.username || 'admin')}">
+      <input id="prof_user" placeholder="שם משתמש" value="${esc(p.username || '')}">
     </div>
-    <div class="form-group">
-      <label>סיסמה נוכחית</label>
-      <input id="prof_cur_pass" type="password" placeholder="הכנס סיסמה נוכחית">
-    </div>
-    <div class="form-group">
-      <label>סיסמה חדשה</label>
-      <input id="prof_new_pass" type="password" placeholder="הכנס סיסמה חדשה">
-    </div>
-    <div class="form-group">
-      <label>אמת סיסמה חדשה</label>
-      <input id="prof_confirm_pass" type="password" placeholder="הכנס שוב את הסיסמה החדשה">
+    <div class="info-box">
+      הסיסמה מנוהלת על ידי Supabase Authentication ואינה נשמרת באפליקציה.
     </div>
     <div id="prof_msg" style="font-size:.85rem;margin-bottom:.5rem;display:none"></div>
     <button class="btn btn-orange" onclick="saveAdminProfile()">שמור שינויים</button>
   </div>`;
+}
+
+async function saveAdminProfile() {
+  if (state.currentUser?.type === 'dev') return;
+  const name = document.getElementById('prof_name')?.value.trim();
+  const username = document.getElementById('prof_user')?.value.trim().toLowerCase();
+  const language = document.getElementById('prof_language')?.value === 'en' ? 'en' : 'he';
+  const addressGender = document.getElementById('prof_gender')?.value === 'male' ? 'male' : 'female';
+  const msg = document.getElementById('prof_msg');
+  const show = (message, ok) => {
+    if (!msg) return;
+    msg.textContent = message;
+    msg.style.color = ok ? 'var(--success)' : 'var(--skip)';
+    msg.style.display = 'block';
+  };
+
+  if (!name || !username) { show('יש למלא שם מלא ושם משתמש', false); return; }
+  try {
+    const { data, error } = await medtrackCloud.client
+      .from('profiles')
+      .update({ display_name:name, username, language, address_gender:addressGender, updated_at:new Date().toISOString() })
+      .eq('id', medtrackCloud.authUser.id)
+      .select('id,role,username,display_name,language,address_gender')
+      .single();
+    if (error) throw error;
+    medtrackCloud.profile = data;
+    state.currentUser = {
+      ...state.currentUser,
+      name, displayName:name, username, language, addressGender
+    };
+    saveSession(state.currentUser);
+    applyAdminProfileToChrome();
+    applyAddressLanguage();
+    setInterfaceLanguage(language);
+    show(t('✓ השינויים נשמרו בהצלחה'), true);
+  } catch (e) {
+    console.error('Profile update failed', e);
+    show(e?.message || 'שמירת הפרופיל נכשלה', false);
+  }
 }
 
 // Store admin credentials in localStorage (separate from data.json for security)
@@ -4289,8 +4315,9 @@ function setAdminCreds(profile) {
 function applyAdminProfileToChrome() {
   const info = document.getElementById('adminUserInfo');
   const creds = getAdminCreds();
-  const displayName = state.currentUser?.displayName || creds.displayName || 'מנהל';
-  const fullName = state.currentUser?.name || creds.name || displayName;
+  const cloudProfile = medtrackCloud?.profile || {};
+  const displayName = state.currentUser?.displayName || cloudProfile.display_name || creds.displayName || 'מנהל';
+  const fullName = state.currentUser?.name || cloudProfile.display_name || creds.name || displayName;
   if (info) {
     const nameEl = info.querySelector('#adminUserName') || info;
     nameEl.textContent = displayName;
@@ -5058,58 +5085,66 @@ function initNavIcons() {
 document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
 // ── Auto-restore session on app open ──────────────────────────────────────
-(function restoreSession() {
-  const saved = loadSession();
-  if (!saved) return;
-
-  state.currentUser = saved;
-  applyAddressLanguage();
-  applyInterfaceLanguage();
-
-  if (saved.type === 'admin' || saved.type === 'dev') {
-    showScreen('adminScreen');
-    if (saved.type === 'admin') applyAdminProfileToChrome();
-    adminTab('rounds');
-    resetAdminIdleTimer();
-    // Load fresh data from GitHub
-    ghRead().then(remote => {
-      if (remote) {
-        if (remote.nurses)   data.nurses   = remote.nurses;
-        if (remote.residents) data.residents = remote.residents;
-        if (remote.meds)     data.meds      = remote.meds;
-        if (remote.rounds)   data.rounds    = remote.rounds;
-        if (remote.history)  data.history   = remote.history;
-        if (remote.activeRoundSession !== undefined) data.activeRoundSession = remote.activeRoundSession;
-        localStorage.setItem('medtrack_data', JSON.stringify(data));
-        renderAdminContent();
-      }
-    });
-    startSync();
-  } else if (saved.type === 'nurse') {
-    loadNotificationPrefs(saved.id);
-    showScreen('nurseScreen');
-    const ui = document.getElementById('nurseUserInfo');
-    if (ui) {
-      ui.querySelector('strong').textContent = saved.name || '';
-      ui.querySelector('span').textContent   = 'שלום, ' + (saved.name || '').split(' ')[0];
+(async function restoreSession() {
+  try {
+    const auth = await medtrackCloud?.restoreSession?.();
+    if (!auth) {
+      clearSession();
+      return;
     }
-    document.getElementById('nurseTitle').textContent = 'חלוקת תרופות';
-    ghRead().then(remote => {
-      if (remote) {
-        if (remote.nurses)   data.nurses   = remote.nurses;
-        if (remote.residents) data.residents = remote.residents;
-        if (remote.meds)     data.meds      = remote.meds;
-        if (remote.rounds)   data.rounds    = remote.rounds;
-        if (remote.history)  data.history   = remote.history;
-        if (remote.activeRoundSession !== undefined) data.activeRoundSession = remote.activeRoundSession;
-        localStorage.setItem('medtrack_data', JSON.stringify(data));
+    const p = auth.profile;
+    state.currentUser = {
+      type: p.role === 'caregiver' ? 'nurse' : p.role,
+      id: p.id,
+      name: p.display_name || p.username || auth.user.email || '',
+      displayName: p.display_name || p.username || auth.user.email || '',
+      username: p.username || auth.user.email?.split('@')[0] || '',
+      addressGender: p.address_gender || 'female',
+      language: p.language || 'he',
+      email: auth.user.email || ''
+    };
+    state.loginType = state.currentUser.type === 'nurse' ? 'nurse' : 'admin';
+    saveSession(state.currentUser);
+    applyAddressLanguage();
+    applyInterfaceLanguage();
+
+    await medtrackCloud.loadDataInto(data);
+    medtrackCloud.subscribeRealtime(async () => {
+      try {
+        const changed = await medtrackCloud.loadDataInto(data);
+        if (changed.loaded) {
+          localStorage.setItem('medtrack_data', JSON.stringify(data));
+          showSyncBadge('↓ עודכן');
+          rerenderCurrent();
+        }
+      } catch (e) { console.warn('Cloud realtime refresh failed', e); }
+    });
+
+    localStorage.setItem('medtrack_data', JSON.stringify(data));
+
+    if (p.role === 'caregiver') {
+      state.selectedDate = new Date().toISOString().split('T')[0];
+      loadNotificationPrefs(p.id);
+      showScreen('nurseScreen');
+      const ui = document.getElementById('nurseUserInfo');
+      if (ui) {
+        ui.querySelector('strong').textContent = state.currentUser.name;
+        ui.querySelector('span').textContent = 'שלום, ' + state.currentUser.name.split(' ')[0];
       }
+      document.getElementById('nurseTitle').textContent = 'חלוקת תרופות';
       nurseTab('round');
-    }).catch(() => nurseTab('round'));
-    startSync();
-    setTimeout(() => scheduleRoundNotifications(), 2000);
+      setTimeout(() => scheduleRoundNotifications(), 2000);
+    } else {
+      showScreen('adminScreen');
+      applyAdminProfileToChrome();
+      adminTab('rounds');
+      resetAdminIdleTimer();
+    }
+  } catch (e) {
+    console.warn('Cloud session restore failed', e);
+    clearSession();
   }
-})();
+})();;
 // Inject admin tab icons on first render
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
