@@ -121,13 +121,32 @@ alter table public.round_entry_medications enable row level security;
 alter table public.administrations enable row level security;
 alter table public.notification_preferences enable row level security;
 
+drop policy if exists "profiles_read_authenticated" on public.profiles;
+drop policy if exists "profiles_update_self_or_manager" on public.profiles;
+drop policy if exists "profiles_update_self" on public.profiles;
+drop policy if exists "profiles_manager_update" on public.profiles;
+
 create policy "profiles_read_authenticated" on public.profiles
 for select to authenticated using (true);
 
-create policy "profiles_update_self_or_manager" on public.profiles
+-- A user may update only their display/language/address preferences.
+-- Role changes are manager/developer-only and cannot be self-escalated.
+create policy "profiles_update_self" on public.profiles
 for update to authenticated
-using (id = auth.uid() or public.is_manager())
-with check (id = auth.uid() or public.is_manager());
+using (id = auth.uid())
+with check (id = auth.uid());
+
+create policy "profiles_manager_update" on public.profiles
+for update to authenticated
+using (public.is_manager())
+with check (public.is_manager());
+
+drop policy if exists "shared_read_authenticated" on public.residents;
+drop policy if exists "shared_read_authenticated" on public.medications;
+drop policy if exists "shared_read_authenticated" on public.resident_medications;
+drop policy if exists "shared_read_authenticated" on public.rounds;
+drop policy if exists "shared_read_authenticated" on public.round_entries;
+drop policy if exists "shared_read_authenticated" on public.round_entry_medications;
 
 create policy "shared_read_authenticated" on public.residents
 for select to authenticated using (true);
@@ -141,6 +160,14 @@ create policy "shared_read_authenticated" on public.round_entries
 for select to authenticated using (true);
 create policy "shared_read_authenticated" on public.round_entry_medications
 for select to authenticated using (true);
+
+drop policy if exists "admin_write_residents" on public.residents;
+drop policy if exists "admin_write_medications" on public.medications;
+drop policy if exists "admin_write_resident_medications" on public.resident_medications;
+drop policy if exists "admin_write_rounds" on public.rounds;
+drop policy if exists "admin_write_round_entries" on public.round_entries;
+drop policy if exists "admin_write_round_entry_medications" on public.round_entry_medications;
+
 create policy "admin_write_residents" on public.residents
 for all to authenticated using (public.is_manager()) with check (public.is_manager());
 create policy "admin_write_medications" on public.medications
@@ -154,6 +181,10 @@ for all to authenticated using (public.is_manager()) with check (public.is_manag
 create policy "admin_write_round_entry_medications" on public.round_entry_medications
 for all to authenticated using (public.is_manager()) with check (public.is_manager());
 
+drop policy if exists "administrations_read_authenticated" on public.administrations;
+drop policy if exists "administrations_insert_self" on public.administrations;
+drop policy if exists "administrations_update_self_or_manager" on public.administrations;
+
 create policy "administrations_read_authenticated" on public.administrations
 for select to authenticated using (true);
 create policy "administrations_insert_self" on public.administrations
@@ -164,6 +195,7 @@ for update to authenticated
 using (caregiver_id = auth.uid() or public.is_manager())
 with check (caregiver_id = auth.uid() or public.is_manager());
 
+drop policy if exists "notification_preferences_own" on public.notification_preferences;
 create policy "notification_preferences_own" on public.notification_preferences
 for all to authenticated
 using (caregiver_id = auth.uid())
@@ -179,5 +211,4 @@ grant insert, update, delete on public.profiles, public.residents, public.medica
   public.round_entry_medications, public.administrations,
   public.notification_preferences to authenticated;
 
--- Realtime: add operational tables after enabling them in the Supabase Dashboard.
--- Keep the channel private and authorize it with RLS/Auth.
+-- Realtime: enable operational tables in the Supabase Dashboard after running this SQL.
