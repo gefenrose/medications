@@ -4030,6 +4030,9 @@ function getAddressGender() {
 
 function applyAddressLanguage(root = document) {
   const female = getAddressGender() === 'female';
+  const replaceWord = (value, from, to) =>
+    value.replace(new RegExp('(?<![א-ת])' + from + '(?![א-ת])', 'g'), to);
+
   const replacements = female ? [
     ['מהמנהל','מהמנהלת'], ['למנהל','למנהלת'], ['המנהל','המנהלת'],
     ['מנהל','מנהלת'],
@@ -4052,7 +4055,7 @@ function applyAddressLanguage(root = document) {
   while ((node = walker.nextNode())) nodes.push(node);
   nodes.forEach(n => {
     let value = n.nodeValue;
-    replacements.forEach(([from,to]) => { value = value.split(from).join(to); });
+    replacements.forEach(([from,to]) => { value = replaceWord(value, from, to); });
     n.nodeValue = value;
   });
 }
