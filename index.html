@@ -4185,41 +4185,78 @@ function getInterfaceLanguage() {
   } catch(e) {}
   return getAdminCreds().language === 'en' ? 'en' : 'he';
 }
+// Translate from the app's canonical Hebrew source text.
+// We deliberately do not translate from the currently displayed text: doing so
+// caused repeated language toggles to mix Hebrew and English (for example
+// "Log in" being translated again after a previous render).
 function t(text) {
-  if (!text) return text;
-  const map = getInterfaceLanguage() === 'en' ? UI_TRANSLATIONS : UI_TRANSLATIONS_REVERSE;
-  let out = text;
-  Object.entries(map).sort((a,b)=>b[0].length-a[0].length).forEach(([from,to]) => { out = out.split(from).join(to); });
+  if (!text || getInterfaceLanguage() !== 'en') return text;
+  let out = String(text);
+  Object.entries(UI_TRANSLATIONS)
+    .sort((a,b) => b[0].length - a[0].length)
+    .forEach(([from,to]) => { out = out.split(from).join(to); });
   return out;
 }
+
 function applyInterfaceLanguage(root = document) {
   const lang = getInterfaceLanguage();
+  const isEnglish = lang === 'en';
   document.documentElement.lang = lang;
-  document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
-  document.body.dir = lang === 'en' ? 'ltr' : 'rtl';
-  document.body.style.direction = lang === 'en' ? 'ltr' : 'rtl';
+  document.documentElement.dir = isEnglish ? 'ltr' : 'rtl';
+  document.body.dir = isEnglish ? 'ltr' : 'rtl';
+  document.body.style.direction = isEnglish ? 'ltr' : 'rtl';
+
+  const rememberSource = (el, attr, value) => {
+    if (!el.hasAttribute(attr)) el.setAttribute(attr, value ?? '');
+    return el.getAttribute(attr) ?? '';
+  };
+
   root.querySelectorAll?.('.form-group input, .form-group select, .form-group textarea').forEach(el => {
-    el.dir = lang === 'en' ? 'ltr' : 'rtl';
-    el.style.direction = lang === 'en' ? 'ltr' : 'rtl';
+    el.dir = isEnglish ? 'ltr' : 'rtl';
+    el.style.direction = isEnglish ? 'ltr' : 'rtl';
   });
+
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-  const nodes = []; let node;
+  const nodes = [];
+  let node;
   while ((node = walker.nextNode())) {
     if (node.parentElement && !['SCRIPT','STYLE','NOSCRIPT'].includes(node.parentElement.tagName)) nodes.push(node);
   }
-  nodes.forEach(n => { n.nodeValue = t(n.nodeValue); });
-  root.querySelectorAll?.('input[placeholder], textarea[placeholder]').forEach(el => { el.placeholder = t(el.placeholder); });
-  root.querySelectorAll?.('[title]').forEach(el => { el.title = t(el.title); });
+  nodes.forEach(n => {
+    const source = rememberSource(n.parentElement || n, 'data-medtrack-i18n-source', n.nodeValue);
+    n.nodeValue = isEnglish ? t(source) : source;
+  });
+
+  root.querySelectorAll?.('input[placeholder], textarea[placeholder]').forEach(el => {
+    const source = rememberSource(el, 'data-medtrack-i18n-placeholder', el.placeholder);
+    el.placeholder = isEnglish ? t(source) : source;
+  });
+  root.querySelectorAll?.('[title]').forEach(el => {
+    const source = rememberSource(el, 'data-medtrack-i18n-title', el.title);
+    el.title = isEnglish ? t(source) : source;
+  });
 }
+
 function setInterfaceLanguage(language) {
   const lang = language === 'en' ? 'en' : 'he';
   const creds = getAdminCreds();
   try { localStorage.setItem('medtrack_language', lang); } catch(e) {}
   setAdminCreds({ ...creds, language: lang });
-  if (state.currentUser) { state.currentUser.language = lang; saveSession(state.currentUser); }
-  applyInterfaceLanguage();
-  if (state.currentUser?.type === 'admin' || false) renderAdminContent();
-  else if (state.currentUser?.type === 'nurse') renderNurseContent();
+  if (state.currentUser) {
+    state.currentUser.language = lang;
+    saveSession(state.currentUser);
+  }
+
+  // Re-render dynamic screens from their canonical Hebrew templates.
+  // This is safer than translating already-rendered English DOM.
+  if (state.currentUser?.type === 'admin') {
+    renderAdminContent();
+  } else if (state.currentUser?.type === 'nurse') {
+    renderNurseContent();
+  } else {
+    applyInterfaceLanguage();
+  }
+
   const loginLang = document.getElementById('loginLanguage');
   if (loginLang) loginLang.value = lang;
 }
