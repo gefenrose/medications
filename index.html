@@ -2564,7 +2564,7 @@ function setLoginType(type) {
   const devBtn = document.getElementById('devTabBtn');
   if (devBtn) devBtn.style.opacity = type === 'dev' ? '0.8' : '0.25';
   document.getElementById('loginUsername').placeholder =
-    type === 'admin' ? 'הכנס שם משתמש מנהל' :
+    type === 'admin' ? 'הכניסי שם משתמש מנהלת' :
     type === 'dev'   ? 'dev username' : 'הכניסי שם משתמש';
 }
 function doLogin() {
