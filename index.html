@@ -2062,15 +2062,7 @@
       <input type="password" id="loginPassword" placeholder="הכניסי סיסמה" autocomplete="current-password">
     </div>
     <div class="error-msg" id="loginError">שם משתמש או סיסמה שגויים</div>
-    <div class="login-language-switch" style="display:flex;justify-content:center;align-items:center;margin:1rem auto 0;padding:.65rem 1rem;border:1px solid var(--border);border-radius:12px;background:var(--card-bg);width:max-content">
-      <label style="display:flex;align-items:center;gap:.7rem;font-size:1rem;color:var(--text-primary);cursor:pointer">
-        <span>שפה</span>
-        <select id="loginLanguage" class="full-select" style="width:auto;min-width:120px;padding:.5rem .8rem;font-size:1rem" onchange="setInterfaceLanguage(this.value)">
-          <option value="he">עברית</option>
-          <option value="en">English</option>
-        </select>
-      </label>
-    </div>
+
 
     <button class="btn-primary mt-md" onclick="doLogin()">כניסה</button>
     <details class="login-help">
@@ -2082,6 +2074,15 @@
       </div>
     </details>
   </div>
+      <div class="login-language-switch" style="display:flex;justify-content:center;align-items:center;margin:1.15rem auto 0;padding:.55rem .85rem;border:1.5px solid var(--primary);border-radius:999px;background:var(--card-bg);width:max-content;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+      <label style="display:flex;align-items:center;gap:.6rem;font-size:1rem;font-weight:500;color:var(--text-primary);cursor:pointer">
+        <span>שפה</span>
+        <select id="loginLanguage" style="appearance:none;border:0;background:transparent;color:var(--primary);font:inherit;font-weight:600;cursor:pointer;padding:.25rem .2rem;outline:none" onchange="setInterfaceLanguage(this.value)" aria-label="שפת ממשק">
+          <option value="he">עברית</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+    </div>
 </div>
 
 <!-- ===== ADMIN SCREEN ===== -->
