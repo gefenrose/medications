@@ -98,3 +98,25 @@ create trigger profiles_prevent_role_escalation
   before update on public.profiles
   for each row
   execute function public.prevent_profile_role_escalation();
+
+
+-- Enable Postgres Changes for the shared operational tables.
+do $$
+declare
+  tbl text;
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    foreach tbl in array array[
+      'profiles','residents','medications','resident_medications',
+      'rounds','round_entries','round_entry_medications','administrations'
+    ]
+    loop
+      if not exists (
+        select 1 from pg_publication_tables
+        where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = tbl
+      ) then
+        execute format('alter publication supabase_realtime add table public.%I', tbl);
+      end if;
+    end loop;
+  end if;
+end $$;
