@@ -4595,6 +4595,272 @@ function exportPDF(fromDate, toDate) {
     .round-block { page-break-inside:avoid; }
     @page { margin:1.5cm; }
   }
+
+  /* ===== RESPONSIVE WEB APP — PHONE + TABLET + DESKTOP ===== */
+  /* Keep one codebase, but give each screen size its own comfortable layout. */
+
+  html { width: 100%; min-width: 320px; }
+  body { width: 100%; overflow-x: hidden; }
+  button, input, select, textarea { touch-action: manipulation; }
+
+  /* Phones: 320–768px */
+  @media (max-width: 768px) {
+    .screen { width: 100%; min-width: 0; }
+
+    #loginScreen {
+      min-height: 100dvh;
+      padding: max(1rem, env(safe-area-inset-top))
+               max(.75rem, env(safe-area-inset-right))
+               max(1rem, env(safe-area-inset-bottom))
+               max(.75rem, env(safe-area-inset-left));
+      overflow-y: auto;
+    }
+    .login-box {
+      width: min(100%, 420px);
+      max-width: 420px;
+      margin: auto;
+    }
+
+    .topbar,
+    .nurse-topbar-v2,
+    .admin-topbar-v2 {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .topbar {
+      padding-left: max(.8rem, env(safe-area-inset-left));
+      padding-right: max(.8rem, env(safe-area-inset-right));
+    }
+    .topbar-title {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .content,
+    .content-wide {
+      width: 100%;
+      max-width: none;
+      padding-left: max(.8rem, env(safe-area-inset-left));
+      padding-right: max(.8rem, env(safe-area-inset-right));
+    }
+
+    .card,
+    .resident-row,
+    .list-item,
+    .reminder-card {
+      max-width: 100%;
+    }
+
+    /* Tables/lists become horizontally scrollable instead of breaking the page. */
+    .table-wrap,
+    .data-table-wrap,
+    .history-table-wrap {
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Admin stays mobile-first with bottom/tab navigation. */
+    #adminScreen {
+      width: 100%;
+      min-width: 0;
+      height: 100dvh;
+    }
+    .admin-sidebar { display: none !important; }
+    .admin-main {
+      width: 100%;
+      min-width: 0;
+    }
+    .admin-content-wrap {
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+      padding: .9rem max(.8rem, env(safe-area-inset-right)) 1.2rem max(.8rem, env(safe-area-inset-left));
+    }
+
+    .admin-tabs {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      scrollbar-width: none;
+    }
+    .admin-tabs::-webkit-scrollbar { display: none; }
+
+    .admin-tab-bar,
+    .bottom-nav {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .bottom-nav {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .nav-btn {
+      min-width: 0;
+      min-height: 58px;
+    }
+
+    /* Forms use comfortable touch targets. */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      min-height: 44px;
+      max-width: 100%;
+    }
+    .btn,
+    .btn-primary,
+    .btn-orange,
+    .admin-add-btn,
+    .admin-edit-btn,
+    .admin-delete-btn {
+      min-height: 42px;
+    }
+
+    /* Prevent long names / medication notes from forcing horizontal overflow. */
+    .resident-name,
+    .card-title,
+    .section-title,
+    .round-name,
+    .med-name,
+    .list-item,
+    .resident-row {
+      overflow-wrap: anywhere;
+    }
+
+    /* Modal becomes a full-width bottom sheet on phones. */
+    .modal-overlay {
+      align-items: flex-end;
+      padding: 0;
+    }
+    .modal {
+      width: 100%;
+      max-width: 100%;
+      max-height: 92dvh;
+      border-radius: 20px 20px 0 0 !important;
+      padding-bottom: calc(1.25rem + env(safe-area-inset-bottom)) !important;
+    }
+
+    /* Nurse round: single column on phones. */
+    .nurse-round-desktop-grid {
+      display: block !important;
+    }
+    .nurse-round-summary {
+      position: static !important;
+      display: block !important;
+      margin-bottom: .8rem;
+    }
+    .nurse-round-summary > * {
+      margin-bottom: .7rem !important;
+    }
+    .nurse-round-list {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Any grid that gets tight should stack rather than squeeze. */
+    .stats-row,
+    .round-stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+  }
+
+  /* Larger phones / tablets: use more horizontal space without becoming desktop-heavy. */
+  @media (min-width: 480px) and (max-width: 768px) {
+    .content,
+    .content-wide {
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+    }
+    .admin-content-wrap {
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+    }
+    .login-box {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+    .stats-row,
+    .round-stats-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+  }
+
+  /* Tablets and laptops: wider working area, while retaining touch-friendly controls. */
+  @media (min-width: 769px) and (max-width: 1199px) {
+    .content {
+      max-width: 920px;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+    .content-wide {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+    .admin-content-wrap {
+      max-width: none;
+      padding: 1.5rem 1.75rem;
+    }
+    .admin-sidebar {
+      width: 210px;
+      min-width: 210px;
+    }
+    .nurse-round-desktop-grid {
+      grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
+    }
+  }
+
+  /* Full desktop: use the available screen instead of leaving a narrow column. */
+  @media (min-width: 1200px) {
+    .admin-content-wrap {
+      max-width: 1180px;
+      width: 100%;
+      padding: 2rem 2.5rem;
+    }
+    #nurseScreen .content {
+      width: min(1280px, calc(100vw - 64px));
+      max-width: none;
+    }
+    .login-box {
+      max-width: 430px;
+    }
+  }
+
+  /* Very small phones. */
+  @media (max-width: 380px) {
+    #loginScreen { padding-left: .6rem; padding-right: .6rem; }
+    .login-box { padding: 1.4rem 1rem 1rem; }
+    .login-logo h1 { font-size: 1.15rem; }
+    .content,
+    .content-wide {
+      padding-left: .65rem;
+      padding-right: .65rem;
+    }
+    .admin-content-wrap {
+      padding-left: .65rem;
+      padding-right: .65rem;
+    }
+    .nav-btn { font-size: .64rem; }
+    .nav-btn .nav-icon { font-size: 1.05rem; }
+    .stats-row,
+    .round-stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+  }
+
+  /* Accessibility: don't animate for users who ask the OS to reduce motion. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 </style>
 </head>
 <body>
