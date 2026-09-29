@@ -3443,24 +3443,24 @@ function renderNurseRound() {
     }
   }
 
-  // ── Column headers ──
-  html += `</section><section class="nurse-round-list"><div class="res-col-hdrs">
-    <span>דייר / חדר</span>
-    <span>תרופות במנה זו</span>
-    <span>סטטוס</span>
-  </div>`;
+  // ── Resident list ──
+  html += `</section><section class="nurse-round-list">`;
 
-  // ── Resident rows v2 ──
   const isDev = state.currentUser?.type === 'dev';
   let isFirstPending = true;
   const resFilterVal = state.residentFilter || '';
   const filterVal = resFilterVal.trim().toLowerCase();
 
   // Search bar (compact)
-  html += `<div style="padding:0 .1rem .4rem">
+  html += `<div style="padding:0 .1rem .25rem">
     <input type="text" placeholder="חיפוש דייר..." value="${resFilterVal}"
       oninput="nurseResSearch(this.value)"
       style="font-size:14px;padding:.38rem .85rem;border:1px solid var(--border-light);border-radius:20px;font-family:var(--font);direction:rtl;width:100%;background:white" id="nurseResSearch">
+  </div>
+  <div class="res-col-hdrs">
+    <span>דייר / חדר</span>
+    <span>תרופות במנה זו</span>
+    <span>סטטוס</span>
   </div>`;
 
   round.entries.filter(entry => {
