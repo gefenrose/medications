@@ -1,7 +1,7 @@
 // Supabase project configuration.
-// Paste the Project URL and PUBLISHABLE key from Supabase here.
-// Do not paste a secret/service_role key into this file.
+// This file intentionally contains only the browser-safe Publishable key.
+// Never put a Supabase secret/service_role key here.
 window.MEDTRACK_SUPABASE = {
-  url: '',
-  publishableKey: ''
+  url: 'https://ddgftzlvlintvdistcjl.supabase.co',
+  publishableKey: 'sb_publishable_i60Hz8vLCmMXXdpNYJBdOw_sM-thuxQ'
 };
