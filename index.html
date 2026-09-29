@@ -4279,9 +4279,10 @@ function setInterfaceLanguage(language) {
     // an unrelated rendering error.
   }
 
+  // Final pass: translate canonical text first, then apply Hebrew addressing
+  // without translating it back again.
   applyInterfaceLanguage();
   applyAddressLanguage();
-  applyInterfaceLanguage();
 
   // If a cloud profile exists, keep the preference synchronized across devices.
   if (state.currentUser && medtrackCloud?.configured && medtrackCloud?.client && medtrackCloud?.profile) {
