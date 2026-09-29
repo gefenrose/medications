@@ -3921,7 +3921,11 @@ function renderNurseHistory() {
 
 function renderNurseHistContent() {
   const el = document.getElementById('nurseContent');
-  if (el) el.innerHTML = renderNurseHistory();
+  if (el) {
+    el.innerHTML = renderNurseHistory();
+    applyAddressLanguage(el);
+    applyInterfaceLanguage(el);
+  }
 }
 
 function nurseHistSearch() {
@@ -4063,6 +4067,7 @@ const UI_TRANSLATIONS = {
   'עריכת סבב':'Edit round','סבב חדש':'New round','עריכת דייר':'Edit resident','דייר חדש':'New resident',
   'עריכת תרופה':'Edit medication','תרופה חדשה':'New medication','עריכת מדריכה':'Edit caregiver','מדריכה חדשה':'New caregiver',
   'ניתנה':'Given','דולג':'Skipped','ממתין':'Pending','הבא':'Next','צפייה':'View','נקה סינון':'Clear filters',
+  'היסטוריית חלוקה':'Administration history','כל המדריכות':'All caregivers','תאריך':'Date','אין היסטוריה':'No history',
   'סבב נוכחי':'Current round','נותרו':'remaining','דייר / חדר':'Resident / Room','תרופות במנה זו':'Medications in this round',
   'סטטוס':'Status','הפעולה הבאה':'NEXT ACTION','חדר':'Room','דולג בסבב זה':'Skipped in this round',
   'הסבב הושלם!':'Round completed!','קיבלו':'received medication','עם דילוג':'with skipped medication',
@@ -4783,7 +4788,8 @@ function residentAvatar(res) {
 }
 function formatDate(d) {
   const date = new Date(d);
-  return date.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const locale = getInterfaceLanguage() === 'en' ? 'en-US' : 'he-IL';
+  return date.toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 function showNurseViewFromAdmin() {
