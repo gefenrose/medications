@@ -2043,7 +2043,7 @@
       <p>מערכת ניהול תרופות לדיור</p>
     </div>
     <div class="info-box" style="margin-bottom:1rem;text-align:center">
-      הכניסה מנוהלת דרך החשבון המאובטח בענן. ההרשאה (מדריכה / מנהל / ) נקבעת לפי החשבון.
+      הכניסה מנוהלת דרך החשבון המאובטח בענן. ההרשאה (מדריכה / מנהל) נקבעת לפי החשבון.
     </div>
     <div class="form-group">
       <label>אימייל</label>
@@ -4084,7 +4084,7 @@ function getAddressGender() {
 
 const UI_TRANSLATIONS = {
   'מעקב תרופות':'Medication Tracker','מערכת ניהול תרופות לדיור':'Medication management for assisted living',
-  'הכניסה מנוהלת דרך החשבון המאובטח בענן. ההרשאה (מדריכה / מנהל / ) נקבעת לפי החשבון.':'Sign-in is managed through your secure cloud account. Your access level (Caregiver / Manager / ) is determined by your account.',
+  'הכניסה מנוהלת דרך החשבון המאובטח בענן. ההרשאה (מדריכה / מנהל / ) נקבעת לפי החשבון.':'Sign-in is managed through your secure cloud account. Your access level (Caregiver / Manager) is determined by your account.',
   'אימייל':'Email','כתובת אימייל':'Email address','הכניסי כתובת אימייל':'Enter email address',
   'הכניסי סיסמה':'Enter password','שם משתמש או סיסמה שגויים':'Incorrect username or password',
   'נא למלא אימייל וסיסמה':'Please enter email and password','חיבור הענן אינו מוגדר':'Cloud connection is not configured',
@@ -4130,8 +4130,7 @@ const UI_TRANSLATIONS = {
   'פרטי ההתחברות של כל מדריכה':'Login details for all caregivers','רשומות חלוקת תרופות':'Medication administration records',
   'אין רשומות':'No records','ייצוא דוח חלוקה — Excel':'Export administration report — Excel',
   'הדוח יכלול: תאריך, שעת סבב, מדריכה, דייר, תרופה, מינון, שעת נתינה, סטטוס, הערות — לפי סדר כרונולוגי. ניתן לפתוח ישירות ב-Excel.':'The report includes: date, round time, caregiver, resident, medication, dose, administration time, status, and notes — in chronological order. It can be opened directly in Excel.',
-  'מתאריך':'From date','עד תאריך':'To date','גישת  — ייצוא מושבת':' access — export disabled',
-  'PDF שחור-לבן':'Black & white PDF','התראות Push':'Push notifications','לפי סבב':'By round',
+  'מתאריך':'From date','עד תאריך':'To date','PDF שחור-לבן':'Black & white PDF','התראות Push':'Push notifications','לפי סבב':'By round',
   'הפעל הכל':'Enable all','כבה הכל':'Disable all','פועל — התראות מתוזמנות לפי הסבבים':'On — notifications are scheduled for selected rounds',
   'כבוי — לא יישלחו התראות':'Off — no notifications will be sent','גלובלי כבוי':'All notifications off','מושתק':'Muted','עבר':'Past','מתוזמן':'Scheduled','בדוק':'Test',
   'נחסמו בהגדרות הדפדפן':'Blocked in browser settings','אפשרי התראות לקבל תזכורת לפני כל סבב':'Enable notifications to receive a reminder before each round',
@@ -4411,7 +4410,7 @@ function renderAdminExport() {
         <input type="date" id="pdf_to" value="${today}">
       </div>
     </div>
-    ${false ? '<p style="color:var(--skip);font-size:.85rem">גישת  — ייצוא מושבת</p>' : `<div style="display:flex;gap:.6rem;flex-wrap:wrap">
+    ${false ? '' : `<div style="display:flex;gap:.6rem;flex-wrap:wrap">
       <button class="btn btn-orange" onclick="exportPDFRange()" style="display:flex;align-items:center;gap:.5rem;padding:.7rem 1.2rem">
         ${icon("download",16)} Excel
       </button>
@@ -4915,13 +4914,13 @@ ${body}
 }
 
 function exportPDFRange() {
-  if (false) return; const from = document.getElementById('pdf_from')?.value || '';
+  const from = document.getElementById('pdf_from')?.value || '';
   const to   = document.getElementById('pdf_to')?.value   || '';
   exportExcel(from, to);
 }
 
 function exportExcel(fromDate, toDate) {
-  if (false) return; if (typeof XLSX === 'undefined') {
+  if (typeof XLSX === 'undefined') {
     alert(t('טוען את ספריית Excel... נסה שוב בעוד שנייה'));
     return;
   }
