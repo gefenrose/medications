@@ -2597,7 +2597,8 @@ function doLogin() {
       state.currentUser = {
         type: 'admin',
         name: cr.name || 'מנהל',
-        displayName: cr.displayName || cr.name || 'מנהל'
+        displayName: cr.displayName || cr.name || 'מנהל',
+        addressGender: cr.addressGender || 'female'
       };
       saveSession(state.currentUser);
       resetAdminIdleTimer();
@@ -2622,7 +2623,7 @@ function doLogin() {
   } else {
     const nurse = data.nurses.find(n => n.username.toLowerCase() === u && n.password.toLowerCase() === p);
     if (nurse) {
-      state.currentUser = { type: 'nurse', name: nurse.name, id: nurse.id };
+      state.currentUser = { type: 'nurse', name: nurse.name, id: nurse.id, addressGender: getAddressGender() };
       state.selectedDate = new Date().toISOString().split('T')[0];
       saveSession(state.currentUser);
       // Schedule notifications after data loads
@@ -2802,6 +2803,7 @@ function adminSearchUpdate(field, val, renderFn) {
   const el = document.getElementById('adminContent');
   if (!el) return;
   el.innerHTML = renderFn();
+  applyAddressLanguage(el);
   // Restore focus and cursor
   const inp = document.getElementById(inputId);
   if (inp) {
@@ -3313,6 +3315,7 @@ function renderNurseContent() {
       default: el.innerHTML = '';
     }
   }
+  applyAddressLanguage(el);
 }
 
 function getCurrentRound() {
@@ -4015,11 +4018,58 @@ function checkSyncStatus() {
     if (el) el.textContent = `✓ מחובר — עדכון אחרון: ${t}`;
   }).catch(() => { if (el) el.textContent = '✕ שגיאת חיבור'; });
 }
+
+/* ==================== ADDRESSING / GENDER ==================== */
+function getAddressGender() {
+  try {
+    const raw = localStorage.getItem('medtrack_admin_creds');
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed.addressGender === 'male' ? 'male' : 'female';
+  } catch(e) { return 'female'; }
+}
+
+function applyAddressLanguage(root = document) {
+  const female = getAddressGender() === 'female';
+  const replacements = female ? [
+    ['מהמנהל','מהמנהלת'], ['למנהל','למנהלת'], ['המנהל','המנהלת'],
+    ['מנהל','מנהלת'],
+    ['הכנס','הכניסי'], ['השאר','השאירי'],
+    ['הוסף','הוסיפי'], ['ערוך','ערכי'], ['מחק','מחקי'],
+    ['שמור','שמרי'], ['בחר','בחרי'], ['נסה','נסי'],
+    ['אפשר','אפשרי'], ['בקש','בקשי']
+  ] : [
+    ['מהמנהלת','מהמנהל'], ['למנהלת','למנהל'], ['המנהלת','המנהל'],
+    ['מנהלת','מנהל'],
+    ['הכניסי','הכנס'], ['השאירי','השאר'],
+    ['הוסיפי','הוסף'], ['ערכי','ערוך'], ['מחקי','מחק'],
+    ['שמרי','שמור'], ['בחרי','בחר'], ['נסי','נסה'],
+    ['אפשרי','אפשר'], ['בקשי','בקש']
+  ];
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  let node;
+  while ((node = walker.nextNode())) nodes.push(node);
+  nodes.forEach(n => {
+    let value = n.nodeValue;
+    replacements.forEach(([from,to]) => { value = value.split(from).join(to); });
+    n.nodeValue = value;
+  });
+}
+
 function renderAdminProfile() {
   if (state.currentUser?.type === 'dev') return '<div class="empty-state"><p>גישה לא מורשית</p></div>';
   const creds = getAdminCreds();
   return `<div class="card">
     <div class="card-title" style="margin-bottom:.8rem">פרופיל מנהל</div>
+    <div class="form-group">
+      <label>לשון פנייה</label>
+      <select id="prof_gender" class="full-select">
+        <option value="female" ${getAdminCreds().addressGender === 'male' ? '' : 'selected'}>נקבה — פנייה לנשים</option>
+        <option value="male" ${getAdminCreds().addressGender === 'male' ? 'selected' : ''}>זכר — פנייה לגברים</option>
+      </select>
+      <div class="section-desc">הבחירה קובעת את לשון הפנייה למנהלת ולמדריכות ברחבי המערכת.</div>
+    </div>
     <div class="form-group">
       <label>שם מלא</label>
       <input id="prof_name" placeholder="שם מלא" value="${esc(creds.name || '')}">
@@ -4058,9 +4108,10 @@ function getAdminCreds() {
       username: parsed.username || 'admin',
       password: parsed.password || '1234',
       name: parsed.name || 'מנהל',
-      displayName: parsed.displayName || parsed.name || 'מנהל'
+      displayName: parsed.displayName || parsed.name || 'מנהל',
+      addressGender: parsed.addressGender === 'male' ? 'male' : 'female'
     };
-  } catch(e) { return { username: 'admin', password: '1234', name: 'מנהל', displayName: 'מנהל' }; }
+  } catch(e) { return { username: 'admin', password: '1234', name: 'מנהל', displayName: 'מנהל', addressGender: 'female' }; }
 }
 function setAdminCreds(profile) {
   localStorage.setItem('medtrack_admin_creds', JSON.stringify(profile));
@@ -4090,6 +4141,7 @@ function saveAdminProfile() {
   const curPass    = document.getElementById('prof_cur_pass').value;
   const newPass    = document.getElementById('prof_new_pass').value;
   const confirmPass= document.getElementById('prof_confirm_pass').value;
+  const addressGender = document.getElementById('prof_gender')?.value === 'male' ? 'male' : 'female';
   const msg        = document.getElementById('prof_msg');
 
   const show = (text, ok) => {
@@ -4110,12 +4162,14 @@ function saveAdminProfile() {
     username: newUser,
     password: newPass || creds.password,
     name,
-    displayName: display
+    displayName: display,
+    addressGender
   };
   setAdminCreds(nextProfile);
   state.currentUser = { ...state.currentUser, name, displayName: display };
   saveSession(state.currentUser);
   applyAdminProfileToChrome();
+  applyAddressLanguage();
   show('✓ השינויים נשמרו בהצלחה', true);
   document.getElementById('prof_cur_pass').value = '';
   document.getElementById('prof_new_pass').value = '';
@@ -4565,6 +4619,7 @@ function openModal(title, body) {
   document.getElementById('modalTitle').textContent = title;
   document.getElementById('modalBody').innerHTML = body;
   document.getElementById('modalOverlay').classList.add('open');
+  applyAddressLanguage(document.getElementById('modalOverlay'));
   // Set resident selects after DOM is rendered
   setTimeout(() => {
     const round = state.editId ? data.rounds.find(r=>r.id===state.editId) : null;
@@ -4814,6 +4869,7 @@ document.getElementById('loginPassword').addEventListener('keydown', e => { if (
   if (!saved) return;
 
   state.currentUser = saved;
+  applyAddressLanguage();
 
   if (saved.type === 'admin' || saved.type === 'dev') {
     showScreen('adminScreen');
@@ -4866,6 +4922,7 @@ document.addEventListener('DOMContentLoaded', () => {
       el.style.cssText = 'display:inline-flex;align-items:center;margin-left:3px;opacity:.7';
     });
     initNavIcons();
+    applyAddressLanguage();
   }, 50);
 });
 // Patch round form options after modal opens
