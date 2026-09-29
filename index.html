@@ -4072,6 +4072,9 @@ function checkSyncStatus() {
 
 /* ==================== ADDRESSING / GENDER ==================== */
 function getAddressGender() {
+  if (medtrackCloud?.profile?.address_gender) {
+    return medtrackCloud.profile.address_gender === 'male' ? 'male' : 'female';
+  }
   try {
     const raw = localStorage.getItem('medtrack_admin_creds');
     const parsed = raw ? JSON.parse(raw) : {};
