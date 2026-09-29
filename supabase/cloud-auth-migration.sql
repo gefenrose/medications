@@ -74,3 +74,27 @@ using (caregiver_id = auth.uid() or public.is_manager());
 
 grant select, insert, update, delete on public.administrations to authenticated;
 grant select, insert, update on public.profiles to authenticated;
+
+
+-- Defense in depth: a caregiver cannot change their own role even though
+-- the profile update policy permits updates to their row.
+create or replace function public.prevent_profile_role_escalation()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.role is distinct from old.role and not public.is_manager() then
+    raise exception 'Only a manager can change profile roles';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_prevent_role_escalation on public.profiles;
+
+create trigger profiles_prevent_role_escalation
+  before update on public.profiles
+  for each row
+  execute function public.prevent_profile_role_escalation();
