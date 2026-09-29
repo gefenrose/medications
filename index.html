@@ -4084,6 +4084,12 @@ function getAddressGender() {
 
 const UI_TRANSLATIONS = {
   'מעקב תרופות':'Medication Tracker','מערכת ניהול תרופות לדיור מוגן':'Medication management for assisted living',
+  'הכניסה מנוהלת דרך החשבון המאובטח בענן. ההרשאה (מדריכה / מנהל / Developer) נקבעת לפי החשבון.':'Sign-in is managed through your secure cloud account. Your access level (Caregiver / Manager / Developer) is determined by your account.',
+  'אימייל':'Email','כתובת אימייל':'Email address','הכניסי כתובת אימייל':'Enter email address',
+  'הכניסי סיסמה':'Enter password','שם משתמש או סיסמה שגויים':'Incorrect username or password',
+  'נא למלא אימייל וסיסמה':'Please enter email and password','חיבור הענן אינו מוגדר':'Cloud connection is not configured',
+  'מתחברת…':'Signing in…','חשבון חדש נוצר ומנוהל דרך Supabase Authentication.':'New accounts are created and managed through Supabase Authentication.',
+  'שפה':'Language','עברית':'Hebrew','English':'English',
   'מדריכה':'Caregiver','מדריכות':'Caregivers','מנהל':'Manager','מנהלת':'Manager','לוח ניהול':'Admin Dashboard',
   'סבבים':'Rounds','סבב':'Round','דיירים':'Residents','דייר':'Resident','תרופות':'Medications','תרופה':'Medication',
   'היסטוריה':'History','ייצוא':'Export','פרופיל':'Profile','יציאה':'Log out','תצוגת מדריכה':'Caregiver View',
@@ -4153,7 +4159,13 @@ const UI_TRANSLATIONS = {
   'נא לבחור קובץ תמונה':'Please choose an image file','לא ניתן לטעון את התמונה':'Unable to load image'
 };
 const UI_TRANSLATIONS_REVERSE = Object.fromEntries(Object.entries(UI_TRANSLATIONS).map(([he,en]) => [en,he]));
-function getInterfaceLanguage() { return getAdminCreds().language === 'en' ? 'en' : 'he'; }
+function getInterfaceLanguage() {
+  try {
+    const saved = localStorage.getItem('medtrack_language');
+    if (saved === 'en' || saved === 'he') return saved;
+  } catch(e) {}
+  return getAdminCreds().language === 'en' ? 'en' : 'he';
+}
 function t(text) {
   if (!text) return text;
   const map = getInterfaceLanguage() === 'en' ? UI_TRANSLATIONS : UI_TRANSLATIONS_REVERSE;
@@ -4167,6 +4179,10 @@ function applyInterfaceLanguage(root = document) {
   document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
   document.body.dir = lang === 'en' ? 'ltr' : 'rtl';
   document.body.style.direction = lang === 'en' ? 'ltr' : 'rtl';
+  root.querySelectorAll?.('.form-group input, .form-group select, .form-group textarea').forEach(el => {
+    el.dir = lang === 'en' ? 'ltr' : 'rtl';
+    el.style.direction = lang === 'en' ? 'ltr' : 'rtl';
+  });
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes = []; let node;
   while ((node = walker.nextNode())) {
@@ -4179,6 +4195,7 @@ function applyInterfaceLanguage(root = document) {
 function setInterfaceLanguage(language) {
   const lang = language === 'en' ? 'en' : 'he';
   const creds = getAdminCreds();
+  try { localStorage.setItem('medtrack_language', lang); } catch(e) {}
   setAdminCreds({ ...creds, language: lang });
   if (state.currentUser) { state.currentUser.language = lang; saveSession(state.currentUser); }
   applyInterfaceLanguage();
@@ -5108,6 +5125,7 @@ document.getElementById('loginPassword').addEventListener('keydown', e => { if (
     };
     state.loginType = state.currentUser.type === 'nurse' ? 'nurse' : 'admin';
     saveSession(state.currentUser);
+    try { localStorage.setItem('medtrack_language', state.currentUser.language === 'en' ? 'en' : 'he'); } catch(e) {}
     applyAddressLanguage();
     applyInterfaceLanguage();
 
