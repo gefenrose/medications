@@ -3976,7 +3976,13 @@ function renderNurseReminders() {
   if (!notifGranted) return html;
 
   // ── Per-round rows ─────────────────────────────────────────────────────
-  html += `<div class="section-title" style="margin-bottom:.6rem">לפי סבב</div>`;
+  html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.6rem">
+    <div class="section-title" style="margin:0">לפי סבב</div>
+    <div style="display:flex;gap:.4rem">
+      <button class="btn btn-outline btn-sm" onclick="setAllRoundNotifications(true)" ${!notifGranted ? "disabled" : ""}>הפעל הכל</button>
+      <button class="btn btn-outline btn-sm" onclick="setAllRoundNotifications(false)" ${!notifGranted ? "disabled" : ""}>כבה הכל</button>
+    </div>
+  </div>`;
 
   const sorted = [...data.rounds].sort((a,b) => a.time.localeCompare(b.time));
 
@@ -4029,6 +4035,19 @@ function renderNurseReminders() {
   return html;
 }
 
+
+function setAllRoundNotifications(enabled) {
+  state.remindersEnabled = !!enabled;
+  state.mutedRounds = enabled ? {} : Object.fromEntries(data.rounds.map(r => [r.id, true]));
+  saveNotificationPrefs();
+  if (enabled) {
+    scheduleRoundNotifications();
+  } else {
+    Object.values(_scheduledNotifs).forEach(id => clearTimeout(id));
+    _scheduledNotifs = {};
+  }
+  renderNurseContent();
+}
 
 function toggleReminders() {
   toggleGlobalNotif(!state.remindersEnabled);
@@ -4097,6 +4116,8 @@ const UI_TRANSLATIONS = {
   'הדוח יכלול: תאריך, שעת סבב, מדריכה, דייר, תרופה, מינון, שעת נתינה, סטטוס, הערות — לפי סדר כרונולוגי. ניתן לפתוח ישירות ב-Excel.':'The report includes: date, round time, caregiver, resident, medication, dose, administration time, status, and notes — in chronological order. It can be opened directly in Excel.',
   'מתאריך':'From date','עד תאריך':'To date','גישת Developer — ייצוא מושבת':'Developer access — export disabled',
   'PDF שחור-לבן':'Black & white PDF','התראות Push':'Push notifications','לפי סבב':'By round',
+  'הפעל הכל':'Enable all','כבה הכל':'Disable all','פועל — התראות מתוזמנות לפי הסבבים':'On — notifications are scheduled for selected rounds',
+  'כבוי — לא יישלחו התראות':'Off — no notifications will be sent','גלובלי כבוי':'All notifications off','מושתק':'Muted','עבר':'Past','מתוזמן':'Scheduled','בדוק':'Test',
   'נחסמו בהגדרות הדפדפן':'Blocked in browser settings','אפשרי התראות לקבל תזכורת לפני כל סבב':'Enable notifications to receive a reminder before each round',
   'פועל — התראות מתוזמנות לפי הסבבים':'On — notifications are scheduled for the rounds','כבוי — לא יישלחו התראות':'Off — no notifications will be sent',
   'גלובלי כבוי':'Globally off','מתוזמן':'Scheduled','עבר':'Past','מושתק':'Muted','אין דיירים':'No residents','בדוק':'Test',
