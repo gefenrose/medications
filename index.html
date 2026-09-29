@@ -4192,9 +4192,34 @@ function getInterfaceLanguage() {
 function t(text) {
   if (!text || getInterfaceLanguage() !== 'en') return text;
   let out = String(text);
+
+  // Replace Hebrew words/phrases only when they are not embedded inside
+  // another Hebrew word. This prevents "כניסה" from becoming "הLog in" inside
+  // the word "הכניסה".
+  const isHebrew = ch => !!ch && /[א-ת]/.test(ch);
+  const replaceWholeHebrew = (value, from, to) => {
+    let result = '';
+    let cursor = 0;
+    let index;
+    while ((index = value.indexOf(from, cursor)) !== -1) {
+      const before = index > 0 ? value[index - 1] : '';
+      const after = index + from.length < value.length ? value[index + from.length] : '';
+      result += value.slice(cursor, index);
+      if (!isHebrew(before) && !isHebrew(after)) {
+        result += to;
+      } else {
+        result += from;
+      }
+      cursor = index + from.length;
+    }
+    return result + value.slice(cursor);
+  };
+
   Object.entries(UI_TRANSLATIONS)
     .sort((a,b) => b[0].length - a[0].length)
-    .forEach(([from,to]) => { out = out.split(from).join(to); });
+    .forEach(([from,to]) => {
+      out = replaceWholeHebrew(out, from, to);
+    });
   return out;
 }
 
