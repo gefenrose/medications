@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="תרופות">
 <meta name="theme-color" content="#006C70">
-<title>מעקב תרופות – דיור מוגן</title>
+<title>מעקב תרופות – דיור</title>
 <link rel="icon" href="icons/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <!-- v20 -->
@@ -2040,10 +2040,10 @@
     <div class="login-logo" style="animation:fadeSlideDown .4s ease">
       <div class="icon"><img src="./icons/icon-192.png" alt="" aria-hidden="true"></div>
       <h1>מעקב תרופות</h1>
-      <p>מערכת ניהול תרופות לדיור מוגן</p>
+      <p>מערכת ניהול תרופות לדיור</p>
     </div>
     <div class="info-box" style="margin-bottom:1rem;text-align:center">
-      הכניסה מנוהלת דרך החשבון המאובטח בענן. ההרשאה (מדריכה / מנהל / Developer) נקבעת לפי החשבון.
+      הכניסה מנוהלת דרך החשבון המאובטח בענן. ההרשאה (מדריכה / מנהל / ) נקבעת לפי החשבון.
     </div>
     <div class="form-group">
       <label>אימייל</label>
@@ -2426,7 +2426,7 @@ function saveData() {
       console.warn('Cloud administration save failed', e);
       showSyncBadge('✕ אין חיבור', true);
     });
-    if (['manager','developer'].includes(medtrackCloud.profile.role)) {
+    if (['manager'].includes(medtrackCloud.profile.role)) {
       medtrackCloud.saveManagerData(data).catch(e => {
         console.warn('Cloud manager save failed', e);
         showSyncBadge('✕ אין חיבור', true);
@@ -2612,7 +2612,7 @@ async function doLogin() {
     // Load cloud data. If the database is still empty, the manager account
     // performs a one-time migration from the existing GitHub data file.
     let cloudResult = await medtrackCloud.loadDataInto(data);
-    if (cloudResult.empty && ['manager','developer'].includes(p.role)) {
+    if (cloudResult.empty && ['manager'].includes(p.role)) {
       const legacy = await ghRead();
       if (legacy) {
         if (legacy.nurses) data.nurses = legacy.nurses;
@@ -2657,7 +2657,7 @@ async function doLogin() {
       resetAdminIdleTimer();
       showScreen('adminScreen');
       document.getElementById('adminTitle').textContent =
-        p.role === 'developer' ? '⚙ Developer Mode' : 'לוח ניהול';
+        'לוח ניהול';
       applyAdminProfileToChrome();
       adminTab('rounds');
     }
@@ -2756,7 +2756,7 @@ function renderAdminContent() {
     case 'nurses': el.innerHTML = renderAdminNurses(); break;
     case 'history': el.innerHTML = renderAdminHistory(); break;
     case 'export': el.innerHTML = renderAdminExport(); break;
-    case 'profile': if (state.currentUser?.type === 'dev') { adminTab('rounds'); return; } el.innerHTML = renderAdminProfile(); break;
+    case 'profile': if (false) { adminTab('rounds'); return; } el.innerHTML = renderAdminProfile(); break;
   }
   applyAddressLanguage(el);
   applyInterfaceLanguage(el);
@@ -2765,7 +2765,7 @@ function renderAdminContent() {
 }
 
 function renderAdminRounds() {
-  const isDev = state.currentUser?.type === 'dev';
+  const isDev = false;
   // Summary stats
   const totalMeds = data.meds.length;
   const totalRes  = data.residents.length;
@@ -2840,7 +2840,7 @@ function adminSearchUpdate(field, val, renderFn) {
 }
 
 function renderAdminResidents() {
-  const isDev = state.currentUser?.type === 'dev';
+  const isDev = false;
   let html = `<div class="adm-section-hdr">
     <div><div class="adm-section-title">דיירים</div><div class="adm-section-sub">פרטי הדיירים ותרופותיהם</div></div>
     ${!isDev ? `<button class="adm-add-btn" onclick="openResidentModal()">${icon('plus-circle',15)} הוסף</button>` : ''}
@@ -2875,7 +2875,7 @@ function renderAdminResidents() {
 }
 
 function renderAdminMeds() {
-  const isDev = state.currentUser?.type === 'dev';
+  const isDev = false;
   let html = `<div class="adm-section-hdr">
     <div><div class="adm-section-title">תרופות</div><div class="adm-section-sub">כל התרופות הקיימות במערכת</div></div>
     ${!isDev ? `<button class="adm-add-btn" onclick="openMedModal()">${icon('plus-circle',15)} הוסף</button>` : ''}
@@ -2906,7 +2906,7 @@ function renderAdminMeds() {
 }
 
 function renderAdminNurses() {
-  const isDev = state.currentUser?.type === 'dev';
+  const isDev = false;
   let html = `<div class="adm-section-hdr">
     <div><div class="adm-section-title">מדריכות</div><div class="adm-section-sub">פרטי ההתחברות של כל מדריכה</div></div>
     ${!isDev ? `<button class="adm-add-btn" onclick="openNurseModal()">${icon('plus-circle',15)} הוסף</button>` : ''}
@@ -2974,7 +2974,7 @@ function renderAdminHistory() {
         :'<span style="font-size:.7rem;font-weight:700;color:var(--skip);background:#fef2f2;padding:.15rem .5rem;border-radius:20px;white-space:nowrap">✕ דולג</span>';
       html+=`<div class="adm-hist-entry">
         <div style="flex:1;min-width:0">
-          <div style="font-size:.82rem;font-weight:700;color:var(--text-primary)">${res?esc(res.name):'?'} — ${med?(state.currentUser?.type==='dev'?'••••••':esc(med.name)):'?'}</div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--text-primary)">${res?esc(res.name):'?'} — ${med?(false?'••••••':esc(med.name)):'?'}</div>
           <div style="font-size:.72rem;color:var(--text-secondary);margin-top:.1rem">${h.time||''} | ${round?esc(round.name):''} | <strong>${esc(h.nurseName||'—')}</strong></div>
           ${h.note?`<div style="font-size:.7rem;color:var(--text-muted);font-style:italic;margin-top:.1rem">* ${esc(h.note)}</div>`:''}
         </div>${badge}
@@ -2984,7 +2984,7 @@ function renderAdminHistory() {
   });
   return html;
 }
-function openRoundModal(id) {  if (state.currentUser?.type === 'dev') return;
+function openRoundModal(id) {  if (false) return;
 
   state.editId = id || null;
   const round = id ? data.rounds.find(r=>r.id===id) : null;
@@ -3075,7 +3075,7 @@ function saveRound() {
   }
   saveData(); closeModal(); renderAdminContent();
 }
-function deleteRound(id) {  if (state.currentUser?.type === 'dev') return;
+function deleteRound(id) {  if (false) return;
   const round = data.rounds.find(r=>r.id===id);
   if (!round) return;
   if (!confirm(t(`למחוק את הסבב "${round.name}"?\n\nפעולה זו לא ניתנת לביטול.`))) return;
@@ -3137,7 +3137,7 @@ function removeResidentPhoto() {
   document.getElementById('res_photo_preview').innerHTML = photoPreviewHtml(name, '');
 }
 
-function openResidentModal(id) {  if (state.currentUser?.type === 'dev') return;
+function openResidentModal(id) {  if (false) return;
 
   state.editId = id || null;
   const res = id ? data.residents.find(r=>r.id===id) : null;
@@ -3189,7 +3189,7 @@ function saveResident() {
   }
   saveData(); closeModal(); renderAdminContent();
 }
-function deleteResident(id) {  if (state.currentUser?.type === 'dev') return;
+function deleteResident(id) {  if (false) return;
   const res = data.residents.find(r=>r.id===id);
   if (!res) return;
   if (!confirm(t(`למחוק את הדייר "${res.name}"?\n\nפעולה זו לא ניתנת לביטול.`))) return;
@@ -3197,7 +3197,7 @@ function deleteResident(id) {  if (state.currentUser?.type === 'dev') return;
   saveData(); renderAdminContent();
 }
 
-function openMedModal(id) {  if (state.currentUser?.type === 'dev') return;
+function openMedModal(id) {  if (false) return;
 
   state.editId = id || null;
   const med = id ? data.meds.find(m=>m.id===id) : null;
@@ -3223,7 +3223,7 @@ function saveMed() {
   }
   saveData(); closeModal(); renderAdminContent();
 }
-function deleteMed(id) {  if (state.currentUser?.type === 'dev') return;
+function deleteMed(id) {  if (false) return;
   const med = data.meds.find(m=>m.id===id);
   if (!med) return;
   if (!confirm(t(`למחוק את התרופה "${med.name}"?\n\nפעולה זו לא ניתנת לביטול.`))) return;
@@ -3231,7 +3231,7 @@ function deleteMed(id) {  if (state.currentUser?.type === 'dev') return;
   saveData(); renderAdminContent();
 }
 
-function openNurseModal(id) {  if (state.currentUser?.type === 'dev') return;
+function openNurseModal(id) {  if (false) return;
 
   state.editId = id || null;
   const nurse = id ? data.nurses.find(n=>n.id===id) : null;
@@ -3289,7 +3289,7 @@ function saveNurse() {
   }
   saveData(); closeModal(); renderAdminContent();
 }
-function deleteNurse(id) {  if (state.currentUser?.type === 'dev') return;
+function deleteNurse(id) {  if (false) return;
   const nurse = data.nurses.find(n=>n.id===id);
   if (!nurse) return;
   if (!confirm(t(`למחוק את המדריכה "${nurse.name}"?\n\nפעולה זו לא ניתנת לביטול.`))) return;
@@ -3455,7 +3455,7 @@ function renderNurseRound() {
   // ── Resident list ──
   html += `</section><section class="nurse-round-list">`;
 
-  const isDev = state.currentUser?.type === 'dev';
+  const isDev = false;
   let isFirstPending = true;
   const resFilterVal = state.residentFilter || '';
   const filterVal = resFilterVal.trim().toLowerCase();
@@ -3656,7 +3656,7 @@ function toggleResMeds(residentId) {
 }
 
 function markAllMeds(roundId, residentId, action) {
-  if (state.currentUser?.type === 'dev') return;
+  if (false) return;
   ensureSession(roundId);
   const round = data.rounds.find(r => r.id === roundId);
   if (!round) return;
@@ -3715,7 +3715,7 @@ function ensureSession(roundId) {
 }
 
 function markMedStatus(roundId, residentId, medId, status) {
-  if (state.currentUser?.type === 'dev') return;
+  if (false) return;
   ensureSession(roundId);
   if (!data.activeRoundSession.statuses[residentId]) {
     data.activeRoundSession.statuses[residentId] = { meds: {} };
@@ -3838,7 +3838,7 @@ function renderNurseDateHistory(dateStr) {
               ? '<span class="badge badge-given">ניתנה ✓</span>'
               : '<span class="badge badge-skipped">דולג</span>';
             return `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:.3rem;font-size:.82rem">
-              <span>${med ? (state.currentUser?.type==='dev' ? '•••••• •••' : esc(med.name)+' '+esc(med.dose)) : '?'}</span>
+              <span>${med ? (false ? '•••••• •••' : esc(med.name)+' '+esc(med.dose)) : '?'}</span>
               <div style="display:flex;align-items:center;gap:.4rem">${badge}<span style="color:var(--text-muted);font-size:.75rem">${h.time||''}</span></div>
             </div>
             ${h.note ? `<div style="font-size:.75rem;color:var(--text-muted);margin-top:.1rem">הערה: ${esc(h.note)}</div>` : ''}`;
@@ -3856,7 +3856,7 @@ function renderNurseHistory() {
   if (!state.nurseHistFilters) state.nurseHistFilters = { resident: '', nurse: '', date: '' };
   const { resident: fRes, nurse: fNurse, date: fDate } = state.nurseHistFilters;
   const today = new Date().toISOString().split('T')[0];
-  const isDev = state.currentUser?.type === 'dev';
+  const isDev = false;
 
   // Filters UI
   const nurseOptions = data.nurses.map(n =>
@@ -4083,8 +4083,8 @@ function getAddressGender() {
 }
 
 const UI_TRANSLATIONS = {
-  'מעקב תרופות':'Medication Tracker','מערכת ניהול תרופות לדיור מוגן':'Medication management for assisted living',
-  'הכניסה מנוהלת דרך החשבון המאובטח בענן. ההרשאה (מדריכה / מנהל / Developer) נקבעת לפי החשבון.':'Sign-in is managed through your secure cloud account. Your access level (Caregiver / Manager / Developer) is determined by your account.',
+  'מעקב תרופות':'Medication Tracker','מערכת ניהול תרופות לדיור':'Medication management for assisted living',
+  'הכניסה מנוהלת דרך החשבון המאובטח בענן. ההרשאה (מדריכה / מנהל / ) נקבעת לפי החשבון.':'Sign-in is managed through your secure cloud account. Your access level (Caregiver / Manager / ) is determined by your account.',
   'אימייל':'Email','כתובת אימייל':'Email address','הכניסי כתובת אימייל':'Enter email address',
   'הכניסי סיסמה':'Enter password','שם משתמש או סיסמה שגויים':'Incorrect username or password',
   'נא למלא אימייל וסיסמה':'Please enter email and password','חיבור הענן אינו מוגדר':'Cloud connection is not configured',
@@ -4130,7 +4130,7 @@ const UI_TRANSLATIONS = {
   'פרטי ההתחברות של כל מדריכה':'Login details for all caregivers','רשומות חלוקת תרופות':'Medication administration records',
   'אין רשומות':'No records','ייצוא דוח חלוקה — Excel':'Export administration report — Excel',
   'הדוח יכלול: תאריך, שעת סבב, מדריכה, דייר, תרופה, מינון, שעת נתינה, סטטוס, הערות — לפי סדר כרונולוגי. ניתן לפתוח ישירות ב-Excel.':'The report includes: date, round time, caregiver, resident, medication, dose, administration time, status, and notes — in chronological order. It can be opened directly in Excel.',
-  'מתאריך':'From date','עד תאריך':'To date','גישת Developer — ייצוא מושבת':'Developer access — export disabled',
+  'מתאריך':'From date','עד תאריך':'To date','גישת  — ייצוא מושבת':' access — export disabled',
   'PDF שחור-לבן':'Black & white PDF','התראות Push':'Push notifications','לפי סבב':'By round',
   'הפעל הכל':'Enable all','כבה הכל':'Disable all','פועל — התראות מתוזמנות לפי הסבבים':'On — notifications are scheduled for selected rounds',
   'כבוי — לא יישלחו התראות':'Off — no notifications will be sent','גלובלי כבוי':'All notifications off','מושתק':'Muted','עבר':'Past','מתוזמן':'Scheduled','בדוק':'Test',
@@ -4199,7 +4199,7 @@ function setInterfaceLanguage(language) {
   setAdminCreds({ ...creds, language: lang });
   if (state.currentUser) { state.currentUser.language = lang; saveSession(state.currentUser); }
   applyInterfaceLanguage();
-  if (state.currentUser?.type === 'admin' || state.currentUser?.type === 'dev') renderAdminContent();
+  if (state.currentUser?.type === 'admin' || false) renderAdminContent();
   else if (state.currentUser?.type === 'nurse') renderNurseContent();
   const loginLang = document.getElementById('loginLanguage');
   if (loginLang) loginLang.value = lang;
@@ -4238,7 +4238,7 @@ function applyAddressLanguage(root = document) {
 }
 
 function renderAdminProfile() {
-  if (state.currentUser?.type === 'dev') return '<div class="empty-state"><p>גישה לא מורשית</p></div>';
+  if (false) return '<div class="empty-state"><p>גישה לא מורשית</p></div>';
   const p = medtrackCloud?.profile || {};
   const language = p.language === 'en' ? 'en' : 'he';
   const gender = p.address_gender === 'male' ? 'male' : 'female';
@@ -4275,7 +4275,7 @@ function renderAdminProfile() {
 }
 
 async function saveAdminProfile() {
-  if (state.currentUser?.type === 'dev') return;
+  if (false) return;
   const name = document.getElementById('prof_name')?.value.trim();
   const username = document.getElementById('prof_user')?.value.trim().toLowerCase();
   const language = document.getElementById('prof_language')?.value === 'en' ? 'en' : 'he';
@@ -4350,7 +4350,7 @@ function applyAdminProfileToChrome() {
 }
 
 function saveAdminProfile() {
-  if (state.currentUser?.type === 'dev') return;
+  if (false) return;
   const name       = document.getElementById('prof_name').value.trim();
   const display    = document.getElementById('prof_display').value.trim();
   const newUser    = document.getElementById('prof_user').value.trim();
@@ -4411,7 +4411,7 @@ function renderAdminExport() {
         <input type="date" id="pdf_to" value="${today}">
       </div>
     </div>
-    ${state.currentUser?.type === 'dev' ? '<p style="color:var(--skip);font-size:.85rem">גישת Developer — ייצוא מושבת</p>' : `<div style="display:flex;gap:.6rem;flex-wrap:wrap">
+    ${false ? '<p style="color:var(--skip);font-size:.85rem">גישת  — ייצוא מושבת</p>' : `<div style="display:flex;gap:.6rem;flex-wrap:wrap">
       <button class="btn btn-orange" onclick="exportPDFRange()" style="display:flex;align-items:center;gap:.5rem;padding:.7rem 1.2rem">
         ${icon("download",16)} Excel
       </button>
@@ -4864,7 +4864,7 @@ function exportPDF(fromDate, toDate) {
 </style>
 </head>
 <body>
-<h1>מעקב תרופות  דיור מוגן</h1>
+<h1>מעקב תרופות  דיור</h1>
 <p class="subtitle">${dr}</p>
 <hr>
 ${body}
@@ -4915,13 +4915,13 @@ ${body}
 }
 
 function exportPDFRange() {
-  if (state.currentUser?.type === 'dev') return; const from = document.getElementById('pdf_from')?.value || '';
+  if (false) return; const from = document.getElementById('pdf_from')?.value || '';
   const to   = document.getElementById('pdf_to')?.value   || '';
   exportExcel(from, to);
 }
 
 function exportExcel(fromDate, toDate) {
-  if (state.currentUser?.type === 'dev') return; if (typeof XLSX === 'undefined') {
+  if (false) return; if (typeof XLSX === 'undefined') {
     alert(t('טוען את ספריית Excel... נסה שוב בעוד שנייה'));
     return;
   }
@@ -5352,7 +5352,7 @@ function toggleRoundNotif(roundId, mute) {
 // ==================== INIT ====================
 function initNavIcons() {
   // Hide profile tab for dev (mobile tab bar + overflow menu + sidebar)
-  const isDev = state.currentUser?.type === 'dev';
+  const isDev = false;
   ['adminProfileTab', 'adminProfileTabSidebar'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = isDev ? 'none' : '';
@@ -5467,7 +5467,7 @@ if (canUseServiceWorker) {
         if (document.visibilityState === 'visible') {
           reg.update();
           // Re-check notifications on app resume (catches missed round times)
-          if (state.currentUser?.type === 'nurse' || state.currentUser?.type === 'dev') {
+          if (state.currentUser?.type === 'nurse' || false) {
             scheduleRoundNotifications();
           }
         }
