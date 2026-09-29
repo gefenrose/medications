@@ -4243,26 +4243,58 @@ function applyInterfaceLanguage(root = document) {
 
 function setInterfaceLanguage(language) {
   const lang = language === 'en' ? 'en' : 'he';
-  const creds = getAdminCreds();
+
+  // Persist the choice first so every subsequent render reads the same language.
   try { localStorage.setItem('medtrack_language', lang); } catch(e) {}
-  setAdminCreds({ ...creds, language: lang });
+  try {
+    const creds = getAdminCreds();
+    setAdminCreds({ ...creds, language: lang });
+  } catch(e) {
+    console.warn('Could not persist interface language locally', e);
+  }
+
   if (state.currentUser) {
     state.currentUser.language = lang;
     saveSession(state.currentUser);
   }
 
-  // Re-render dynamic screens from their canonical Hebrew templates.
-  // This is safer than translating already-rendered English DOM.
-  if (state.currentUser?.type === 'admin') {
-    renderAdminContent();
-  } else if (state.currentUser?.type === 'nurse') {
-    renderNurseContent();
-  } else {
-    applyInterfaceLanguage();
-  }
+  // Update direction and all currently visible static text immediately.
+  // This also makes the login screen switch without depending on a re-render.
+  applyInterfaceLanguage();
 
   const loginLang = document.getElementById('loginLanguage');
   if (loginLang) loginLang.value = lang;
+
+  // Dynamic screens are rebuilt from their canonical Hebrew templates.
+  // Re-apply the language after the rebuild so the result is always consistent.
+  try {
+    if (state.currentUser?.type === 'admin') {
+      renderAdminContent();
+    } else if (state.currentUser?.type === 'nurse') {
+      renderNurseContent();
+    }
+  } catch (e) {
+    console.error('Language switch render failed', e);
+    // Keep the already-applied language even if a dynamic screen has
+    // an unrelated rendering error.
+  }
+
+  applyInterfaceLanguage();
+  applyAddressLanguage();
+  applyInterfaceLanguage();
+
+  // If a cloud profile exists, keep the preference synchronized across devices.
+  if (state.currentUser && medtrackCloud?.configured && medtrackCloud?.client && medtrackCloud?.profile) {
+    medtrackCloud.client
+      .from('profiles')
+      .update({ language: lang })
+      .eq('id', medtrackCloud.profile.id)
+      .then(({ error }) => {
+        if (error) console.warn('Cloud language preference save failed', error);
+        else medtrackCloud.profile.language = lang;
+      })
+      .catch(e => console.warn('Cloud language preference save failed', e));
+  }
 }
 function applyAddressLanguage(root = document) {
   if (getInterfaceLanguage() === 'en') return;
