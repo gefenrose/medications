@@ -2042,23 +2042,12 @@
       <h1>מעקב תרופות</h1>
       <p>מערכת ניהול תרופות לדיור מוגן</p>
     </div>
-    <div class="login-roles" style="animation:fadeSlideUp .35s .1s ease both">
-      <button class="login-role-card active" onclick="setLoginType('nurse')">
-        <span class="role-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="12" y1="1" x2="12" y2="4"/><line x1="10.5" y1="2.5" x2="13.5" y2="2.5"/></svg>
-        </span>
-        <span class="role-label">מדריכה</span>
-      </button>
-      <button class="login-role-card" onclick="setLoginType('admin')">
-        <span class="role-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </span>
-        <span class="role-label">מנהל</span>
-      </button>
+    <div class="info-box" style="margin-bottom:1rem;text-align:center">
+      הכניסה מנוהלת דרך החשבון המאובטח בענן. ההרשאה (מדריכה / מנהל / Developer) נקבעת לפי החשבון.
     </div>
     <div class="form-group">
-      <label>שם משתמש</label>
-      <input type="text" id="loginUsername" placeholder="הכניסי שם משתמש" autocomplete="username">
+      <label>אימייל</label>
+      <input type="email" id="loginUsername" placeholder="הכניסי כתובת אימייל" autocomplete="username" inputmode="email">
     </div>
     <div class="form-group">
       <label>סיסמה</label>
@@ -2068,14 +2057,9 @@
 
 
     <button class="btn-primary mt-md" onclick="doLogin()">כניסה</button>
-    <details class="login-help">
-      <summary>פרטי כניסה לדמו</summary>
-      <div class="login-help-content">
-        <div>מדריכה: sarah / 1234</div>
-        <div>מנהל: admin / 1234</div>
-        <button onclick="setLoginType('dev')" id="devTabBtn">developer</button>
-      </div>
-    </details>
+    <div class="login-help" style="text-align:center;font-size:.78rem;color:var(--text-muted);margin-top:.8rem">
+      חשבון חדש נוצר ומנוהל דרך Supabase Authentication.
+    </div>
   </div>
       <div class="login-language-switch" style="display:flex;justify-content:center;align-items:center;margin:1.15rem auto 0;padding:.55rem .85rem;border:1.5px solid var(--primary);border-radius:999px;background:var(--card-bg);width:max-content;box-shadow:0 2px 8px rgba(0,0,0,.06)">
       <label style="display:flex;align-items:center;gap:.6rem;font-size:1rem;font-weight:500;color:var(--text-primary);cursor:pointer">
@@ -2387,6 +2371,7 @@ function startSync() {
 }
 
 function stopSync() {
+  medtrackCloud?.stopRealtime?.();
   _syncEnabled = false;
   if (_pollInterval) { clearInterval(_pollInterval); _pollInterval = null; }
 }
@@ -2436,7 +2421,19 @@ function loadData() {
 
 function saveData() {
   localStorage.setItem('medtrack_data', JSON.stringify(data));
-  saveDataRemote();
+  if (medtrackCloud?.configured && medtrackCloud.profile) {
+    medtrackCloud.saveCurrentAdministrations(data).catch(e => {
+      console.warn('Cloud administration save failed', e);
+      showSyncBadge('✕ אין חיבור', true);
+    });
+    if (['manager','developer'].includes(medtrackCloud.profile.role)) {
+      medtrackCloud.saveManagerData(data).catch(e => {
+        console.warn('Cloud manager save failed', e);
+        showSyncBadge('✕ אין חיבור', true);
+      });
+    }
+    showSyncBadge('✓ מסונכרן');
+  }
 }
 
 let data = loadData();
@@ -2571,106 +2568,113 @@ window.addEventListener('pageshow', e => {
 
 // ==================== LOGIN ====================
 function setLoginType(type) {
+  // Kept for backwards compatibility with older saved UI state.
   state.loginType = type;
-  document.querySelectorAll('.login-role-card').forEach((t,i) => t.classList.toggle('active',
-    (i===0 && type==='nurse') || (i===1 && type==='admin')
-  ));
-  // Highlight dev button if selected
-  const devBtn = document.getElementById('devTabBtn');
-  if (devBtn) devBtn.style.opacity = type === 'dev' ? '0.8' : '0.25';
-  document.getElementById('loginUsername').placeholder =
-    getInterfaceLanguage() === 'en'
-      ? (type === 'dev' ? 'dev username' : 'Enter username')
-      : (type === 'admin' ? 'הכניסי שם משתמש מנהלת' : 'הכניסי שם משתמש');
 }
-function doLogin() {
-  const u = document.getElementById('loginUsername').value.trim().toLowerCase();
-  const p = document.getElementById('loginPassword').value.trim().toLowerCase();
+async function doLogin() {
+  const email = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
   const err = document.getElementById('loginError');
   err.style.display = 'none';
-  if (state.loginType === 'admin' || state.loginType === 'dev') {
-    if (u === 'developer' && p === 'dev1234') {
-      state.currentUser = { type: 'dev', name: 'Developer' };
-      saveSession(state.currentUser);
-      showScreen('adminScreen');
-      document.getElementById('adminTitle').textContent = '⚙ Developer Mode';
-      adminTab('rounds');
-      ghRead().then(remote => {
-        if (remote) {
-          if (remote.nurses)   data.nurses   = remote.nurses;
-          if (remote.residents) data.residents = remote.residents;
-          if (remote.meds)     data.meds      = remote.meds;
-          if (remote.rounds)   data.rounds    = remote.rounds;
-          if (remote.history)  data.history   = remote.history;
-          if (remote.activeRoundSession !== undefined) data.activeRoundSession = remote.activeRoundSession;
+
+  if (!medtrackCloud?.configured) {
+    err.textContent = 'חיבור הענן אינו מוגדר';
+    err.style.display = 'block';
+    return;
+  }
+  if (!email || !password) {
+    err.textContent = 'נא למלא אימייל וסיסמה';
+    err.style.display = 'block';
+    return;
+  }
+
+  const btn = document.querySelector('#loginScreen .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'מתחברת…'; }
+
+  try {
+    const auth = await medtrackCloud.signIn(email, password);
+    const p = auth.profile;
+
+    data.nurses = data.nurses || [];
+    state.currentUser = {
+      type: p.role === 'caregiver' ? 'nurse' : p.role,
+      id: p.id,
+      name: p.display_name || p.username || email,
+      displayName: p.display_name || p.username || email,
+      username: p.username || email.split('@')[0],
+      addressGender: p.address_gender || 'female',
+      language: p.language || 'he',
+      email
+    };
+    state.loginType = state.currentUser.type === 'nurse' ? 'nurse' : 'admin';
+    saveSession(state.currentUser);
+
+    // Load cloud data. If the database is still empty, the manager account
+    // performs a one-time migration from the existing GitHub data file.
+    let cloudResult = await medtrackCloud.loadDataInto(data);
+    if (cloudResult.empty && ['manager','developer'].includes(p.role)) {
+      const legacy = await ghRead();
+      if (legacy) {
+        if (legacy.nurses) data.nurses = legacy.nurses;
+        if (legacy.residents) data.residents = legacy.residents;
+        if (legacy.meds) data.meds = legacy.meds;
+        if (legacy.rounds) data.rounds = legacy.rounds;
+        if (legacy.history) data.history = legacy.history;
+        if (legacy.activeRoundSession !== undefined) data.activeRoundSession = legacy.activeRoundSession;
+        await medtrackCloud.saveManagerData(data);
+        await medtrackCloud.loadDataInto(data);
+        cloudResult = { loaded:true, empty:false };
+      }
+    }
+
+    medtrackCloud.subscribeRealtime(async () => {
+      try {
+        const changed = await medtrackCloud.loadDataInto(data);
+        if (changed.loaded) {
           localStorage.setItem('medtrack_data', JSON.stringify(data));
-          renderAdminContent();
+          showSyncBadge('↓ עודכן');
+          rerenderCurrent();
         }
-      });
-      startSync();
-    } else if ((()=>{ const cr=getAdminCreds(); return u===cr.username.toLowerCase() && p===cr.password.toLowerCase(); })()) {
-      const cr = getAdminCreds();
-      state.currentUser = {
-        type: 'admin',
-        name: cr.name || 'מנהל',
-        displayName: cr.displayName || cr.name || 'מנהל',
-        addressGender: cr.addressGender || 'female',
-        language: cr.language || 'he'
-      };
-      saveSession(state.currentUser);
-      resetAdminIdleTimer();
-      showScreen('adminScreen');
-      applyAdminProfileToChrome();
-      adminTab('rounds');
-      // Load latest from Firebase first
-      ghRead().then(remote => {
-        if (remote) {
-          if (remote.nurses) data.nurses = remote.nurses;
-          if (remote.residents) data.residents = remote.residents;
-          if (remote.meds) data.meds = remote.meds;
-          if (remote.rounds) data.rounds = remote.rounds;
-          if (remote.history) data.history = remote.history;
-          if (remote.activeRoundSession !== undefined) data.activeRoundSession = remote.activeRoundSession;
-          localStorage.setItem('medtrack_data', JSON.stringify(data));
-          renderAdminContent();
-        }
-      });
-      startSync();
-    } else { err.style.display = 'block'; }
-  } else {
-    const nurse = data.nurses.find(n => n.username.toLowerCase() === u && n.password.toLowerCase() === p);
-    if (nurse) {
-      state.currentUser = { type: 'nurse', name: nurse.name, id: nurse.id, addressGender: getAddressGender() };
-      loadNotificationPrefs(nurse.id);
+      } catch (e) {
+        console.warn('Cloud realtime refresh failed', e);
+      }
+    });
+
+    localStorage.setItem('medtrack_data', JSON.stringify(data));
+
+    if (p.role === 'caregiver') {
       state.selectedDate = new Date().toISOString().split('T')[0];
-      saveSession(state.currentUser);
-      // Schedule notifications after data loads
       setTimeout(() => scheduleRoundNotifications(), 2000);
       showScreen('nurseScreen');
       document.getElementById('nurseTitle').textContent = 'חלוקת תרופות';
       const ui = document.getElementById('nurseUserInfo');
-      ui.querySelector('strong').textContent = nurse.name;
-      ui.querySelector('span').textContent = 'שלום, ' + nurse.name.split(' ')[0];
-      // Load latest from Firebase
-      ghRead().then(remote => {
-        if (remote) {
-          if (remote.nurses) data.nurses = remote.nurses;
-          if (remote.residents) data.residents = remote.residents;
-          if (remote.meds) data.meds = remote.meds;
-          if (remote.rounds) data.rounds = remote.rounds;
-          if (remote.history) data.history = remote.history;
-          if (remote.activeRoundSession !== undefined) data.activeRoundSession = remote.activeRoundSession;
-          localStorage.setItem('medtrack_data', JSON.stringify(data));
-        }
-        nurseTab('round');
-      }).catch(() => nurseTab('round'));
-      startSync();
-    } else { err.style.display = 'block'; }
+      if (ui) {
+        ui.querySelector('strong').textContent = state.currentUser.name;
+        ui.querySelector('span').textContent = 'שלום, ' + state.currentUser.name.split(' ')[0];
+      }
+      nurseTab('round');
+    } else {
+      resetAdminIdleTimer();
+      showScreen('adminScreen');
+      document.getElementById('adminTitle').textContent =
+        p.role === 'developer' ? '⚙ Developer Mode' : 'לוח ניהול';
+      applyAdminProfileToChrome();
+      adminTab('rounds');
+    }
+
+    showSyncBadge('✓ מסונכרן');
+  } catch (e) {
+    console.error('Cloud login failed', e);
+    err.textContent = e?.message || 'אימייל או סיסמה שגויים';
+    err.style.display = 'block';
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'כניסה'; }
   }
 }
 function doLogout() {
   stopSync();
   stopAdminIdleTimer();
+  medtrackCloud?.signOut?.();
   clearSession();
   state.currentUser = null;
   showScreen('loginScreen');
