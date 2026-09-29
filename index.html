@@ -3047,7 +3047,7 @@ function removeEntry(i) {
 function saveRound() {
   const name = document.getElementById('rf_name').value.trim();
   const time = document.getElementById('rf_time').value;
-  if (!name || !time) return alert('נא למלא שם ושעה');
+  if (!name || !time) return alert(t('נא למלא שם ושעה'));
   const c = document.getElementById('entriesContainer');
   const entries = [];
   c.querySelectorAll('[id^=entry_res_]').forEach(sel => {
@@ -3069,7 +3069,7 @@ function saveRound() {
 function deleteRound(id) {  if (state.currentUser?.type === 'dev') return;
   const round = data.rounds.find(r=>r.id===id);
   if (!round) return;
-  if (!confirm(`למחוק את הסבב "${round.name}"?\n\nפעולה זו לא ניתנת לביטול.`)) return;
+  if (!confirm(t(`למחוק את הסבב "${round.name}"?\n\nפעולה זו לא ניתנת לביטול.`))) return;
   data.rounds = data.rounds.filter(r=>r.id!==id);
   saveData(); renderAdminContent();
 }
@@ -3106,7 +3106,7 @@ async function handleResidentPhoto(input) {
   const file = input.files && input.files[0];
   if (!file) return;
   if (!file.type.startsWith('image/')) {
-    alert('נא לבחור קובץ תמונה');
+    alert(t('נא לבחור קובץ תמונה'));
     input.value = '';
     return;
   }
@@ -3116,7 +3116,7 @@ async function handleResidentPhoto(input) {
     const name = document.getElementById('res_name')?.value || '';
     document.getElementById('res_photo_preview').innerHTML = photoPreviewHtml(name, dataUrl);
   } catch(e) {
-    alert(e.message || 'לא ניתן לטעון את התמונה');
+    alert(t(e.message || 'לא ניתן לטעון את התמונה'));
   } finally {
     input.value = '';
   }
@@ -3171,7 +3171,7 @@ function saveResident() {
   const notes = document.getElementById('res_notes').value.trim();
   const photo = document.getElementById('res_photo_data')?.value || '';
   const meds = [...document.querySelectorAll('#res_med_pills .med-pill.selected')].map(p => p.dataset.medid);
-  if (!name) return alert('נא להכניס שם');
+  if (!name) return alert(t('נא להכניס שם'));
   if (state.editId) {
     const r = data.residents.find(r=>r.id===state.editId);
     if (r) { r.name = name; r.room = room; r.notes = notes; r.meds = meds; r.photo = photo; }
@@ -3183,7 +3183,7 @@ function saveResident() {
 function deleteResident(id) {  if (state.currentUser?.type === 'dev') return;
   const res = data.residents.find(r=>r.id===id);
   if (!res) return;
-  if (!confirm(`למחוק את הדייר "${res.name}"?\n\nפעולה זו לא ניתנת לביטול.`)) return;
+  if (!confirm(t(`למחוק את הדייר "${res.name}"?\n\nפעולה זו לא ניתנת לביטול.`))) return;
   data.residents = data.residents.filter(r=>r.id!==id);
   saveData(); renderAdminContent();
 }
@@ -3205,7 +3205,7 @@ function saveMed() {
   const type = document.getElementById('med_type').value.trim();
   const dose = document.getElementById('med_dose').value.trim();
   const notes = document.getElementById('med_notes').value.trim();
-  if (!name) return alert('נא להכניס שם תרופה');
+  if (!name) return alert(t('נא להכניס שם תרופה'));
   if (state.editId) {
     const m = data.meds.find(m=>m.id===state.editId);
     if (m) { m.name = name; m.type = type; m.dose = dose; m.notes = notes; }
@@ -3217,7 +3217,7 @@ function saveMed() {
 function deleteMed(id) {  if (state.currentUser?.type === 'dev') return;
   const med = data.meds.find(m=>m.id===id);
   if (!med) return;
-  if (!confirm(`למחוק את התרופה "${med.name}"?\n\nפעולה זו לא ניתנת לביטול.`)) return;
+  if (!confirm(t(`למחוק את התרופה "${med.name}"?\n\nפעולה זו לא ניתנת לביטול.`))) return;
   data.meds = data.meds.filter(m=>m.id!==id);
   saveData(); renderAdminContent();
 }
@@ -3250,14 +3250,14 @@ function openNurseModal(id) {  if (state.currentUser?.type === 'dev') return;
 async function handleNursePhoto(input) {
   const file = input.files && input.files[0];
   if (!file) return;
-  if (!file.type.startsWith('image/')) { alert('נא לבחור קובץ תמונה'); input.value = ''; return; }
+  if (!file.type.startsWith('image/')) { alert(t('נא לבחור קובץ תמונה')); input.value = ''; return; }
   try {
     const dataUrl = await resizeResidentPhoto(file);
     document.getElementById('nurse_photo_data').value = dataUrl;
     const name = document.getElementById('nurse_name')?.value || '';
     document.getElementById('nurse_photo_preview').innerHTML = photoPreviewHtml(name, dataUrl);
   } catch(e) {
-    alert(e.message || 'לא ניתן לטעון את התמונה');
+    alert(t(e.message || 'לא ניתן לטעון את התמונה'));
   } finally { input.value = ''; }
 }
 function removeNursePhoto() {
@@ -3270,12 +3270,12 @@ function saveNurse() {
   const username = document.getElementById('nurse_username').value.trim();
   const password = document.getElementById('nurse_password').value.trim();
   const photo = document.getElementById('nurse_photo_data')?.value || '';
-  if (!name || !username) return alert('נא למלא שם ושם משתמש');
+  if (!name || !username) return alert(t('נא למלא שם ושם משתמש'));
   if (state.editId) {
     const n = data.nurses.find(n=>n.id===state.editId);
     if (n) { n.name = name; n.username = username; n.photo = photo; if (password) n.password = password; }
   } else {
-    if (!password) return alert('נא להכניס סיסמה');
+    if (!password) return alert(t('נא להכניס סיסמה'));
     data.nurses.push({ id: genId(), name, username, password, photo });
   }
   saveData(); closeModal(); renderAdminContent();
@@ -3283,7 +3283,7 @@ function saveNurse() {
 function deleteNurse(id) {  if (state.currentUser?.type === 'dev') return;
   const nurse = data.nurses.find(n=>n.id===id);
   if (!nurse) return;
-  if (!confirm(`למחוק את המדריכה "${nurse.name}"?\n\nפעולה זו לא ניתנת לביטול.`)) return;
+  if (!confirm(t(`למחוק את המדריכה "${nurse.name}"?\n\nפעולה זו לא ניתנת לביטול.`))) return;
   data.nurses = data.nurses.filter(n=>n.id!==id);
   saveData(); renderAdminContent();
 }
@@ -3690,7 +3690,7 @@ function nurseSelectDate(dateStr) {
 
 function switchRound(roundId) {
   if (data.activeRoundSession && data.activeRoundSession.roundId !== roundId) {
-    if (!confirm('לעבור לסבב אחר? הפעולות שבוצעו לא יאבדו.')) return;
+    if (!confirm(t('לעבור לסבב אחר? הפעולות שבוצעו לא יאבדו.'))) return;
   }
   const today = new Date().toISOString().split('T')[0];
   if (!data.activeRoundSession || data.activeRoundSession.roundId !== roundId) {
@@ -4564,7 +4564,7 @@ ${body}
 
   // Open in new tab and trigger print
   const win = window.open('', '_blank');
-  if (!win) { alert('אפשרי חלונות popup בדפדפן'); return; }
+  if (!win) { alert(t('אפשרי חלונות popup בדפדפן')); return; }
   win.document.write(html);
   win.document.close();
   win.focus();
@@ -4579,7 +4579,7 @@ function exportPDFRange() {
 
 function exportExcel(fromDate, toDate) {
   if (state.currentUser?.type === 'dev') return; if (typeof XLSX === 'undefined') {
-    alert('טוען את ספריית Excel... נסה שוב בעוד שנייה');
+    alert(t('טוען את ספריית Excel... נסה שוב בעוד שנייה'));
     return;
   }
 
@@ -4928,7 +4928,7 @@ function triggerRoundNotification(round) {
 async function enableNotifications() {
   const granted = await requestNotifPermission();
   if (!granted) {
-    alert('ההרשאה נדחתה. אנא אפשרי התראות בהגדרות הדפדפן.');
+    alert(t('ההרשאה נדחתה. אנא אפשרי התראות בהגדרות הדפדפן.'));
     return;
   }
   scheduleRoundNotifications();
