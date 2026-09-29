@@ -2263,9 +2263,10 @@ let state = {
   adminTab: 'rounds',
   nurseTab: 'round',
   remindersEnabled: true,
+  mutedRounds: {},
+  notificationPrefsLoaded: false,
   editId: null,
   selectedDate: new Date().toISOString().split('T')[0],
-  mutedRounds: {},  // roundId -> true
   residentFilter: '',
   histFilters: { date: '', nurse: '', resident: '' },
   adminSearch: { residents: '', meds: '', nurses: '' }
@@ -2637,6 +2638,7 @@ function doLogin() {
     const nurse = data.nurses.find(n => n.username.toLowerCase() === u && n.password.toLowerCase() === p);
     if (nurse) {
       state.currentUser = { type: 'nurse', name: nurse.name, id: nurse.id, addressGender: getAddressGender() };
+      loadNotificationPrefs(nurse.id);
       state.selectedDate = new Date().toISOString().split('T')[0];
       saveSession(state.currentUser);
       // Schedule notifications after data loads
@@ -4846,6 +4848,38 @@ async function requestNotifPermission() {
 // Track which rounds already fired today (by date)
 const _firedToday = {};
 
+function notificationPrefsKey(userId) {
+  return 'medtrack_notification_prefs_' + (userId || 'default');
+}
+
+function loadNotificationPrefs(userId) {
+  try {
+    const raw = localStorage.getItem(notificationPrefsKey(userId));
+    const prefs = raw ? JSON.parse(raw) : null;
+    if (prefs && typeof prefs === 'object') {
+      state.remindersEnabled = prefs.remindersEnabled !== false;
+      state.mutedRounds = prefs.mutedRounds && typeof prefs.mutedRounds === 'object' ? prefs.mutedRounds : {};
+    } else {
+      state.remindersEnabled = true;
+      state.mutedRounds = {};
+    }
+  } catch (e) {
+    state.remindersEnabled = true;
+    state.mutedRounds = {};
+  }
+  state.notificationPrefsLoaded = true;
+}
+
+function saveNotificationPrefs() {
+  if (!state.currentUser?.id) return;
+  try {
+    localStorage.setItem(notificationPrefsKey(state.currentUser.id), JSON.stringify({
+      remindersEnabled: !!state.remindersEnabled,
+      mutedRounds: state.mutedRounds || {}
+    }));
+  } catch (e) {}
+}
+
 function scheduleRoundNotifications() {
   Object.values(_scheduledNotifs).forEach(id => clearTimeout(id));
   _scheduledNotifs = {};
@@ -4931,22 +4965,25 @@ async function enableNotifications() {
     alert(t('ההרשאה נדחתה. אנא אפשרי התראות בהגדרות הדפדפן.'));
     return;
   }
+  state.remindersEnabled = true;
+  saveNotificationPrefs();
   scheduleRoundNotifications();
   renderNurseContent();
 }
 
 function disableNotifications() {
   state.remindersEnabled = false;
+  saveNotificationPrefs();
   Object.values(_scheduledNotifs).forEach(id => clearTimeout(id));
   _scheduledNotifs = {};
   renderNurseContent();
 }
 
 function toggleGlobalNotif(enabled) {
-  state.remindersEnabled = enabled;
-  if (enabled) {
-    scheduleRoundNotifications();
-  } else {
+  state.remindersEnabled = !!enabled;
+  saveNotificationPrefs();
+  if (state.remindersEnabled) scheduleRoundNotifications();
+  else {
     Object.values(_scheduledNotifs).forEach(id => clearTimeout(id));
     _scheduledNotifs = {};
   }
@@ -4962,27 +4999,12 @@ function testNotification(roundId) {
 function toggleRoundNotif(roundId, mute) {
   if (mute) {
     state.mutedRounds[roundId] = true;
-    if (_scheduledNotifs[roundId]) {
-      clearTimeout(_scheduledNotifs[roundId]);
-      delete _scheduledNotifs[roundId];
-    }
   } else {
     delete state.mutedRounds[roundId];
-    // Re-schedule just this round
-    if (state.remindersEnabled && Notification.permission === 'granted') {
-      const round = data.rounds.find(r => r.id === roundId);
-      if (round) {
-        const now = new Date();
-        const [hh, mm] = round.time.split(':').map(Number);
-        const fireAt = new Date(now);
-        fireAt.setHours(hh, mm, 0, 0);
-        const msUntil = fireAt - now;
-        if (msUntil > 0) {
-          _scheduledNotifs[roundId] = setTimeout(() => triggerRoundNotification(round), msUntil);
-        }
-      }
-    }
   }
+  saveNotificationPrefs();
+  // Rebuild the complete schedule so per-round changes are reliable.
+  scheduleRoundNotifications();
   renderNurseContent();
 }
 
@@ -5036,6 +5058,7 @@ document.getElementById('loginPassword').addEventListener('keydown', e => { if (
     });
     startSync();
   } else if (saved.type === 'nurse') {
+    loadNotificationPrefs(saved.id);
     showScreen('nurseScreen');
     const ui = document.getElementById('nurseUserInfo');
     if (ui) {
