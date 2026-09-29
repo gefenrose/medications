@@ -393,6 +393,20 @@
   /* Login: gradient background like Health summary */
   #loginScreen {
     background: linear-gradient(160deg, #e8f5f0 0%, #f4f6f4 40%, #f0ece8 100%);
+    justify-content: flex-start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  #loginScreen .login-box {
+    flex-shrink: 0;
+    margin-top: clamp(2rem, 10vh, 6rem);
+    margin-bottom: 1rem;
+  }
+  #loginScreen .login-language-switch {
+    flex-shrink: 0;
+    margin-bottom: 2rem !important;
   }
   .login-box {
     background: rgba(255,255,255,.92);
@@ -2760,8 +2774,9 @@ function renderAdminContent() {
   }
   applyAddressLanguage(el);
   applyInterfaceLanguage(el);
-  if (barEl) applyInterfaceLanguage(barEl);
-  applyInterfaceLanguage(document.getElementById('nurseScreen'));
+  // Admin rendering must not depend on the nurse bottom-bar element.
+  // Keeping this function self-contained also prevents a render error from
+  // leaving #adminContent hidden after adminTab() starts its fade transition.
 }
 
 function renderAdminRounds() {
