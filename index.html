@@ -2751,6 +2751,8 @@ function renderAdminContent() {
   }
   applyAddressLanguage(el);
   applyInterfaceLanguage(el);
+  if (barEl) applyInterfaceLanguage(barEl);
+  applyInterfaceLanguage(document.getElementById('nurseScreen'));
 }
 
 function renderAdminRounds() {
@@ -3767,7 +3769,8 @@ function finishRound(roundId) {
 function renderNurseDateHistory(dateStr) {
   const today = new Date().toISOString().split('T')[0];
   const selDate = state.selectedDate || today;
-  const dateLabel = new Date(dateStr + 'T12:00:00').toLocaleDateString('he-IL', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const dateLocale = getInterfaceLanguage() === 'en' ? 'en-US' : 'he-IL';
+  const dateLabel = new Date(dateStr + 'T12:00:00').toLocaleDateString(dateLocale, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
   const dayHistory = data.history.filter(h => h.date && h.date.startsWith(dateStr));
 
@@ -4067,7 +4070,20 @@ const UI_TRANSLATIONS = {
   'עריכת סבב':'Edit round','סבב חדש':'New round','עריכת דייר':'Edit resident','דייר חדש':'New resident',
   'עריכת תרופה':'Edit medication','תרופה חדשה':'New medication','עריכת מדריכה':'Edit caregiver','מדריכה חדשה':'New caregiver',
   'ניתנה':'Given','דולג':'Skipped','ממתין':'Pending','הבא':'Next','צפייה':'View','נקה סינון':'Clear filters',
-  'היסטוריית חלוקה':'Administration history','כל המדריכות':'All caregivers','תאריך':'Date','אין היסטוריה':'No history',
+  'היסטוריית חלוקה':'Administration history','כל המדריכות':'All caregivers','כל המדריכות':'All caregivers','תאריך':'Date','אין היסטוריה':'No history',
+  'היסטוריית חלוקה ליום זה':'Administration history for this day','אין רישומים ליום':'No records for',
+  'סבב לא ידוע':'Unknown round','הערה:':'Note:','ללא תרופות':'No medications',
+  'פרטי הדיירים ותרופותיהם':'Resident details and their medications','כל התרופות הקיימות במערכת':'All medications in the system',
+  'פרטי ההתחברות של כל מדריכה':'Login details for all caregivers','רשומות חלוקת תרופות':'Medication administration records',
+  'אין רשומות':'No records','ייצוא דוח חלוקה — Excel':'Export administration report — Excel',
+  'הדוח יכלול: תאריך, שעת סבב, מדריכה, דייר, תרופה, מינון, שעת נתינה, סטטוס, הערות — לפי סדר כרונולוגי. ניתן לפתוח ישירות ב-Excel.':'The report includes: date, round time, caregiver, resident, medication, dose, administration time, status, and notes — in chronological order. It can be opened directly in Excel.',
+  'מתאריך':'From date','עד תאריך':'To date','גישת Developer — ייצוא מושבת':'Developer access — export disabled',
+  'PDF שחור-לבן':'Black & white PDF','התראות Push':'Push notifications','לפי סבב':'By round',
+  'נחסמו בהגדרות הדפדפן':'Blocked in browser settings','אפשרי התראות לקבל תזכורת לפני כל סבב':'Enable notifications to receive a reminder before each round',
+  'פועל — התראות מתוזמנות לפי הסבבים':'On — notifications are scheduled for the rounds','כבוי — לא יישלחו התראות':'Off — no notifications will be sent',
+  'גלובלי כבוי':'Globally off','מתוזמן':'Scheduled','עבר':'Past','מושתק':'Muted','אין דיירים':'No residents','בדוק':'Test',
+  'הפעל':'Enable','הפעל הכל':'Enable all','כבה הכל':'Disable all',
+  'היסטוריה':'History','סבבים':'Rounds','דיירים':'Residents','מדריכות':'Caregivers','תרופות':'Medications',
   'סבב נוכחי':'Current round','נותרו':'remaining','דייר / חדר':'Resident / Room','תרופות במנה זו':'Medications in this round',
   'סטטוס':'Status','הפעולה הבאה':'NEXT ACTION','חדר':'Room','דולג בסבב זה':'Skipped in this round',
   'הסבב הושלם!':'Round completed!','קיבלו':'received medication','עם דילוג':'with skipped medication',
