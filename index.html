@@ -2053,15 +2053,6 @@
         <span class="role-label">מנהל</span>
       </button>
     </div>
-    <div class="login-language-switch" style="display:flex;justify-content:flex-end;margin:-.5rem 0 1rem">
-      <label style="display:flex;align-items:center;gap:.45rem;font-size:.8rem;color:var(--text-secondary);cursor:pointer">
-        <span>שפה</span>
-        <select id="loginLanguage" class="full-select" style="width:auto;min-width:110px;padding:.45rem .7rem" onchange="setInterfaceLanguage(this.value)">
-          <option value="he">עברית</option>
-          <option value="en">English</option>
-        </select>
-      </label>
-    </div>
     <div class="form-group">
       <label>שם משתמש</label>
       <input type="text" id="loginUsername" placeholder="הכניסי שם משתמש" autocomplete="username">
@@ -2071,6 +2062,16 @@
       <input type="password" id="loginPassword" placeholder="הכניסי סיסמה" autocomplete="current-password">
     </div>
     <div class="error-msg" id="loginError">שם משתמש או סיסמה שגויים</div>
+    <div class="login-language-switch" style="display:flex;justify-content:center;align-items:center;margin:1rem auto 0;padding:.65rem 1rem;border:1px solid var(--border);border-radius:12px;background:var(--card-bg);width:max-content">
+      <label style="display:flex;align-items:center;gap:.7rem;font-size:1rem;color:var(--text-primary);cursor:pointer">
+        <span>שפה</span>
+        <select id="loginLanguage" class="full-select" style="width:auto;min-width:120px;padding:.5rem .8rem;font-size:1rem" onchange="setInterfaceLanguage(this.value)">
+          <option value="he">עברית</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+    </div>
+
     <button class="btn-primary mt-md" onclick="doLogin()">כניסה</button>
     <details class="login-help">
       <summary>פרטי כניסה לדמו</summary>
