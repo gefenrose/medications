@@ -2736,6 +2736,7 @@ function renderAdminContent() {
     case 'export': el.innerHTML = renderAdminExport(); break;
     case 'profile': if (state.currentUser?.type === 'dev') { adminTab('rounds'); return; } el.innerHTML = renderAdminProfile(); break;
   }
+  applyAddressLanguage(el);
 }
 
 function renderAdminRounds() {
