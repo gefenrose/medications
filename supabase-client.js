@@ -172,7 +172,7 @@
     },
 
     async saveManagerData(appData) {
-      if (!this.client || !this.profile || !['manager','developer'].includes(this.profile.role)) {
+      if (!this.client || !this.profile || this.profile.role !== 'manager') {
         return false;
       }
 
