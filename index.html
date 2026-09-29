@@ -2053,6 +2053,15 @@
         <span class="role-label">מנהל</span>
       </button>
     </div>
+    <div class="login-language-switch" style="display:flex;justify-content:flex-end;margin:-.5rem 0 1rem">
+      <label style="display:flex;align-items:center;gap:.45rem;font-size:.8rem;color:var(--text-secondary);cursor:pointer">
+        <span>שפה</span>
+        <select id="loginLanguage" class="full-select" style="width:auto;min-width:110px;padding:.45rem .7rem" onchange="setInterfaceLanguage(this.value)">
+          <option value="he">עברית</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+    </div>
     <div class="form-group">
       <label>שם משתמש</label>
       <input type="text" id="loginUsername" placeholder="הכניסי שם משתמש" autocomplete="username">
@@ -4097,6 +4106,8 @@ function setInterfaceLanguage(language) {
   applyInterfaceLanguage();
   if (state.currentUser?.type === 'admin' || state.currentUser?.type === 'dev') renderAdminContent();
   else if (state.currentUser?.type === 'nurse') renderNurseContent();
+  const loginLang = document.getElementById('loginLanguage');
+  if (loginLang) loginLang.value = lang;
 }
 function applyAddressLanguage(root = document) {
   if (getInterfaceLanguage() === 'en') return;
