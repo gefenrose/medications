@@ -4198,6 +4198,8 @@ function t(text) {
   return out;
 }
 
+const interfaceLanguageSources = new WeakMap();
+
 function applyInterfaceLanguage(root = document) {
   const lang = getInterfaceLanguage();
   const isEnglish = lang === 'en';
@@ -4205,11 +4207,6 @@ function applyInterfaceLanguage(root = document) {
   document.documentElement.dir = isEnglish ? 'ltr' : 'rtl';
   document.body.dir = isEnglish ? 'ltr' : 'rtl';
   document.body.style.direction = isEnglish ? 'ltr' : 'rtl';
-
-  const rememberSource = (el, attr, value) => {
-    if (!el.hasAttribute(attr)) el.setAttribute(attr, value ?? '');
-    return el.getAttribute(attr) ?? '';
-  };
 
   root.querySelectorAll?.('.form-group input, .form-group select, .form-group textarea').forEach(el => {
     el.dir = isEnglish ? 'ltr' : 'rtl';
@@ -4223,16 +4220,23 @@ function applyInterfaceLanguage(root = document) {
     if (node.parentElement && !['SCRIPT','STYLE','NOSCRIPT'].includes(node.parentElement.tagName)) nodes.push(node);
   }
   nodes.forEach(n => {
-    const source = rememberSource(n.parentElement || n, 'data-medtrack-i18n-source', n.nodeValue);
+    if (!interfaceLanguageSources.has(n)) interfaceLanguageSources.set(n, n.nodeValue);
+    const source = interfaceLanguageSources.get(n);
     n.nodeValue = isEnglish ? t(source) : source;
   });
 
   root.querySelectorAll?.('input[placeholder], textarea[placeholder]').forEach(el => {
-    const source = rememberSource(el, 'data-medtrack-i18n-placeholder', el.placeholder);
+    if (!el.hasAttribute('data-medtrack-i18n-placeholder')) {
+      el.setAttribute('data-medtrack-i18n-placeholder', el.placeholder);
+    }
+    const source = el.getAttribute('data-medtrack-i18n-placeholder') || '';
     el.placeholder = isEnglish ? t(source) : source;
   });
   root.querySelectorAll?.('[title]').forEach(el => {
-    const source = rememberSource(el, 'data-medtrack-i18n-title', el.title);
+    if (!el.hasAttribute('data-medtrack-i18n-title')) {
+      el.setAttribute('data-medtrack-i18n-title', el.title);
+    }
+    const source = el.getAttribute('data-medtrack-i18n-title') || '';
     el.title = isEnglish ? t(source) : source;
   });
 }
