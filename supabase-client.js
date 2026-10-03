@@ -60,6 +60,65 @@
       return this.profile ? { user: this.authUser, profile: this.profile } : null;
     },
 
+    async createCaregiver({ email, password, displayName, username }) {
+      if (!this.client || !this.profile || this.profile.role !== 'manager') {
+        throw new Error('רק מנהלת יכולה להוסיף משתמשים');
+      }
+
+      const { data: currentSessionData } = await this.client.auth.getSession();
+      const managerSession = currentSessionData?.session;
+      if (!managerSession) throw new Error('לא נמצאה התחברות של המנהלת');
+
+      const normalizedEmail = String(email || '').trim().toLowerCase();
+      const normalizedPassword = String(password || '');
+      const normalizedName = String(displayName || '').trim();
+      const normalizedUsername = String(username || normalizedEmail).trim();
+
+      if (!normalizedEmail || !normalizedEmail.includes('@')) {
+        throw new Error('נא להזין כתובת אימייל תקינה');
+      }
+      if (normalizedPassword.length < 6) {
+        throw new Error('הסיסמה חייבת להכיל לפחות 6 תווים');
+      }
+      if (!normalizedName) throw new Error('נא למלא שם מלא');
+
+      const { data: signUpData, error: signUpError } = await this.client.auth.signUp({
+        email: normalizedEmail,
+        password: normalizedPassword,
+        options: {
+          data: {
+            display_name: normalizedName,
+            username: normalizedUsername,
+            role: 'caregiver'
+          }
+        }
+      });
+      if (signUpError) throw signUpError;
+
+      const newUser = signUpData?.user;
+      if (!newUser) throw new Error('Supabase לא החזיר משתמש חדש');
+
+      // The sign-up may temporarily switch the browser session to the new user.
+      // Restore the manager session before changing the new user's profile.
+      await this.client.auth.setSession({
+        access_token: managerSession.access_token,
+        refresh_token: managerSession.refresh_token
+      });
+      await this.loadProfile();
+
+      const { error: profileError } = await this.client
+        .from('profiles')
+        .update({
+          display_name: normalizedName,
+          username: normalizedUsername,
+          role: 'caregiver'
+        })
+        .eq('id', newUser.id);
+      if (profileError) throw profileError;
+
+      return { id: newUser.id, email: normalizedEmail };
+    },
+
     async signOut() {
       if (!this.client) return;
       await this.client.auth.signOut();
