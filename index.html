@@ -3251,14 +3251,13 @@ function deleteMed(id) {  if (false) return;
   saveData(); renderAdminContent();
 }
 
-function openNurseModal(id) {  if (false) return;
-
+function openNurseModal(id) {
   state.editId = id || null;
   const nurse = id ? data.nurses.find(n=>n.id===id) : null;
   openModal(id ? 'עריכת מדריכה' : 'מדריכה חדשה', `
     <div class="form-group"><label>שם מלא</label><input id="nurse_name" value="${nurse ? esc(nurse.name) : ''}"></div>
-    <div class="form-group"><label>שם משתמש</label><input id="nurse_username" value="${nurse ? esc(nurse.username) : ''}"></div>
-    <div class="form-group"><label>סיסמה</label><input id="nurse_password" type="password" placeholder="${nurse ? 'השאר ריק לשמירת הסיסמה הקיימת' : ''}"></div>
+    <div class="form-group"><label>אימייל</label><input id="nurse_email" type="email" autocomplete="off" value="${nurse ? esc(nurse.email || nurse.username || '') : ''}" placeholder="name@example.com"></div>
+    <div class="form-group"><label>סיסמה</label><input id="nurse_password" type="password" autocomplete="new-password" placeholder="${nurse ? 'השאר ריק לשמירת הסיסמה הקיימת' : ''}"></div>
     <div class="form-group">
       <label>תמונה</label>
       <div class="photo-picker">
@@ -3294,21 +3293,50 @@ function removeNursePhoto() {
   const name = document.getElementById('nurse_name')?.value || '';
   document.getElementById('nurse_photo_preview').innerHTML = photoPreviewHtml(name, '');
 }
-function saveNurse() {
+async function saveNurse() {
   const name = document.getElementById('nurse_name').value.trim();
-  const username = document.getElementById('nurse_username').value.trim();
+  const email = document.getElementById('nurse_email').value.trim();
   const password = document.getElementById('nurse_password').value.trim();
   const photo = document.getElementById('nurse_photo_data')?.value || '';
-  if (!name || !username) return alert(t('נא למלא שם ושם משתמש'));
-  if (state.editId) {
-    const n = data.nurses.find(n=>n.id===state.editId);
-    if (n) { n.name = name; n.username = username; n.photo = photo; if (password) n.password = password; }
-  } else {
-    if (!password) return alert(t('נא להכניס סיסמה'));
-    data.nurses.push({ id: genId(), name, username, password, photo });
+  if (!name || !email) return alert(t('נא למלא שם ואימייל'));
+
+  try {
+    if (state.editId) {
+      const n = data.nurses.find(n=>n.id===state.editId);
+      if (!n) return;
+      n.name = name;
+      n.email = email;
+      n.username = email;
+      n.photo = photo;
+      // Password changes for existing Auth users are intentionally not handled
+      // here; they should use Supabase's password-reset flow.
+      if (photo !== (n.photo || '')) n.photo = photo;
+      await saveData();
+    } else {
+      if (!password) return alert(t('נא להכניס סיסמה'));
+      if (!medtrackCloud?.configured || !medtrackCloud?.client || medtrackCloud.profile?.role !== 'manager') {
+        return alert(t('לא ניתן להוסיף משתמש ללא חיבור מאובטח לענן'));
+      }
+
+      const created = await medtrackCloud.createCaregiver({
+        email,
+        password,
+        displayName: name,
+        username: email
+      });
+
+      data.nurses.push({ id: created.id, name, email, username: email, photo });
+      await saveData();
+    }
+
+    closeModal();
+    renderAdminContent();
+  } catch (e) {
+    console.error('Failed to save caregiver', e);
+    alert(t(e.message || 'לא ניתן לשמור את המשתמש'));
   }
-  saveData(); closeModal(); renderAdminContent();
 }
+
 function deleteNurse(id) {  if (false) return;
   const nurse = data.nurses.find(n=>n.id===id);
   if (!nurse) return;
