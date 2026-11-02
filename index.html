@@ -4143,6 +4143,47 @@ const UI_TRANSLATIONS = {
   'לא ניתן לשמור את השינויים':'Could not save changes',
   'מדריכה חדשה':'New caregiver','עריכת מדריכה':'Edit caregiver',
   'אין מדריכות':'No caregivers','אין דיירים':'No residents','אין תרופות':'No medications',
+  "מעקב תרופות – דיור":"Medication Tracker – Assisted Living",
+  "מעקב תרופות  דיור":"Medication Tracker – Assisted Living",
+  "סבבי חלוקה":"Medication rounds",
+  "מינון:":"Dose:",
+  "שם משתמש:":"Username:",
+  "ניתנה ✓":"Given ✓",
+  "✕ דולג":"✕ Skipped",
+  "+ הוסף דייר":"+ Add resident",
+  "— בחר דייר —":"— Select resident —",
+  "התמונה תישמר בפרופיל הדייר ותוצג בסבבים":"The photo will be saved to the resident profile and displayed in rounds",
+  "בקשי מהמנהל להוסיף סבבי חלוקה":"Ask a manager to add medication rounds",
+  "גישה לא מורשית":"Unauthorized access",
+  "פרופיל מנהל":"Manager profile",
+  "אין נתונים בטווח שנבחר.":"No data in the selected date range.",
+  "מקרא":"Legend",
+  "— התרופה ניתנה לדייר":"— Medication was given to the resident",
+  "— התרופה דולגה":"— Medication was skipped",
+  "— לא סומן — לא נרשמה פעולה":"— Not marked — no action recorded",
+  "עמודות בכל שורה:":"Columns in each row:",
+  "[סטטוס]":"[Status]",
+  "תרופה ומינון":"Medication and dose",
+  "שעה בפועל":"Actual time",
+  "אמצעי הדגשה:":"Emphasis:",
+  "שם דייר, סטטוס, שעת נתינה בפועל":"Resident name, status, actual administration time",
+  "Italic + קו תחתון":"Italic + underline",
+  "שם המדריכה שנתנה את התרופה":"Name of the caregiver who administered the medication",
+  "שם דייר שתרופתו לא סומנה [!]":"Name of a resident whose medication was not marked [!]",
+  "הערות, תיאור כללי":"Notes, general description",
+  "חדר":"Room",
+  "דייר":"Resident",
+  "תרופות":"Medications",
+  "דיירים":"Residents",
+  "עם דילוג":"with skipped medication",
+  "דיירים קיבלו":"residents received medication",
+  "דולג בסבב זה":"Skipped in this round",
+  "ללא תרופות":"No medications",
+  "אין רישומים ליום":"No records for",
+  "הערה:":"Note:",
+  "סבב לא ידוע":"Unknown round",
+  "הוסף דייר":"Add resident",
+  "שם משתמש":"Username",
   'אימייל':'Email','כתובת אימייל':'Email address','הכניסי כתובת אימייל':'Enter email address',
   'הכניסי סיסמה':'Enter password','שם משתמש או סיסמה שגויים':'Incorrect username or password',
   'נא למלא אימייל וסיסמה':'Please enter email and password','חיבור הענן אינו מוגדר':'Cloud connection is not configured',
@@ -4294,6 +4335,15 @@ function applyInterfaceLanguage(root = document) {
     }
     const source = el.getAttribute('data-medtrack-i18n-placeholder') || '';
     el.placeholder = isEnglish ? t(source) : source;
+  });
+  root.querySelectorAll?.('[aria-label], [alt]').forEach(el => {
+    for (const attr of ['aria-label', 'alt']) {
+      if (!el.hasAttribute(attr)) continue;
+      const sourceAttr = 'data-medtrack-i18n-' + attr;
+      if (!el.hasAttribute(sourceAttr)) el.setAttribute(sourceAttr, el.getAttribute(attr));
+      const source = el.getAttribute(sourceAttr) || '';
+      el.setAttribute(attr, isEnglish ? t(source) : source);
+    }
   });
   root.querySelectorAll?.('[title]').forEach(el => {
     if (!el.hasAttribute('data-medtrack-i18n-title')) {
