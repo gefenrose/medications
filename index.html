@@ -2097,6 +2097,7 @@
       <label>סיסמה</label>
       <input type="password" id="loginPassword" placeholder="הכניסי סיסמה" autocomplete="current-password">
     </div>
+    <label style="display:flex;align-items:center;gap:.65rem;margin:.3rem 0 .85rem;font-size:.94rem;cursor:pointer"><input type="checkbox" id="rememberLogin" style="width:20px;height:20px;accent-color:var(--primary)" aria-label="להישאר מחוברת"> <span>להישאר מחוברת במכשיר הזה</span></label>
     <div class="error-msg" id="loginError">שם משתמש או סיסמה שגויים</div>
 
 
@@ -2639,6 +2640,12 @@ async function doLogin() {
   try {
     const auth = await medtrackCloud.signIn(email, password);
     const p = auth.profile;
+    const remember = document.getElementById('rememberLogin')?.checked === true;
+    try {
+      if (remember) localStorage.setItem('medtrack_remember_login', '1');
+      else localStorage.removeItem('medtrack_remember_login');
+      sessionStorage.setItem('medtrack_tab_login', '1');
+    } catch (e) { console.warn('Login preference could not be saved', e); }
 
     data.nurses = data.nurses || [];
     state.currentUser = {
@@ -2720,6 +2727,7 @@ function doLogout() {
   stopSync();
   stopAdminIdleTimer();
   medtrackCloud?.signOut?.();
+  try { localStorage.removeItem('medtrack_remember_login'); sessionStorage.removeItem('medtrack_tab_login'); } catch(e) {}
   clearSession();
   state.currentUser = null;
   showScreen('loginScreen');
@@ -4216,6 +4224,7 @@ const UI_TRANSLATIONS = {
   "הוסף דייר":"Add resident",
   "שם משתמש":"Username",
   'חזרה לניהול':'Back to management',
+  'להישאר מחוברת במכשיר הזה':'Keep me signed in on this device',
   'שעה:':'Time:',
   'מדריכה:':'Caregiver:',
   'אימייל':'Email','כתובת אימייל':'Email address','הכניסי כתובת אימייל':'Enter email address',
@@ -5625,6 +5634,15 @@ document.getElementById('loginPassword').addEventListener('keydown', e => { if (
 // ── Auto-restore session on app open ──────────────────────────────────────
 (async function restoreSession() {
   try {
+    // An unchecked box keeps the login only for this browser tab/session.
+    // Never restore an older persisted Supabase token on a new browser session.
+    const persistent = localStorage.getItem('medtrack_remember_login') === '1';
+    const currentTab = sessionStorage.getItem('medtrack_tab_login') === '1';
+    if (!persistent && !currentTab) {
+      await medtrackCloud?.signOut?.();
+      clearSession();
+      return;
+    }
     const auth = await medtrackCloud?.restoreSession?.();
     if (!auth) {
       clearSession();
