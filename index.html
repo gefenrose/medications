@@ -3025,7 +3025,7 @@ function renderAdminNurses() {
     const nurse = data.nurses.find(n => n.id === u.id);
     const name = u.display_name || nurse?.name || u.username || 'משתמש';
     html += `<div class="adm-list-item" style="gap:.6rem;flex-wrap:wrap">
-      <div class="resident-avatar${nurse?.photo ? ' photo' : ''}" style="width:36px;height:36px;font-size:.78rem">${nurse?.photo ? `<img src="${esc(nurse.photo)}" alt="${esc(name)}">` : initials(name)}</div>
+      <div class="resident-avatar${(u.photo_url || nurse?.photo) ? ' photo' : ''}" style="width:36px;height:36px;font-size:.78rem">${(u.photo_url || nurse?.photo) ? `<img src="${esc(u.photo_url || nurse.photo)}" alt="${esc(name)}">` : initials(name)}</div>
       <div class="adm-item-body">
         <div class="adm-item-title">${esc(name)}</div>
         <div class="adm-item-sub">${esc(u.username || '')}${own ? ' · החשבון שלי' : ''}</div>
@@ -3361,9 +3361,9 @@ function openNurseModal(id) {
   const managed = id ? managedUsers?.find(u=>u.id===id) : null;
   const editing = !!id;
   openModal(editing ? 'עריכת משתמשת' : 'מדריכה חדשה', `
-    <div class="form-group"><label>שם מלא</label><input id="nurse_name" value="${esc(nurse?.name || managed?.display_name || '')}"></div>
-    <div class="form-group"><label>אימייל</label><input id="nurse_email" type="email" autocomplete="off" value="${esc(nurse?.email || nurse?.username || managed?.username || '')}" placeholder="name@example.com"></div>
-    <div class="form-group"><label>סיסמה</label><input id="nurse_password" type="password" autocomplete="new-password" placeholder="${editing ? 'השאר ריק לשמירת הסיסמה הקיימת' : ''}"></div>
+    <div class="form-group"><label>שם מלא</label><input id="nurse_name" value="${esc(managed?.display_name || nurse?.name || '')}"></div>
+    <div class="form-group"><label>אימייל</label><input id="nurse_email" type="email" autocomplete="off" value="${esc(managed?.username || nurse?.email || nurse?.username || '')}" placeholder="name@example.com"></div>
+    <div class="form-group"><label>סיסמה</label><input id="nurse_password" type="password" autocomplete="new-password" placeholder="${editing ? 'השאירי ריק לשמירת הסיסמה הקיימת (לפחות 8 תווים לשינוי)' : 'לפחות 8 תווים'}"></div>
     ${editing && managed ? `<div class="form-group"><label for="nurse_role">תפקיד</label>
       <select id="nurse_role" class="full-select" ${managed.id === state.currentUser?.id ? 'disabled' : ''}>
         <option value="caregiver" ${managed.role==='caregiver'?'selected':''}>מדריכה</option>
@@ -3374,9 +3374,9 @@ function openNurseModal(id) {
     <div class="form-group">
       <label>תמונה</label>
       <div class="photo-picker">
-        <div id="nurse_photo_preview">${photoPreviewHtml(nurse?.name || '', nurse?.photo || '')}</div>
+        <div id="nurse_photo_preview">${photoPreviewHtml(nurse?.name || '', managed?.photo_url || nurse?.photo || '')}</div>
         <div style="flex:1">
-          <input type="hidden" id="nurse_photo_data" value="${nurse?.photo ? esc(nurse.photo) : ''}">
+          <input type="hidden" id="nurse_photo_data" value="${managed?.photo_url ? esc(managed.photo_url) : (nurse?.photo ? esc(nurse.photo) : '')}">
           <input class="photo-file" id="nurse_photo_file" type="file" accept="image/*" onchange="handleNursePhoto(this)">
           <div class="photo-picker-actions">
             <label for="nurse_photo_file" class="btn btn-outline btn-sm">בחר תמונה</label>
@@ -3409,11 +3409,12 @@ function removeNursePhoto() {
 async function saveNurse() {
   const name = document.getElementById('nurse_name').value.trim();
   const email = document.getElementById('nurse_email').value.trim();
-  const password = document.getElementById('nurse_password').value.trim();
+  const password = document.getElementById('nurse_password').value;
   const photo = document.getElementById('nurse_photo_data')?.value || '';
   const requestedRole = document.getElementById('nurse_role')?.value;
   const managed = managedUsers?.find(u=>u.id===state.editId);
   if (!name || !email) return alert(t('נא למלא שם ואימייל'));
+  if (password && password.length < 8) return alert('סיסמה חייבת להכיל לפחות 8 תווים');
 
   try {
     if (state.editId) {
@@ -3424,16 +3425,23 @@ async function saveNurse() {
       }
       const changes = { action: 'change', userId: managed.id };
       if (name !== (managed.display_name || '')) changes.displayName = name;
+      if (email.toLowerCase() !== (managed.username || '').toLowerCase()) changes.email = email;
+      if (password) changes.password = password;
+      if (photo !== (managed.photo_url || '')) changes.photo = photo;
       if (requestedRole && requestedRole !== managed.role) changes.role = requestedRole;
-      if (changes.displayName !== undefined || changes.role !== undefined) {
+      if (Object.keys(changes).length > 2) {
         const result = await medtrackCloud.manageUserRoles(changes);
         managed.display_name = result.user.display_name;
         managed.role = result.user.role;
+        managed.username = result.user.username;
+        managed.photo_url = result.user.photo_url;
       }
       // Local data is a cache, not the authoritative profile record.
       const n = data.nurses.find(n=>n.id===state.editId);
       if (n) {
         n.name = name;
+        n.username = email;
+        n.email = email;
         n.photo = photo;
       }
       if (state.currentUser?.id === state.editId) {
