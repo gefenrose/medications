@@ -2465,20 +2465,36 @@ function loadData() {
   return JSON.parse(JSON.stringify(defaultData));
 }
 
+let _saveQueue = Promise.resolve();
 function saveData() {
   localStorage.setItem('medtrack_data', JSON.stringify(data));
-  if (medtrackCloud?.configured && medtrackCloud.profile) {
-    medtrackCloud.saveCurrentAdministrations(data).catch(e => {
-      console.warn('Cloud administration save failed', e);
-      showSyncBadge('✕ אין חיבור', true);
-    });
-    if (['manager'].includes(medtrackCloud.profile.role)) {
-      medtrackCloud.saveManagerData(data).catch(e => {
-        console.warn('Cloud manager save failed', e);
-        showSyncBadge('✕ אין חיבור', true);
-      });
-    }
-    showSyncBadge('✓ מסונכרן');
+  if (!medtrackCloud?.configured || !medtrackCloud.profile) {
+    showSyncBadge('✕ נשמר מקומית בלבד', true);
+    return Promise.reject(new Error('אין חיבור לחשבון הענן'));
+  }
+  // Serialize writes so an older save cannot overwrite a newer edit.
+  const snapshot = JSON.parse(JSON.stringify(data));
+  const write = async () => {
+    showSyncBadge('… שומר');
+    if (medtrackCloud.profile.role === 'manager') await medtrackCloud.saveManagerData(snapshot);
+    await medtrackCloud.saveCurrentAdministrations(snapshot);
+    showSyncBadge('✓ נשמר בענן');
+    return true;
+  };
+  const task = _saveQueue.then(write, write);
+  _saveQueue = task.catch(e => {
+    console.error('Cloud save failed', e);
+    showSyncBadge('✕ השמירה בענן נכשלה', true);
+  });
+  return task;
+}
+async function saveAndCloseEditor() {
+  try {
+    await saveData();
+    closeModal();
+    renderAdminContent();
+  } catch (e) {
+    alert('השמירה בענן נכשלה. הנתונים נשמרו מקומית בלבד. נסי שוב.\n' + (e.message || ''));
   }
 }
 
@@ -3197,7 +3213,7 @@ function saveRound() {
   } else {
     data.rounds.push({ id: genId(), name, time, entries });
   }
-  saveData(); closeModal(); renderAdminContent();
+  saveAndCloseEditor();
 }
 function deleteRound(id) {  if (false) return;
   const round = data.rounds.find(r=>r.id===id);
@@ -3307,11 +3323,11 @@ function saveResident() {
   if (!name) return alert(t('נא להכניס שם'));
   if (state.editId) {
     const r = data.residents.find(r=>r.id===state.editId);
-    if (r) { r.name = name; r.room = room; r.notes = notes; r.meds = meds; r.photo = photo; }
+    if (r) { r.name = name; r.room = room; r.notes = notes; r.meds = meds; r.photo = photo; r.photoUrl = photo; }
   } else {
-    data.residents.push({ id: genId(), name, room, notes, meds, photo });
+    data.residents.push({ id: genId(), name, room, notes, meds, photo, photoUrl: photo });
   }
-  saveData(); closeModal(); renderAdminContent();
+  saveAndCloseEditor();
 }
 function deleteResident(id) {  if (false) return;
   const res = data.residents.find(r=>r.id===id);
@@ -3345,7 +3361,7 @@ function saveMed() {
   } else {
     data.meds.push({ id: genId(), name, type, dose, notes });
   }
-  saveData(); closeModal(); renderAdminContent();
+  saveAndCloseEditor();
 }
 function deleteMed(id) {  if (false) return;
   const med = data.meds.find(m=>m.id===id);
