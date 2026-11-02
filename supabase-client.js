@@ -60,6 +60,18 @@
       return this.profile ? { user: this.authUser, profile: this.profile } : null;
     },
 
+    async manageUserRoles(payload) {
+      if (!this.client || this.profile?.role !== 'manager') throw new Error('רק מנהלת יכולה לשנות הרשאות');
+      const { data, error } = await this.client.functions.invoke('manage-user-roles', { body: payload });
+      if (error) {
+        let message = error.message || 'הפעולה נכשלה';
+        try { const details = await error.context?.json(); if (details?.error) message = details.error; } catch (_) {}
+        throw new Error(message);
+      }
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+
     async createCaregiver({ email, password, displayName }) {
       if (!this.client || this.profile?.role !== 'manager') {
         throw new Error('רק מנהלת יכולה להוסיף משתמשים');
