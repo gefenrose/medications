@@ -2217,7 +2217,8 @@
       <span id="nurseTitle">מעקב תרופות</span>
       <span id="syncBadge" style="font-size:.68rem;background:var(--primary-light);color:var(--primary);border-radius:10px;padding:.12rem .38rem;opacity:0;transition:opacity .4s;font-weight:700">✓</span>
     </div>
-    <div style="width:80px;display:flex;justify-content:flex-end">
+    <div style="min-width:80px;display:flex;justify-content:flex-end;align-items:center;gap:.35rem">
+      <button class="ntb-icon-btn" id="backToAdminBtn" onclick="returnToAdminView()" title="חזרה לניהול" aria-label="חזרה לניהול" style="display:none;align-items:center;gap:.3rem;width:auto;padding:0 .55rem;font-size:.8rem;font-weight:600">חזרה לניהול</button>
       <div id="nurseUserInfo" style="display:none"><strong></strong><span></span></div>
     </div>
   </div>
@@ -4184,6 +4185,7 @@ const UI_TRANSLATIONS = {
   "סבב לא ידוע":"Unknown round",
   "הוסף דייר":"Add resident",
   "שם משתמש":"Username",
+  'חזרה לניהול':'Back to management',
   'אימייל':'Email','כתובת אימייל':'Email address','הכניסי כתובת אימייל':'Enter email address',
   'הכניסי סיסמה':'Enter password','שם משתמש או סיסמה שגויים':'Incorrect username or password',
   'נא למלא אימייל וסיסמה':'Please enter email and password','חיבור הענן אינו מוגדר':'Cloud connection is not configured',
@@ -5375,10 +5377,22 @@ function formatDate(d) {
 }
 
 function showNurseViewFromAdmin() {
-  if (!state.currentUser) return;
+  if (!state.currentUser || state.currentUser.role !== 'manager') return;
+  const backButton = document.getElementById('backToAdminBtn');
+  if (backButton) backButton.style.display = 'inline-flex';
   showScreen('nurseScreen');
   nurseTab('round');
+  applyInterfaceLanguage(document.getElementById('nurseScreen'));
 }
+
+function returnToAdminView() {
+  if (!state.currentUser || state.currentUser.role !== 'manager') return;
+  showScreen('adminScreen');
+  applyAdminProfileToChrome();
+  adminTab(state.adminTab || 'rounds');
+  resetAdminIdleTimer();
+}
+
 
 // ==================== PUSH NOTIFICATIONS ====================
 
