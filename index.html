@@ -2049,6 +2049,31 @@
     .card-title { font-size: 12pt !important; }
     @page { margin: 1.5cm; }
   }
+
+  /* Accessibility and usability baseline across all screens */
+  :root { color-scheme: light; }
+  body { font-size: 16px; line-height: 1.5; }
+  button, input, select, textarea { font: inherit; }
+  button, [role="button"], select, input[type="checkbox"], input[type="radio"] { cursor: pointer; }
+  button:disabled, [aria-disabled="true"] { cursor: not-allowed; opacity: .55; }
+  :where(button, a, input, select, textarea, [role="button"], [tabindex]):focus-visible {
+    outline: 3px solid #155D85 !important;
+    outline-offset: 3px !important;
+  }
+  :where(.btn, .btn-primary, .btn-outline, .nav-btn, .adm-add-btn, .asb-nav-item, .ntb-icon-btn, .topbar-btn, .login-tab) {
+    min-height: 44px;
+  }
+  :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) { min-height: 44px; }
+  :where(.text-muted, .text-secondary) { color: #46534D; }
+  .screen :where(button, a, input, select, textarea) { touch-action: manipulation; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  }
+  @media (max-width: 600px) {
+    #loginScreen { overflow-y: auto; justify-content: safe center; padding: 1rem; }
+    .login-box { padding: 1.5rem 1.15rem; }
+    .modal { max-height: min(90dvh, 900px); overflow-y: auto; }
+  }
 </style>
 </head>
 <body>
@@ -2701,9 +2726,27 @@ function doLogout() {
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPassword').value = '';
 }
+function improveInterfaceAccessibility(root = document) {
+  root.querySelectorAll?.('button, a, input, select, textarea').forEach(el => {
+    if (el.matches('button') && !el.hasAttribute('type')) el.type = 'button';
+    if (el.matches('button') && !el.getAttribute('aria-label') && !el.textContent.trim()) {
+      const label = el.getAttribute('title');
+      if (label) el.setAttribute('aria-label', label);
+    }
+    if (el.matches('input, select, textarea') && !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby')) {
+      const label = el.id ? [...root.querySelectorAll('label[for]')].find(l => l.htmlFor === el.id) : null;
+      if (!label && !el.closest('label')) {
+        const text = el.getAttribute('placeholder') || el.getAttribute('title');
+        if (text) el.setAttribute('aria-label', text);
+      }
+    }
+  });
+}
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  improveInterfaceAccessibility(document.getElementById(id));
   setTimeout(initNavIcons, 10);
 }
 
@@ -2780,6 +2823,7 @@ function renderAdminContent() {
   }
   applyInterfaceLanguage(el);
   applyAddressLanguage(el);
+  improveInterfaceAccessibility(el);
   // Admin rendering must not depend on the nurse bottom-bar element.
   // Keeping this function self-contained also prevents a render error from
   // leaving #adminContent hidden after adminTab() starts its fade transition.
