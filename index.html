@@ -3417,22 +3417,30 @@ async function saveNurse() {
 
   try {
     if (state.editId) {
-      const n = data.nurses.find(n=>n.id===state.editId);
-      if (requestedRole && managed && requestedRole !== managed.role) {
+      if (!managed) throw new Error('פרטי המשתמשת לא נטענו. נסי לרענן את הרשימה.');
+      if (requestedRole && requestedRole !== managed.role) {
         if (managed.id === state.currentUser?.id) throw new Error('לא ניתן לשנות את התפקיד של עצמך');
         if (!confirm('לשנות את התפקיד ל' + (requestedRole === 'manager' ? 'מנהלת' : 'מדריכה') + '?')) return;
-        await medtrackCloud.manageUserRoles({ action: 'change', userId: managed.id, role: requestedRole });
-        managed.role = requestedRole;
       }
-      if (!n) { closeModal(); renderAdminContent(); return; }
-      n.name = name;
-      n.email = email;
-      n.username = email;
-      n.photo = photo;
-      // Password changes for existing Auth users are intentionally not handled
-      // here; they should use Supabase's password-reset flow.
-      if (photo !== (n.photo || '')) n.photo = photo;
-      await saveData();
+      const changes = { action: 'change', userId: managed.id };
+      if (name !== (managed.display_name || '')) changes.displayName = name;
+      if (requestedRole && requestedRole !== managed.role) changes.role = requestedRole;
+      if (changes.displayName !== undefined || changes.role !== undefined) {
+        const result = await medtrackCloud.manageUserRoles(changes);
+        managed.display_name = result.user.display_name;
+        managed.role = result.user.role;
+      }
+      // Local data is a cache, not the authoritative profile record.
+      const n = data.nurses.find(n=>n.id===state.editId);
+      if (n) {
+        n.name = name;
+        n.photo = photo;
+      }
+      if (state.currentUser?.id === state.editId) {
+        state.currentUser.name = name;
+        state.currentUser.displayName = name;
+        saveSession(state.currentUser);
+      }
     } else {
       if (!password) return alert(t('נא להכניס סיסמה'));
       if (!medtrackCloud?.configured || !medtrackCloud?.client || medtrackCloud.profile?.role !== 'manager') {
@@ -3451,7 +3459,7 @@ async function saveNurse() {
     }
 
     closeModal();
-    if (managedUsers) refreshManagedUsers();
+    if (managedUsers) await refreshManagedUsers();
     renderAdminContent();
   } catch (e) {
     console.error('Failed to save caregiver', e);
