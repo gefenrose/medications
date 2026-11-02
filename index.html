@@ -2770,6 +2770,12 @@ function improveInterfaceAccessibility(root = document) {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  // Reset stale document scrolling when restoring a session on mobile Safari.
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  window.scrollTo(0, 0);
+  const active = document.getElementById(id);
+  active.querySelectorAll('.admin-content-wrap').forEach(el => { el.scrollTop = 0; });
   improveInterfaceAccessibility(document.getElementById(id));
   setTimeout(initNavIcons, 10);
 }
@@ -5325,6 +5331,31 @@ function exportPDF(fromDate, toDate) {
     display: block;
     max-width: 100%;
   }
+
+  /* iOS Safari: keep the application shell anchored to the visible viewport.
+     Only content panels scroll; the page itself must not retain a previous offset. */
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  .screen, .screen.active {
+    height: 100dvh;
+    max-height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+  #adminScreen.active, #nurseScreen.active {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+  #adminScreen .admin-main { flex: 1 1 auto; min-height: 0; overflow: hidden; }
+  #adminScreen .admin-topbar-v2, #adminScreen .admin-tab-bar {
+    position: relative;
+    top: auto;
+    flex-shrink: 0;
+  }
+  #adminScreen .admin-content-wrap { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+  #nurseScreen :is(.nurse-content, .nurse-content-wrap) { min-height: 0; }
 </style>
 </head>
 <body>
