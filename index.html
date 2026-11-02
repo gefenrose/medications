@@ -3002,45 +3002,43 @@ async function changeManagedUserRole(id, role) {
 }
 function renderAdminNurses() {
   const isDev = false;
+  const nurseQ = state.adminSearch.nurses || '';
   let html = `<div class="adm-section-hdr">
-    <div><div class="adm-section-title">מדריכות</div><div class="adm-section-sub">פרטי ההתחברות של כל מדריכה</div></div>
+    <div><div class="adm-section-title">מדריכות ומנהלות</div><div class="adm-section-sub">פרטי משתמשים וניהול הרשאות</div></div>
     ${!isDev ? `<button class="adm-add-btn" onclick="openNurseModal()">${icon('plus-circle',15)} הוסף</button>` : ''}
   </div>
-  <input type="text" id="nurseSearchInput" class="adm-search" placeholder="חיפוש לפי שם מדריכה..." value="${state.adminSearch.nurses||''}"
+  <input type="search" id="nurseSearchInput" class="adm-search" placeholder="חיפוש לפי שם או אימייל..." value="${esc(nurseQ)}"
     oninput="adminSearchUpdate('nurses',this.value,renderAdminNurses)">`;
-  html += '<div class="adm-section-hdr" style="margin-top:1.2rem"><div><div class="adm-section-title">ניהול הרשאות משתמשים</div><div class="adm-section-sub">שינוי תפקיד בין מדריכה למנהלת</div></div><button class="adm-edit-btn" onclick="refreshManagedUsers()">רענון</button></div>';
-  if (managedUsersError) html += `<p role="alert" style="color:var(--skip)">${esc(managedUsersError)}</p>`;
+  if (managedUsersError) html += `<p role="alert" style="color:var(--skip)">${esc(managedUsersError)} <button class="adm-edit-btn" onclick="refreshManagedUsers()">נסי שוב</button></p>`;
   if (!managedUsers) {
     html += '<p>טוענת משתמשים…</p>';
     setTimeout(() => { if (state.adminTab === 'nurses') refreshManagedUsers(); }, 0);
-  } else {
-    managedUsers.forEach(u => {
-      const own = u.id === state.currentUser?.id;
-      html += `<div class="adm-list-item" style="gap:.6rem;flex-wrap:wrap">
-        <div class="adm-item-body"><div class="adm-item-title">${esc(u.display_name || u.username || 'משתמש')}</div>
-        <div class="adm-item-sub">${esc(u.username || '')}${own ? ' · החשבון שלי' : ''}</div></div>
-        <label style="display:flex;align-items:center;gap:.45rem">תפקיד
-          <select aria-label="תפקיד משתמש" class="full-select" style="width:auto;min-width:120px" ${own ? 'disabled title="לא ניתן לשנות את התפקיד של עצמך"' : ''} onchange="changeManagedUserRole('${esc(u.id)}',this.value)">
-            <option value="caregiver" ${u.role==='caregiver'?'selected':''}>מדריכה</option>
-            <option value="manager" ${u.role==='manager'?'selected':''}>מנהלת</option>
-          </select>
-        </label>
-      </div>`;
-    });
+    return html;
   }
-  if (!data.nurses.length) html += `<div class="empty-state"><p>אין מדריכות</p></div>`;
-  const nurseQ = state.adminSearch.nurses||'';
-  const nursesFiltered = nurseQ ? data.nurses.filter(n=>fuzzy(n.name,nurseQ)) : data.nurses;
-  nursesFiltered.forEach(nurse => {
-    html += `<div class="adm-list-item">
-      <div class="resident-avatar${nurse.photo ? ' photo' : ''}" style="width:36px;height:36px;font-size:.78rem">${nurse.photo ? `<img src="${esc(nurse.photo)}" alt="${esc(nurse.name)}">` : initials(nurse.name)}</div>
+  const users = managedUsers.filter(u => {
+    const text = (u.display_name || '') + ' ' + (u.username || '');
+    return !nurseQ || fuzzy(text, nurseQ);
+  });
+  if (!users.length) html += '<div class="empty-state"><p>לא נמצאו משתמשים</p></div>';
+  users.forEach(u => {
+    const own = u.id === state.currentUser?.id;
+    const nurse = data.nurses.find(n => n.id === u.id);
+    const name = u.display_name || nurse?.name || u.username || 'משתמש';
+    html += `<div class="adm-list-item" style="gap:.6rem;flex-wrap:wrap">
+      <div class="resident-avatar${nurse?.photo ? ' photo' : ''}" style="width:36px;height:36px;font-size:.78rem">${nurse?.photo ? `<img src="${esc(nurse.photo)}" alt="${esc(name)}">` : initials(name)}</div>
       <div class="adm-item-body">
-        <div class="adm-item-title">${esc(nurse.name)}</div>
-        <div class="adm-item-sub">שם משתמש: ${esc(nurse.username)}</div>
+        <div class="adm-item-title">${esc(name)}</div>
+        <div class="adm-item-sub">${esc(u.username || '')}${own ? ' · החשבון שלי' : ''}</div>
       </div>
-      ${!isDev ? `<div class="adm-item-actions">
-        <button class="adm-edit-btn" onclick="openNurseModal('${nurse.id}')">ערוך</button>
-        <button class="adm-del-btn" onclick="deleteNurse('${nurse.id}')">מחק</button>
+      <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem">תפקיד
+        <select aria-label="תפקיד של ${esc(name)}" class="full-select" style="width:auto;min-width:115px" ${own ? 'disabled title="לא ניתן לשנות את התפקיד של עצמך"' : ''} onchange="changeManagedUserRole('${esc(u.id)}',this.value)">
+          <option value="caregiver" ${u.role==='caregiver'?'selected':''}>מדריכה</option>
+          <option value="manager" ${u.role==='manager'?'selected':''}>מנהלת</option>
+        </select>
+      </label>
+      ${nurse && !isDev ? `<div class="adm-item-actions">
+        <button class="adm-edit-btn" onclick="openNurseModal('${esc(nurse.id)}')">ערוך</button>
+        <button class="adm-del-btn" onclick="deleteNurse('${esc(nurse.id)}')">מחק</button>
       </div>` : ''}
     </div>`;
   });
