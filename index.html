@@ -5423,7 +5423,7 @@ function formatDate(d) {
 }
 
 function showNurseViewFromAdmin() {
-  if (!state.currentUser || state.currentUser.role !== 'manager') return;
+  if (!state.currentUser || state.currentUser.type !== 'manager') return;
   const backButton = document.getElementById('backToAdminBtn');
   if (backButton) backButton.style.display = 'inline-flex';
   showScreen('nurseScreen');
@@ -5432,7 +5432,7 @@ function showNurseViewFromAdmin() {
 }
 
 function returnToAdminView() {
-  if (!state.currentUser || state.currentUser.role !== 'manager') return;
+  if (!state.currentUser || state.currentUser.type !== 'manager') return;
   showScreen('adminScreen');
   applyAdminProfileToChrome();
   adminTab(state.adminTab || 'rounds');
