@@ -5258,6 +5258,73 @@ function exportPDF(fromDate, toDate) {
   @media (prefers-reduced-motion: reduce) {
     input, textarea, select { transition: none !important; }
   }
+
+  /* Consistent raised input surfaces: readable on white modal backgrounds. */
+  .form-group { margin-bottom: 1.05rem; }
+  .form-group > label, .modal .form-group > label {
+    display: block;
+    margin-bottom: .48rem;
+    color: #34434D;
+    font-size: .91rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .modal .form-group :is(input:not([type="hidden"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]), textarea, select),
+  .screen .form-group :is(input:not([type="hidden"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]), textarea, select),
+  .modal select.full-select, .screen select.full-select,
+  .screen input.adm-search {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 48px;
+    padding: .78rem .9rem;
+    border: 2px solid #A0B4BF !important;
+    border-radius: 11px !important;
+    background: #F1F6F8 !important;
+    color: #1D303A !important;
+    box-shadow: inset 0 1px 2px rgba(23,47,59,.035), 0 1px 0 rgba(23,47,59,.05);
+    font-size: 1rem;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .modal .form-group textarea, .screen .form-group textarea {
+    min-height: 96px;
+    line-height: 1.55;
+  }
+  .modal .form-group :is(input, textarea, select):focus,
+  .screen .form-group :is(input, textarea, select):focus,
+  .screen input.adm-search:focus {
+    outline: 2px solid #276887 !important;
+    outline-offset: 1px;
+    border-color: #276887 !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 0 0 4px rgba(39,104,135,.15) !important;
+  }
+  .modal .form-group :is(input, textarea, select):disabled,
+  .screen .form-group :is(input, textarea, select):disabled {
+    background: #E6EAED !important;
+    border-color: #C3CBD0 !important;
+    color: #65717A !important;
+    box-shadow: none;
+  }
+  .modal .form-group input[type="checkbox"],
+  .screen .form-group input[type="checkbox"],
+  .modal .form-group input[type="radio"],
+  .screen .form-group input[type="radio"] {
+    display: inline-block;
+    width: 20px;
+    min-height: 20px;
+    height: 20px;
+    padding: 0;
+    appearance: auto;
+    -webkit-appearance: checkbox;
+  }
+  .modal .form-group input[type="file"],
+  .screen .form-group input[type="file"] {
+    display: block;
+    max-width: 100%;
+  }
 </style>
 </head>
 <body>
