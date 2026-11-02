@@ -3098,6 +3098,7 @@ function buildEntryRow(i, resId, medIds, notes, resOpts, medOpts) {
       <div class="text-sm font-bold">דייר ${i+1}</div>
       <button class="btn-icon btn-sm" onclick="removeEntry(${i})">✕</button>
     </div>
+    <input type="search" id="entry_res_search_${i}" placeholder="חיפוש דייר לפי שם או חדר..." aria-label="חיפוש דייר" autocomplete="off" oninput="filterRoundResidents(${i}, this.value)" style="width:100%;margin-bottom:.4rem;padding:.65rem .8rem;border:1px solid var(--border);border-radius:10px;background:white">
     <select class="full-select" id="entry_res_${i}" style="margin-bottom:.6rem" onchange="onEntryResidentChange(${i}, this.value)">
       <option value="">— בחר דייר —</option>${ro}
     </select>
@@ -3114,6 +3115,24 @@ function nurseResSearch(val) {
   if (inp) { inp.value = val; inp.focus(); inp.setSelectionRange(val.length, val.length); }
 }
 
+function filterRoundResidents(i, query) {
+  const select = document.getElementById('entry_res_' + i);
+  if (!select) return;
+  const term = String(query || '').trim().toLocaleLowerCase();
+  const selected = select.value;
+  const options = data.residents.filter(r =>
+    !term || String(r.name || '').toLocaleLowerCase().includes(term) ||
+    String(r.room || '').toLocaleLowerCase().includes(term)
+  );
+  select.innerHTML = '<option value="">— בחר דייר —</option>' +
+    options.map(r => `<option value="${esc(r.id)}">${esc(r.name)} (חדר ${esc(r.room || '')})</option>`).join('');
+  // Preserve the resident already assigned to this row while searching.
+  if (selected && !options.some(r => String(r.id) === String(selected))) {
+    const existing = data.residents.find(r => String(r.id) === String(selected));
+    if (existing) select.add(new Option(existing.name + ' (חדר ' + (existing.room || '') + ')', existing.id));
+  }
+  select.value = selected;
+}
 function onEntryResidentChange(i,resId){const p=document.getElementById('entry_pills_'+i);if(!p)return;const res=resId?data.residents.find(r=>r.id===resId):null;const ids=res?res.meds:[];const ms=ids.length>0?data.meds.filter(m=>ids.includes(m.id)):data.meds;if(!resId){p.innerHTML='<span class="text-muted" style="font-size:.8rem">בחר דייר</span>';return;}p.innerHTML=ms.map(m=>`<span class="med-pill" data-medid="${m.id}" data-entry="${i}" onclick="toggleEntryMedPill(this)">${esc(m.name)} <span style="font-size:.75rem;opacity:.7">${esc(m.dose)}</span></span>`).join('');}
 function addEntryRow() {
   const c = document.getElementById('entriesContainer');
