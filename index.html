@@ -5567,6 +5567,28 @@ function exportExcel(fromDate, toDate) {
 function openModal(title, body) {
   document.getElementById('modalTitle').textContent = title;
   document.getElementById('modalBody').innerHTML = body;
+  // Apply visible edit-field styling directly as well as via CSS.
+  // This keeps controls distinguishable even when an older stylesheet wins.
+  document.getElementById('modalBody').querySelectorAll('input:not([type="hidden"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]), textarea, select').forEach(field => {
+    field.style.setProperty('background-color', '#EAF3F7', 'important');
+    field.style.setProperty('border', '2px solid #7299AB', 'important');
+    field.style.setProperty('border-radius', '12px', 'important');
+    field.style.setProperty('padding', '12px 14px', 'important');
+    field.style.setProperty('min-height', '48px', 'important');
+    field.style.setProperty('box-shadow', '0 1px 3px rgba(30,70,90,.12)', 'important');
+    field.style.setProperty('width', '100%', 'important');
+    field.style.setProperty('box-sizing', 'border-box', 'important');
+    field.addEventListener('focus', () => {
+      field.style.setProperty('border-color', '#176487', 'important');
+      field.style.setProperty('background-color', '#FFFFFF', 'important');
+      field.style.setProperty('outline', '3px solid rgba(23,100,135,.25)', 'important');
+    });
+    field.addEventListener('blur', () => {
+      field.style.setProperty('border-color', '#7299AB', 'important');
+      field.style.setProperty('background-color', '#EAF3F7', 'important');
+      field.style.removeProperty('outline');
+    });
+  });
   document.getElementById('modalOverlay').classList.add('open');
   applyInterfaceLanguage(document.getElementById('modalOverlay'));
   applyAddressLanguage(document.getElementById('modalOverlay'));
