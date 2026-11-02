@@ -122,7 +122,7 @@
       if (empty) return { loaded: false, empty: true };
 
       appData.residents = residents.map(r => ({
-        id: r.id, name: r.name, room: r.room || '', notes: r.notes || '', photoUrl: r.photo_url || ''
+        id: r.id, name: r.name, room: r.room || '', notes: r.notes || '', photo: r.photo_url || '', photoUrl: r.photo_url || ''
       }));
 
       appData.meds = medications.map(m => ({
