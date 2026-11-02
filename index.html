@@ -2996,7 +2996,7 @@ function renderAdminHistory() {
       html+=`<div class="adm-hist-entry">
         <div style="flex:1;min-width:0">
           <div style="font-size:.82rem;font-weight:700;color:var(--text-primary)">${res?esc(res.name):'?'} — ${med?(false?'••••••':esc(med.name)):'?'}</div>
-          <div style="font-size:.72rem;color:var(--text-secondary);margin-top:.1rem">${h.time||''} | ${round?esc(round.name):''} | <strong>${esc(h.nurseName||'—')}</strong></div>
+          <div style="font-size:.72rem;color:var(--text-secondary);margin-top:.1rem"><span>שעה: <strong>${esc(h.time||'—')}</strong></span> · <span>מדריכה: <strong>${esc(h.nurseName||'—')}</strong></span>${round?` · ${esc(round.name)}`:''}</div>
           ${h.note?`<div style="font-size:.7rem;color:var(--text-muted);font-style:italic;margin-top:.1rem">* ${esc(h.note)}</div>`:''}
         </div>${badge}
       </div>`;
@@ -3968,7 +3968,7 @@ function renderNurseHistory() {
       html += `<div class="flex-center justify-between" style="padding:.45rem 0;border-bottom:1px solid var(--border)">
         <div>
           <div class="text-sm font-bold">${res?res.name:'?'} — ${medName}</div>
-          <div class="text-muted" style="font-size:.75rem">${h.time||''} | ${round?round.name:''} | <strong>${h.nurseName||'—'}</strong></div>
+          <div class="text-muted" style="font-size:.75rem"><span>שעה: <strong>${esc(h.time||'—')}</strong></span> · <span>מדריכה: <strong>${esc(h.nurseName||'—')}</strong></span>${round?` · ${esc(round.name)}`:''}</div>
           ${h.note?`<div style="font-size:.72rem;font-style:italic;color:var(--text-muted)">* ${esc(h.note)}</div>`:''}
         </div>
         ${badge}
@@ -4186,6 +4186,8 @@ const UI_TRANSLATIONS = {
   "הוסף דייר":"Add resident",
   "שם משתמש":"Username",
   'חזרה לניהול':'Back to management',
+  'שעה:':'Time:',
+  'מדריכה:':'Caregiver:',
   'אימייל':'Email','כתובת אימייל':'Email address','הכניסי כתובת אימייל':'Enter email address',
   'הכניסי סיסמה':'Enter password','שם משתמש או סיסמה שגויים':'Incorrect username or password',
   'נא למלא אימייל וסיסמה':'Please enter email and password','חיבור הענן אינו מוגדר':'Cloud connection is not configured',
