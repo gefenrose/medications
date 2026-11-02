@@ -2978,6 +2978,28 @@ function renderAdminMeds() {
   return html;
 }
 
+let managedUsers = null;
+let managedUsersError = '';
+async function refreshManagedUsers() {
+  try {
+    const result = await medtrackCloud.manageUserRoles({ action: 'list' });
+    managedUsers = result.users || [];
+    managedUsersError = '';
+  } catch (e) {
+    managedUsersError = e.message || 'לא ניתן לטעון משתמשים';
+  }
+  if (state.adminTab === 'nurses') renderAdminContent();
+}
+async function changeManagedUserRole(id, role) {
+  const user = managedUsers?.find(u => u.id === id);
+  if (!user || !['manager','caregiver'].includes(role) || role === user.role) return;
+  if (!confirm(t('לשנות את ההרשאה של ' + (user.display_name || user.username || 'המשתמש') + ' ל' + (role === 'manager' ? 'מנהלת' : 'מדריכה') + '?'))) return;
+  try {
+    await medtrackCloud.manageUserRoles({ action: 'change', userId: id, role });
+    await refreshManagedUsers();
+    alert(t('התפקיד עודכן. השינוי יחול על המשתמש בהתחברות הבאה.'));
+  } catch (e) { alert(t(e.message || 'שינוי התפקיד נכשל')); }
+}
 function renderAdminNurses() {
   const isDev = false;
   let html = `<div class="adm-section-hdr">
@@ -2986,6 +3008,26 @@ function renderAdminNurses() {
   </div>
   <input type="text" id="nurseSearchInput" class="adm-search" placeholder="חיפוש לפי שם מדריכה..." value="${state.adminSearch.nurses||''}"
     oninput="adminSearchUpdate('nurses',this.value,renderAdminNurses)">`;
+  html += '<div class="adm-section-hdr" style="margin-top:1.2rem"><div><div class="adm-section-title">ניהול הרשאות משתמשים</div><div class="adm-section-sub">שינוי תפקיד בין מדריכה למנהלת</div></div><button class="adm-edit-btn" onclick="refreshManagedUsers()">רענון</button></div>';
+  if (managedUsersError) html += `<p role="alert" style="color:var(--skip)">${esc(managedUsersError)}</p>`;
+  if (!managedUsers) {
+    html += '<p>טוענת משתמשים…</p>';
+    setTimeout(() => { if (state.adminTab === 'nurses') refreshManagedUsers(); }, 0);
+  } else {
+    managedUsers.forEach(u => {
+      const own = u.id === state.currentUser?.id;
+      html += `<div class="adm-list-item" style="gap:.6rem;flex-wrap:wrap">
+        <div class="adm-item-body"><div class="adm-item-title">${esc(u.display_name || u.username || 'משתמש')}</div>
+        <div class="adm-item-sub">${esc(u.username || '')}${own ? ' · החשבון שלי' : ''}</div></div>
+        <label style="display:flex;align-items:center;gap:.45rem">תפקיד
+          <select aria-label="תפקיד משתמש" class="full-select" style="width:auto;min-width:120px" ${own ? 'disabled title="לא ניתן לשנות את התפקיד של עצמך"' : ''} onchange="changeManagedUserRole('${esc(u.id)}',this.value)">
+            <option value="caregiver" ${u.role==='caregiver'?'selected':''}>מדריכה</option>
+            <option value="manager" ${u.role==='manager'?'selected':''}>מנהלת</option>
+          </select>
+        </label>
+      </div>`;
+    });
+  }
   if (!data.nurses.length) html += `<div class="empty-state"><p>אין מדריכות</p></div>`;
   const nurseQ = state.adminSearch.nurses||'';
   const nursesFiltered = nurseQ ? data.nurses.filter(n=>fuzzy(n.name,nurseQ)) : data.nurses;
