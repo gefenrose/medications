@@ -3457,10 +3457,10 @@ function renderNurseRound() {
   const selDate = state.selectedDate || today;
   const isPast = selDate < today;
 
-  if (isPast) return renderNurseDateHistory(selDate);
+  if (isPast) return { main: renderNurseDateHistory(selDate), bar: '' };
 
   const round = data.activeRoundSession ? data.rounds.find(r=>r.id===data.activeRoundSession.roundId) : getCurrentRound();
-  if (!round) return `<div class="empty-state" style="margin:1rem"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)">${icon('pill',36)}</div><p>אין סבבים מוגדרים</p><p class="text-muted" style="margin-top:.4rem;font-size:.8rem">בקשי מהמנהל להוסיף סבבי חלוקה</p></div>`;
+  if (!round) return { main: `<div class="empty-state" style="margin:1rem"><div class="empty-icon" style="display:flex;justify-content:center;opacity:.35;color:var(--text-muted)">${icon('pill',36)}</div><p>אין סבבים מוגדרים</p><p class="text-muted" style="margin-top:.4rem;font-size:.8rem">בקשי מהמנהל להוסיף סבבי חלוקה</p></div>`, bar: '' };
 
   const session = data.activeRoundSession && data.activeRoundSession.roundId === round.id ? data.activeRoundSession : null;
   const statuses = session ? session.statuses : {};
@@ -3724,17 +3724,8 @@ function renderNurseRound() {
 
   html += `</section></div>`;
 
-  const bar = `<div class="round-bottom-bar">
-    <div class="rbb-progress">
-      <div class="rbb-label">התקדמות כוללת</div>
-      <div class="rbb-bar"><div class="rbb-fill" style="width:${pct}%"></div></div>
-      <div class="rbb-count">${pct}% · ${handledRes}/${totalRes}</div>
-    </div>
-    <button class="rbb-btn ${isComplete ? 'finish-btn' : ''}"
-      onclick="${isComplete ? `finishRound('${round.id}')` : ''}">
-      ${icon('file-text',14)} סיכום סבב
-    </button>
-  </div>`;
+  // Progress is shown once in the round header. No session-reset button.
+  const bar = '';
 
   return { main: html, bar };
 }
@@ -3861,11 +3852,6 @@ function saveMedNote(roundId, residentId, medId, note) {
   saveData();
 }
 
-function finishRound(roundId) {
-  data.activeRoundSession = null;
-  saveData();
-  renderNurseContent();
-}
 
 
 function renderNurseDateHistory(dateStr) {
